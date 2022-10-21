@@ -1,0 +1,5 @@
+{
+  "$schema": "./schema.json",
+  "latestVersion": "v1.0.0",
+  "debug": true
+}
