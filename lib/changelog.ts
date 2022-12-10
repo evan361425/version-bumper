@@ -3,12 +3,16 @@ import { info } from './logger.js';
 import { Tag } from './tag.js';
 
 export class Changelog {
-  tags: Tag[] = [];
+  readonly tags: Tag[];
 
-  header: string;
+  readonly header: string;
+
+  readonly firstTagKey: string;
 
   constructor(origin: string) {
+    this.tags = [Tag.veryFirst()];
     this.header = Config.instance.changelogInfo.header;
+    this.firstTagKey = Tag.veryFirstTagKey;
     if (typeof origin !== 'string' || origin === '') {
       info('[changelog] No need parse');
       return;
@@ -16,29 +20,33 @@ export class Changelog {
 
     info('[changelog] Start parsing');
 
-    const headerSplitter = origin.toLowerCase().indexOf('\n## [unreleased]');
-    const footerSplitter = origin.toLowerCase().lastIndexOf('[unreleased]: ');
+    const headerIdx = origin.search(/\n## \[/);
+    const footerIdx = origin.search(/\n\[[^\]]+\]:/);
 
-    const header = origin.substring(0, headerSplitter).trim();
-    if (header) this.header = header;
+    if (headerIdx === -1) {
+      this.header = origin;
+      info('[changelog] Not found any tags');
+      return;
+    }
 
-    // parse body
+    // parse tags
+    this.header = origin.substring(0, headerIdx).trim();
     this.tags = origin
-      .substring(
-        headerSplitter,
-        footerSplitter === -1 ? undefined : footerSplitter
-      )
+      .substring(headerIdx, footerIdx === -1 ? undefined : footerIdx)
       .split('## ')
       .map((e) => e.trim())
       .filter((e) => Boolean(e))
       .map((e) => Tag.fromString(e));
-    if (this.tags.length === 0) {
-      this.tags.push(Tag.veryFirst());
-    }
+    this.tags.length === 0 && this.tags.push(Tag.veryFirst());
+    this.firstTagKey = this.tags[0]?.key ?? Tag.veryFirstTagKey;
 
     // parse footer links
+    if (footerIdx === -1) {
+      info('[changelog] Not found footer');
+      return;
+    }
     origin
-      .substring(footerSplitter)
+      .substring(footerIdx)
       .trim()
       .split('\n')
       .forEach((e) => {
@@ -50,8 +58,18 @@ export class Changelog {
       });
   }
 
+  get firstIsUnreleased(): boolean {
+    return this.firstTagKey.toLowerCase() === Tag.veryFirstTagKey.toLowerCase();
+  }
+
   get latestTag(): Tag | undefined {
-    return this.tags.find((tag) => tag.key.toLowerCase() !== 'unreleased');
+    if (!this.firstIsUnreleased) {
+      return this.tags[0];
+    }
+
+    return this.tags.find((tag) => {
+      return tag.key.toLowerCase() !== this.firstTagKey.toLowerCase();
+    });
   }
 
   getTagByKey(key: string): Tag | undefined {
@@ -65,13 +83,13 @@ export class Changelog {
       throw new Error(`tag ${tag.key} exist, should not add again`);
     }
 
-    const unreleased = this.getTagByKey('unreleased');
-    unreleased && unreleased.setDiffLink('HEAD', tag.key);
+    const first = this.getTagByKey(this.firstTagKey);
+    first && first.setDiffLink('HEAD', tag.key);
 
     tag.body = Changelog.fitAutoLinks(tag.body, Config.instance.autoLinks);
     tag.setDiffLink(this.latestTag?.key);
 
-    this.tags.splice(unreleased ? 1 : 0, 0, tag);
+    this.tags.splice(this.firstIsUnreleased ? 1 : 0, 0, tag);
 
     return this;
   }

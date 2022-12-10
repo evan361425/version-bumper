@@ -1,8 +1,5 @@
 ---
-version: v1.2.3
-ticket: EVAN-123
+version: v0.1.0
 ---
 
-### Hi there
-
-this is new release
+Initialize Release

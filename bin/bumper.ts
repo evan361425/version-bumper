@@ -64,11 +64,16 @@ ${message}`);
   const command =
     process.argv.includes('-h') || process.argv.includes('--help')
       ? 'help'
+      : process.argv[2]?.startsWith('--')
+      ? 'version'
       : process.argv[2];
   switch (command) {
     case 'version':
     case undefined:
-      api.bumpVersion();
+      await api.bumpVersion();
+      break;
+    case 'init':
+      await api.init();
       break;
     case 'help':
       api.help();

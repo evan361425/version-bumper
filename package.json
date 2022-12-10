@@ -1,9 +1,13 @@
 {
-  "name": "easy-bumper",
+  "name": "version-bumper",
   "version": "0.1.0",
   "description": "Helper to bump version",
   "bin": {
     "bumper": "./dist/bin/bumper.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evan361425/version-bumper"
   },
   "types": "./dist/lib/api.d.ts",
   "main": "./dist/lib/api.js",

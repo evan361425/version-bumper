@@ -1,4 +1,4 @@
-import { Config } from './config.js';
+import { BaseBranchInfo, Config } from './config.js';
 
 type TagConfig = {
   createdDate: string;
@@ -39,16 +39,18 @@ export class Tag {
   }
 
   static veryFirst() {
-    return new Tag('Unreleased', 'Please check git diff.', {
+    return new Tag(this.veryFirstTagKey, 'Please check git diff.', {
       createdDate: '',
       link: Config.instance.repoLink + '/commits',
     });
   }
 
-  get prTitle() {
+  static readonly veryFirstTagKey = 'Unreleased';
+
+  getPrTitle(branch: BaseBranchInfo) {
     return this.ticket
-      ? `${this.ticket} - ${this.key}(${Config.instance.stage})`
-      : `${this.key}(${Config.instance.stage})`;
+      ? `${this.ticket} - ${this.key}(${branch.name})`
+      : `${this.key}(${branch.name})`;
   }
 
   get parsedBody() {
@@ -59,9 +61,9 @@ export class Tag {
       body = `${pre}\n\n${this.body}`;
     }
     return body
-      .replace(/<version>/g, this.key)
-      .replace(/<stage>/g, Config.instance.stage)
-      .replace(/<ticket>/g, this.ticket ?? '');
+      .replace(/{version}/g, this.key)
+      .replace(/{stage}/g, Config.instance.stage ?? '')
+      .replace(/{ticket}/g, this.ticket ?? '');
   }
 
   setLink(link?: string): Tag {

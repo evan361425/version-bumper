@@ -14,39 +14,31 @@
       "title": "Changelog 中會作為 tag 的連結",
       "description": "預設使用 `git remote get-url origin` 的輸出，\n若無則為 `https://github.com/example/example`"
     },
-    "prRepo": {
-      "type": "string",
-      "title": "要開 PR 的 Repo",
-      "description": "預設是用 `repoLink` 得值，\n例如：`example/example`"
-    },
-    "commitMessage": {
-      "type": "string",
-      "default": "chore: bump to <version>",
-      "title": "每次升版的 commit 訊息",
-      "description": "支援的變數有：\n`version`、`ticket`、`stage`"
-    },
-    "baseBranch": {
-      "type": "string",
-      "default": "main",
-      "title": "主分支的名稱",
-      "description": "通常是 `master` 或 `main`"
-    },
-    "prodOtherPr": {
-      "type": "string",
-      "title": "線上可能會需要開兩個 PR",
-      "description": "這是為了 DR 環境而設計的"
-    },
     "prOnly": {
       "type": "boolean",
       "default": false,
       "title": "根據設定只建立 PR 而不做任何升版",
       "description": "通常需要重新建立 PR 的時候會用到"
     },
-    "productionName": {
-      "type": "string",
-      "default": "production",
-      "title": "線上的分支名稱",
-      "description": "這會用來判斷是否為線上，若為線上則會去改 Changelog"
+    "commit": {
+      "type": "object",
+      "description": "Commit 相關設定",
+      "properties": {
+        "message": {
+          "cliName": "commitMessage",
+          "type": "string",
+          "default": "chore: bump to {version}",
+          "title": "每次升版的 commit 訊息",
+          "description": "支援的變數有：\n`version`、`ticket`、`stage`"
+        },
+        "noPush": {
+          "cliName": "commitNoPush",
+          "type": "boolean",
+          "default": false,
+          "title": "是否把 Commit 推至 remote repo",
+          "description": "這裡包括自動打的 tag"
+        }
+      }
     },
     "changelog": {
       "type": "object",
@@ -91,31 +83,16 @@
           "type": "string",
           "default": "docs/LATEST_VERSION.md",
           "title": "最新版本的內文位置",
-          "description": "其中的票號會被 `autoLinks` 自動補上連結。\n支援的 metadata 有：<version>、<ticket>"
+          "description": "其中的票號會被 `autoLinks` 自動補上連結。\n支援的 metadata 有：version, ticket"
         },
         "prTemplate": {
           "cliName": "filePrTemplate",
           "type": "string",
           "default": "docs/PR_TEMPLATE.md",
           "title": "PR 文本的位置",
-          "description": "支援的變數有：\n<ticket>、<stage>、<version>、最新版本的內文<content>、連結<diff>"
+          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
         }
       }
-    },
-    "latestVersion": {
-      "type": "string",
-      "title": "最新版本號",
-      "description": "不建議設定於此，\n請在 `files.latestVersion` 中透過 metadata 注入。"
-    },
-    "latestTicket": {
-      "type": "string",
-      "title": "最新票號",
-      "description": "不建議設定於此，\n請在 `files.latestVersion` 中透過 metadata 注入。"
-    },
-    "latestContent": {
-      "type": "string",
-      "title": "最新版本的內文",
-      "description": "不建議設定於此，\n請寫在 `files.latestVersion`。"
     },
     "autoLinks": {
       "type": "object",
@@ -131,7 +108,7 @@
       "cli": {
         "autoLinkKeys": {
           "title": "票號前綴",
-          "description": "以逗號（,）做為區隔，每個值只支援 a-z, A-Z 和 -"
+          "description": "以逗號（,）做為區隔，\n每個值只支援 a-z, A-Z 和 -"
         },
         "autoLinkValues": {
           "title": "連結模板",
@@ -139,82 +116,134 @@
         }
       }
     },
-    "branches": {
+    "pr": {
       "type": "object",
-      "description": "用來作為 PR 的分支設定",
-      "patternProperties": {
-        "^[a-zA-Z\\-_]$": {
-          "type": "object",
-          "additionalProperties": false,
-          "description": "鍵值只是代表名稱",
-          "properties": {
-            "base": {
-              "type": "string",
+      "description": "PR 的設定",
+      "properties": {
+        "repo": {
+          "cliName": "prRepo",
+          "type": "string",
+          "title": "要開 PR 的 Repo",
+          "description": "預設是用 `repoLink` 的值，\n例如：`example/example`"
+        },
+        "branches": {
+          "patternProperties": {
+            "^[a-zA-Z\\-_]$": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "鍵值只是代表名稱",
+              "required": ["pattern", "base"],
+              "properties": {
+                "pattern": {
+                  "type": "string",
+                  "title": "這個分支對應的版本號模式",
+                  "description": "會使用 `latestVersion` 來最為版本資訊，\n例如 staging 環境的標籤模式可能為 `v\\d+.\\d+.\\d+-rc\\d*`"
+                },
+                "changelog": {
+                  "type": "boolean",
+                  "default": false,
+                  "title": "當這個 PR 被觸發時，修改 Changelog",
+                  "description": "如果 `prOnly` 為是，則不會去改 Changelog"
+                },
+                "base": {
+                  "type": "string",
+                  "title": "做 PR 時的來源分支",
+                  "description": "需要為 git 上的名稱，\n例如 `production` 的 base 可能為 `deploy/staging`"
+                },
+                "head": {
+                  "type": "string",
+                  "title": "做 PR 時的目標分支",
+                  "default": "deploy/{name}",
+                  "description": "需要為 git 上的名稱，\n例如 `production` 的 head 可能為 `deploy/production`"
+                },
+                "reviewers": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "type": "string" },
+                  "title": "發 PR 時的 reviewers",
+                  "description": "不可以重複"
+                },
+                "siblings": {
+                  "type": "object",
+                  "patternProperties": {
+                    "[a-zA-Z\\-_/0-9]": {
+                      "type": "object",
+                      "properties": {
+                        "base": { "type": "string" },
+                        "head": { "type": "string" },
+                        "labels": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        },
+                        "reviewers": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
+                      }
+                    }
+                  },
+                  "title": "發 PR 時會一起發的額外 PR",
+                  "description": "這是為了 DR 環境而設計的，例如線上環境要同時開 DR 的 PR\n其設定會繼承所有父系設定"
+                },
+                "labels": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "type": "string" },
+                  "title": "發 PR 時的 labels",
+                  "description": "不可以重複"
+                }
+              }
+            }
+          },
+          "cli": {
+            "branchNames": {
+              "title": "分支名稱",
+              "description": "以逗號（,）做為區隔，必須每個都有值"
+            },
+            "branchPatterns": {
+              "title": "該分支的版本模式",
+              "description": "以逗號（,）做為區隔，\n例如 `^v\\d+.\\d+.\\d+-rc\\d*$,^v\\d+.\\d+.\\d+$`\n必須每個都有值"
+            },
+            "branchChangelog": {
+              "title": "做 PR 時是否修改 Changelog",
+              "description": "以逗號（,）做為區隔，有任一值則為 true"
+            },
+            "branchBases": {
               "title": "做 PR 時的來源分支",
-              "default": "透過 `baseBranch` 取得",
-              "description": "需要為 git 上的名稱，\n例如 `production` 的 base 可能為 `deploy/staging`"
+              "description": "以逗號（,）做為區隔，必須每個都有值"
             },
-            "head": {
-              "type": "string",
+            "branchHeads": {
               "title": "做 PR 時的目標分支",
-              "default": "deploy/<name>",
-              "description": "需要為 git 上的名稱，\n例如 `production` 的 head 可能為 `deploy/production`"
+              "default": "deploy/{name}",
+              "description": "以逗號（,）做為區隔"
             },
-            "reviewers": {
-              "type": "array",
-              "uniqueItems": true,
-              "items": { "type": "string" },
-              "title": "發 PR 時的 reviewers",
-              "description": "不可以重複"
+            "branchReviewers": {
+              "title": "做 PR 時的 reviewers",
+              "description": "以逗號（,）做為區隔不同分支，\n再以斜線（/）區分不同 reviewer，\n例如 `stag-rev,prod-rev1/prod-rev2`"
             },
-            "versionPattern": {
-              "type": "string",
-              "title": "確認目前的版本是否為這個分支",
-              "description": "會使用 `latestVersion` 來最為版本資訊，\n例如 staging 環境的標籤模式可能為 `v\\d+.\\d+.\\d+-rc\\d*`"
-            },
-            "labels": {
-              "type": "array",
-              "uniqueItems": true,
-              "items": { "type": "string" },
-              "title": "發 PR 時的 labels",
-              "description": "不可以重複"
+            "branchLabels": {
+              "title": "做 PR 時的 labels",
+              "description": "以逗號（,）做為區隔不同分支，\n再以空白（ ）區分不同 label，\n例如 `stag-label,prod-label1 prod-label2`"
             }
           }
         }
       },
-      "default": {
-        "staging": { "base": "deploy/develop", "head": "deploy/staging" },
-        "production": { "base": "deploy/staging", "head": "deploy/production" }
-      },
-      "cli": {
-        "branchNames": {
-          "title": "分支名稱",
-          "default": "staging,production",
-          "description": "以逗號（,）做為區隔"
-        },
-        "branchBases": {
-          "title": "做 PR 時的來源分支",
-          "default": "deploy/develop,deploy/staging",
-          "description": "以逗號（,）做為區隔，否則為 `baseBranch`"
-        },
-        "branchHeads": {
-          "title": "做 PR 時的目標分支",
-          "default": "deploy/<name>",
-          "description": "以逗號（,）做為區隔"
-        },
-        "branchReviewers": {
-          "title": "做 PR 時的 reviewers",
-          "description": "以逗號（,）做為區隔不同分支，\n再以斜線（/）區分不同 reviewer，\n例如 `stag-rev,prod-rev1/prod-rev2`"
-        },
-        "branchPatterns": {
-          "title": "該分支的版本模式",
-          "description": "以逗號（,）做為區隔，\n例如 `^v\\d+.\\d+.\\d+-rc\\d*$,^v\\d+.\\d+.\\d+$`"
-        },
-        "branchLabels": {
-          "title": "做 PR 時的 labels",
-          "description": "以逗號（,）做為區隔不同分支，\n再以空白（ ）區分不同 label，\n例如 `stag-label,prod-label1 prod-label2`"
-        }
-      }
+      "additionalProperties": false
+    },
+    "latestVersion": {
+      "type": "string",
+      "title": "最新版本號",
+      "description": "不建議設定於此，\n請在 `files.latestVersion` 中透過 metadata 注入。"
+    },
+    "latestTicket": {
+      "type": "string",
+      "title": "最新票號",
+      "description": "不建議設定於此，\n請在 `files.latestVersion` 中透過 metadata 注入。"
+    },
+    "latestContent": {
+      "type": "string",
+      "title": "最新版本的內文",
+      "description": "不建議設定於此，\n請寫在 `files.latestVersion`。"
     }
   }
 }

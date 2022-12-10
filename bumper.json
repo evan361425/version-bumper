@@ -1,5 +1,4 @@
 {
   "$schema": "./schema.json",
-  "latestVersion": "v1.0.0",
-  "debug": true
+  "latestVersion": "v0.1.0"
 }

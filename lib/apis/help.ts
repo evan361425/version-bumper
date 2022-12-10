@@ -1,10 +1,11 @@
 import path from 'node:path';
-import { readFile } from './helper.js';
+import { readFile } from '../helper.js';
 
 const PREFIX = '\t';
 const commands = {
   version: '更新版本，預設的 command',
   help: '顯示此訊息',
+  init: '初始化專案',
 };
 
 type ItemSchema = {
@@ -44,6 +45,11 @@ function printArgsFromSchema() {
       type: 'string',
       underlineKey: 'config',
     },
+    stage: {
+      title: '你可以指定要使用的 PR 分支',
+      type: 'string',
+      underlineKey: 'stage',
+    },
   };
   for (const option of parseObject(schema)) {
     const [key, meta] = option;
@@ -73,7 +79,7 @@ function printArgsFromSchema() {
 }
 
 function getSchemaFile() {
-  const file = path.join(import.meta.url, '..', '..', 'schema.json');
+  const file = path.join(import.meta.url, '..', '..', '..', 'schema.json');
   const schemaIndex = file.indexOf(':');
   if (schemaIndex === -1) return file;
 
