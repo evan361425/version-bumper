@@ -1,6 +1,6 @@
 /* eslint-disable mocha/no-hooks-for-single-case */
 import { expect } from 'chai';
-import { restore, stub, reset } from 'sinon';
+import { restore, stub, reset, useFakeTimers } from 'sinon';
 import bumpVersion from '../lib/apis/bump-version.js';
 import { Config } from '../lib/config.js';
 import { startDebug, stopDebug } from '../lib/helper.js';
@@ -18,6 +18,8 @@ describe('Bump version', function () {
   });
 
   it('example', async function () {
+    const now = new Date('2022-12-1');
+    useFakeTimers(now.getTime());
     const config = new Config({
       repoLink: 'https://github.com/example/example',
       latestVersion: 'v1.0.2',
@@ -33,10 +35,15 @@ describe('Bump version', function () {
         'ticket-': 'replace-<num>',
         'sub-ticket-': 'replace-sub-<num>',
       },
+      tags: {
+        test: {
+          pattern: '^v1.0.\\d+$',
+          changelog: true,
+        },
+      },
       pr: {
         branches: {
           test: {
-            pattern: '^v1.0.\\d+$',
             head: 'test-head',
             base: 'test-base',
             reviewers: ['r1', 'r2'],
@@ -92,12 +99,17 @@ First Release
       repoLink: 'https://github.com/example/example',
       prOnly: false,
       commitInfo: { noPush: false, message: 'chore: bump to {version}' },
+      tagsInfo: {
+        test: {
+          pattern: '^v1.0.\\d+$',
+          changelog: true,
+        },
+      },
       prInfo: {
         repo: 'example/example',
         branches: {
           test: {
             name: 'test',
-            pattern: '^v1.0.\\d+$',
             head: 'test-head',
             base: 'test-base',
             reviewers: ['r1', 'r2'],
@@ -139,6 +151,45 @@ First Release
       '[changelog] Start parsing',
       '[bump] Requirements checked',
       "[cmd]: git 'update-index' '--refresh'",
+      "[cmd]: npm 'version' '--no-commit-hooks' '--no-git-tag-version' 'v1.0.2'",
+      '[bump] Start updating changelog',
+      `# Changelog
+
+This is my test header
+
+Hi there, try correct this!
+
+## [Unreleased]
+
+-   請看 git diff。
+
+## [v1.0.2] - 2022-12-01
+
+ticket prefix:TICKET-200
+
+This is my new release
+
+With version: v1.0.2
+stage: test
+ticket: TICKET-200
+
+## [v1.0.1] - 2022-11-30
+
+單號：[TICKET-100](http://example.com/browse/TICKET-100)
+
+-   SUB-TICKET-1001 Add some feature
+-   SUB-TICKET-1002 Fix some bug
+
+## [v1.0.0] - 2022-01-30
+
+First Release
+
+[unreleased]: https://github.com/example/example/compare/v1.0.2...HEAD
+[v1.0.2]: https://github.com/example/example/compare/v1.0.2...v1.0.1
+[v1.0.1]: https://github.com/example/example/compare/v1.0.0...v1.0.1
+[v1.0.0]: https://github.com/example/example/commits/v1.0.0
+`,
+      "[cmd]: git 'commit' '.' '-m' 'chore: bump to v1.0.2' '--no-verify'",
       "[cmd]: git 'tag' 'v1.0.2' '-m' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
       "[cmd]: git 'push' '--no-verify'",
       "[cmd]: git 'push' '--tag' '--no-verify'",

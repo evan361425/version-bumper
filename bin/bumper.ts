@@ -28,11 +28,7 @@ function getErrorMessage(error: unknown) {
   return error;
 }
 
-/**
- * Get version from package.json
- * @returns {string} The value of version
- */
-function getVersion() {
+function getVersion(): string {
   try {
     return JSON.parse(readFile('package.json')).version;
   } catch (error) {

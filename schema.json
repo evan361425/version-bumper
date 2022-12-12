@@ -116,9 +116,49 @@
         }
       }
     },
+    "tags": {
+      "type": "object",
+      "title": "Tag 的設定",
+      "patternProperties": {
+        "^[a-zA-Z\\-_0-9]+$": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "鍵值只是代表名稱",
+          "required": ["pattern"],
+          "properties": {
+            "pattern": {
+              "type": "string",
+              "title": "這個 Tag 對應的版本號模式",
+              "description": "會使用 `latestVersion` 來最為版本資訊，\n例如 staging 環境的標籤模式可能為 `v\\d+.\\d+.\\d+-rc\\d*`"
+            },
+            "changelog": {
+              "type": "boolean",
+              "default": false,
+              "title": "當這個 Tag 被觸發時，修改 Changelog",
+              "description": "如果 `prOnly` 為是，則不會去改 Changelog"
+            }
+          }
+        }
+      },
+      "cli": {
+        "tagNames": {
+          "title": "Tag 名稱",
+          "description": "以逗號（,）做為區隔，必須每個都有值"
+        },
+        "tagPatterns": {
+          "title": "Tag 的版本模式",
+          "description": "以逗號（,）做為區隔，\n例如 `^v\\d+.\\d+.\\d+-rc\\d*$,^v\\d+.\\d+.\\d+$`\n必須每個都有值"
+        },
+        "tagChangelog": {
+          "title": "Tag 是否要去修改 Changelog",
+          "description": "以逗號（,）做為區隔，有任一值則為 true"
+        }
+      },
+      "additionalProperties": false
+    },
     "pr": {
       "type": "object",
-      "description": "PR 的設定",
+      "title": "PR 的設定",
       "properties": {
         "repo": {
           "cliName": "prRepo",
@@ -127,24 +167,15 @@
           "description": "預設是用 `repoLink` 的值，\n例如：`example/example`"
         },
         "branches": {
+          "type": "object",
+          "title": "PR 的分支管理",
           "patternProperties": {
-            "^[a-zA-Z\\-_]$": {
+            "^[a-zA-Z\\-_0-9]+$": {
               "type": "object",
               "additionalProperties": false,
               "description": "鍵值只是代表名稱",
-              "required": ["pattern", "base"],
+              "required": ["base"],
               "properties": {
-                "pattern": {
-                  "type": "string",
-                  "title": "這個分支對應的版本號模式",
-                  "description": "會使用 `latestVersion` 來最為版本資訊，\n例如 staging 環境的標籤模式可能為 `v\\d+.\\d+.\\d+-rc\\d*`"
-                },
-                "changelog": {
-                  "type": "boolean",
-                  "default": false,
-                  "title": "當這個 PR 被觸發時，修改 Changelog",
-                  "description": "如果 `prOnly` 為是，則不會去改 Changelog"
-                },
                 "base": {
                   "type": "string",
                   "title": "做 PR 時的來源分支",
@@ -198,15 +229,7 @@
           "cli": {
             "branchNames": {
               "title": "分支名稱",
-              "description": "以逗號（,）做為區隔，必須每個都有值"
-            },
-            "branchPatterns": {
-              "title": "該分支的版本模式",
-              "description": "以逗號（,）做為區隔，\n例如 `^v\\d+.\\d+.\\d+-rc\\d*$,^v\\d+.\\d+.\\d+$`\n必須每個都有值"
-            },
-            "branchChangelog": {
-              "title": "做 PR 時是否修改 Changelog",
-              "description": "以逗號（,）做為區隔，有任一值則為 true"
+              "description": "以逗號（,）做為區隔，必須每個都有值\n需要和 Tag 的名稱對齊"
             },
             "branchBases": {
               "title": "做 PR 時的來源分支",
@@ -225,7 +248,8 @@
               "title": "做 PR 時的 labels",
               "description": "以逗號（,）做為區隔不同分支，\n再以空白（ ）區分不同 label，\n例如 `stag-label,prod-label1 prod-label2`"
             }
-          }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

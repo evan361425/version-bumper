@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import { Config } from '../config.js';
 import { isDebug } from '../helper.js';
 import { Changelog } from '../changelog.js';
-import { Tag } from '../tag.js';
 
 export default async function () {
   const config = new Config({});
@@ -33,8 +32,8 @@ export default async function () {
           $schema: schema,
           repoLink: config.repoLink,
           commit: { message: config.commitInfo.message },
-          changelog: {
-            header: changelog.header ?? config.changelogInfo.header,
+          tags: {
+            release: { pattern: 'v[0-9]+.[0-9]+.[0-9]+', changelog: true },
           },
           pr: { repo: config.prInfo.repo },
         },
@@ -54,13 +53,6 @@ ticket:
 ${changelog.latestTag?.body ?? ''}
 `
     );
-  }
-
-  if (fs.existsSync(files.latestVersion)) {
-    const tag = new Tag(config.latestInfo.version, config.latestInfo.body, {
-      ticket: config.latestInfo.ticket,
-    });
-    changelog.addTag(tag);
   }
 
   if (allowed(files.changelog, 'changelog')) {

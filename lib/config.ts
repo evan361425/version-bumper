@@ -39,6 +39,7 @@ export class Config {
   readonly commitInfo: CommitInfo;
   readonly changelogInfo: ChangelogInfo;
   readonly latestInfo: LatestInfo;
+  readonly tagsInfo: TagsInfo;
   readonly prInfo: PRInfo;
 
   readonly autoLinks: Record<string, string>;
@@ -64,12 +65,21 @@ export class Config {
     this.commitInfo = getCommitInfo();
     this.changelogInfo = getChangelogInfo();
     this.files = getFilesInfo();
-    this.prInfo = gitPRInfo();
+    this.tagsInfo = getTagsInfo();
+    this.prInfo = getPRInfo();
     this.latestInfo = getLatestInfo(this.files.latestVersion);
+
+    for (const key of Object.keys(this.prInfo.branches)) {
+      if (!this.tagsInfo[key]) {
+        throw new Error(
+          `Missing ${key} in tags config, PR branches should mappable to tags' keys`
+        );
+      }
+    }
 
     this.autoLinks = getAutoLinks();
 
-    this.stage = getStage(this.latestInfo.version, this.prInfo);
+    this.stage = getStage(this.latestInfo.version, this.tagsInfo);
 
     // ================ helpers =====================
 
@@ -100,40 +110,68 @@ export class Config {
       return fls as FilesInfo;
     }
 
-    function gitPRInfo(): PRInfo {
+    function getTagsInfo(): TagsInfo {
+      let tags: TagsInfo = config['tags'] ?? {};
+
+      const names = stf(getConfig('tag_names'));
+      const patterns = stf(getConfig('tag_patterns'));
+      const changelogs = stf(getConfig('tag_changelogs'));
+
+      if (names && patterns) {
+        tags = {};
+        const ml = Math.min(names.length, patterns.length);
+        for (let i = 0; i < ml; i++) {
+          // @ts-expect-error Type 'undefined' cannot be used as an index type.
+          tags[names[i]] = {
+            pattern: patterns[i],
+            changelog: changelogs[i] ?? false,
+          };
+        }
+      }
+
+      Object.entries(tags).forEach(([, tag]) => {
+        if (!tag.pattern) {
+          throw new Error('Required `pattern` in tags config');
+        }
+
+        tag.changelog ??= false;
+      });
+
+      return tags;
+    }
+
+    function getPRInfo(): PRInfo {
       const pr: Partial<PRInfo> = config['pr'] ?? {};
       pr.repo = getConfig('pr_repo', '');
 
       const names = stf(getConfig('branch_names'));
-      const patterns = stf(getConfig('branch_patterns'));
-      const changelogs = stf(getConfig('branch_changelog')) ?? [];
       const heads = stf(getConfig('branch_heads'));
       const bases = stf(getConfig('branch_bases'));
       const reviewers = stf(getConfig('branch_reviewers')) ?? [];
       const labels = stf(getConfig('branch_labels')) ?? [];
 
-      if (names && patterns && bases) {
+      if (names && bases) {
         // overwrite it! since env take higher procedure
         if (pr.branches) pr.branches = {};
 
-        const ml = Math.min(names.length, patterns.length, bases.length);
+        const ml = Math.min(names.length, bases.length);
         for (let i = 0; i < ml; i++) {
-          // @ts-expect-error Type 'undefined' cannot be used as an index type.
-          pr.branches[names[i]] = {
-            patterns: patterns[i],
-            changelogs: changelogs[i] ?? false,
+          const b: Partial<BaseBranchInfo> = {
             head: heads[i],
             base: bases[i],
             reviewers: stf(reviewers[i], '/'),
             labels: stf(labels[i], ' '),
           };
+
+          // @ts-expect-error Type 'undefined' cannot be used as an index type.
+          pr.branches[names[i]] = b;
         }
       }
 
       if (pr.branches) {
         Object.entries(pr.branches).forEach(([k, meta]) => {
-          if (!meta.base || !meta.pattern) {
-            throw new Error('每個 PR 的 Branch 都必須要有 `base` 和 `pattern`');
+          if (!meta.base) {
+            throw new Error('Required `base` in PR.branches config');
           }
 
           meta.name = k;
@@ -194,11 +232,11 @@ export class Config {
       return result;
     }
 
-    function getStage(v: string, pr: PRInfo): string | undefined {
+    function getStage(v: string, tags: TagsInfo): string | undefined {
       const stage = getConfig('stage');
-      if (stage && pr.branches[stage]) return stage;
+      if (stage && tags[stage]) return stage;
 
-      const hit = Object.entries(pr.branches).find((e) => {
+      const hit = Object.entries(tags).find((e) => {
         if (!e[1].pattern) return;
 
         return new RegExp(e[1].pattern).test(v);
@@ -255,6 +293,11 @@ export class Config {
     info(JSON.stringify(this, undefined, 2));
   }
 
+  get tag(): TagInfo | undefined {
+    if (!this.stage) return;
+    return this.tagsInfo[this.stage];
+  }
+
   get branch(): BranchInfo | undefined {
     if (!this.stage) return;
     return this.prInfo.branches[this.stage];
@@ -306,6 +349,10 @@ function stf<T>(
   ) as never;
 }
 
+type TagInfo = {
+  pattern: string;
+  changelog: boolean;
+};
 export type BaseBranchInfo = {
   name: string;
   head: string;
@@ -314,8 +361,6 @@ export type BaseBranchInfo = {
   reviewers: string[];
 };
 type BranchInfo = BaseBranchInfo & {
-  pattern: string;
-  changelog: boolean;
   siblings: Record<string, BaseBranchInfo>;
 };
 type ChangelogInfo = {
@@ -329,5 +374,6 @@ type FilesInfo = {
   prTemplate: string;
 };
 type PRInfo = { repo: string; branches: Record<string, BranchInfo> };
+type TagsInfo = Record<string, TagInfo>;
 type CommitInfo = { message: string; noPush: boolean };
 type LatestInfo = { version: string; body: string; ticket?: string };

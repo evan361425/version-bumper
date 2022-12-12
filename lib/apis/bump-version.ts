@@ -35,8 +35,8 @@ export default async function () {
 async function bump(changelog: Changelog) {
   const tag = changelog.latestTag;
   const stage = Config.instance.stage;
-  const branch = Config.instance.branch;
-  if (!tag || !stage || !branch) return;
+  const tagInfo = Config.instance.tag;
+  if (!tag || !stage || !tagInfo) return;
   info('[bump] Requirements checked');
 
   const msg = Config.instance.commitInfo.message
@@ -47,7 +47,7 @@ async function bump(changelog: Changelog) {
   const polluted = await git('update-index', '--refresh');
   if (polluted) await gitCommit(msg);
 
-  if (branch.changelog) {
+  if (tagInfo.changelog) {
     await npm('version', '--no-commit-hooks', '--no-git-tag-version', tag.key);
 
     if (!Config.instance.changelogInfo.disable) {
