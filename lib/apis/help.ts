@@ -46,7 +46,7 @@ function printArgsFromSchema() {
       underlineKey: 'config',
     },
     stage: {
-      title: '你可以指定要使用的 PR 分支',
+      title: '你可以指定要使用的 Tag 類別',
       type: 'string',
       underlineKey: 'stage',
     },

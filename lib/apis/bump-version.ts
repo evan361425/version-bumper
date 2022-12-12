@@ -10,10 +10,24 @@ export default async function () {
   const changelog = new Changelog(Config.instance.changelog);
   const info = Config.instance.latestInfo;
   const tag = new Tag(info.version, info.body, { ticket: info.ticket });
-  changelog.addTag(tag);
+
+  let tagExist;
+  try {
+    changelog.addTag(tag);
+  } catch (error) {
+    tagExist = error;
+  }
 
   if (Config.instance.prOnly) {
     return await createPRs(tag);
+  }
+
+  if (Config.instance.releaseOnly) {
+    return await createRelease(tag);
+  }
+
+  if (tagExist) {
+    throw tagExist;
   }
 
   // 如有必要，更新 Changelog
@@ -30,6 +44,9 @@ export default async function () {
 
   // 建立 PR
   await createPRs(tag);
+
+  // 建立 Release
+  await createRelease(tag);
 }
 
 async function bump(changelog: Changelog) {
@@ -113,5 +130,19 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     Config.instance.prInfo.repo,
     ...b.reviewers.map((reviewer) => ['--reviewer', reviewer]).flat(),
     ...(b.labels.map((label) => ['--label', label]).flat() ?? [])
+  );
+}
+
+function createRelease(tag: Tag) {
+  // https://cli.github.com/manual/gh_release_create
+  return gh(
+    'release',
+    'create',
+    '--prerelease',
+    '--title',
+    tag.key,
+    '--notes',
+    tag.parsedBody,
+    tag.key
   );
 }

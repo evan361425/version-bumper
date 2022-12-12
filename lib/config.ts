@@ -34,6 +34,7 @@ export class Config {
   repoLink: string;
   readonly stage?: string;
   readonly prOnly: boolean;
+  readonly releaseOnly: boolean;
 
   readonly files: FilesInfo;
   readonly commitInfo: CommitInfo;
@@ -61,6 +62,7 @@ export class Config {
 
     this.repoLink = getConfig('repo_link') ?? '';
     this.prOnly = getBoolConfig('pr_only');
+    this.releaseOnly = getBoolConfig('release_only');
 
     this.commitInfo = getCommitInfo();
     this.changelogInfo = getChangelogInfo();
