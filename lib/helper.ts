@@ -6,7 +6,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import path from 'node:path';
-import { info, error } from './logger.js';
+import { info } from './logger.js';
 
 let debug = false;
 let mockedCommands: undefined | Promise<string>[];
@@ -58,7 +58,6 @@ export async function git(...args: string[]): Promise<string> {
   try {
     return await createCommand('git', args);
   } catch (err) {
-    error(`${err}`);
     return '';
   }
 }
