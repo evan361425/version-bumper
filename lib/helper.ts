@@ -1,8 +1,16 @@
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  appendFileSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
+import path from 'node:path';
 import { info, error } from './logger.js';
 
 let debug = false;
+let mockedCommands: undefined | Promise<string>[];
+let mockedFiles: undefined | string[];
 
 export function startDebug(): void {
   debug = true;
@@ -16,25 +24,34 @@ export function isDebug(): boolean {
   return debug;
 }
 
-function createCommand(name: string, args: string[]): Promise<string> {
+export function createCommand(name: string, args: string[]): Promise<string> {
   const force = typeof args[0] === 'boolean' ? args.shift() : false;
   info(`[cmd]: ${name} '${args.join("' '")}'`);
-  if (!force && isDebug()) return Promise.resolve('');
 
-  return new Promise((res, rej) => {
-    const command = spawn(name, args);
-    let response = '';
-    let error = '';
+  const prepared =
+    !force && isDebug()
+      ? Promise.resolve('')
+      : mockedCommands
+      ? mockedCommands.shift()
+      : undefined;
 
-    command.stdout.on('data', (data) => (response += data.toString()));
-    command.stderr.on('data', (data) => (error += data.toString()));
-    command.on('error', (err) => {
-      rej(err);
-    });
-    command.on('close', () => {
-      error !== '' ? rej(new Error(error)) : res(response);
-    });
-  });
+  return (
+    prepared ??
+    new Promise((res, rej) => {
+      const command = spawn(name, args);
+      let response = '';
+      let error = '';
+
+      command.stdout.on('data', (data) => (response += data.toString()));
+      command.stderr.on('data', (data) => (error += data.toString()));
+      command.on('error', (err) => {
+        rej(err);
+      });
+      command.on('close', () => {
+        error !== '' ? rej(new Error(error)) : res(response);
+      });
+    })
+  );
 }
 
 export async function git(...args: string[]): Promise<string> {
@@ -66,12 +83,33 @@ export function breaker(value: string, length = 1, separator = '\n'): string[] {
   return result;
 }
 
-export function readFile(fileName: string) {
+export function readFile(fileName: string): string {
+  if (mockedFiles && mockedFiles.length) {
+    return mockedFiles.shift() ?? '';
+  }
   return existsSync(fileName) ? readFileSync(fileName).toString() : '';
 }
 
-export function writeFile(fileName: string, data: string) {
-  isDebug() ? info(data) : writeFileSync(fileName, data);
+export function writeFile(fileName: string | undefined, data: string) {
+  if (isDebug()) {
+    console.log(data);
+    return;
+  }
+
+  if (fileName) {
+    writeFileSync(fileName, data);
+  }
+}
+
+export function appendFile(fileName: string | undefined, data: string) {
+  if (isDebug()) {
+    console.log(data);
+    return;
+  }
+
+  if (fileName) {
+    appendFileSync(fileName, data);
+  }
 }
 
 type MarkdownMeta = Partial<{
@@ -95,4 +133,24 @@ export function parseMarkdown(fileName: string): [MarkdownMeta, string] {
     });
 
   return [meta, body?.trim() ?? ''];
+}
+
+export function getSchemaFile() {
+  const paths = ['..', '..', 'schema.json'];
+  if (import.meta.url.endsWith('.js')) paths.unshift('..');
+  const file = path.join(import.meta.url, ...paths);
+  const schemaIndex = file.indexOf(':');
+  if (schemaIndex === -1) return file;
+
+  return file.substring(schemaIndex + 1);
+}
+
+export function mockCommand(target: Promise<string>) {
+  if (mockedCommands) mockedCommands.push(target);
+  else mockedCommands = [target];
+}
+
+export function mockFile(target: string) {
+  if (mockedFiles) mockedFiles.push(target);
+  else mockedFiles = [target];
 }

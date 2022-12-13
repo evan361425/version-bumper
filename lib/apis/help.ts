@@ -1,9 +1,9 @@
-import path from 'node:path';
-import { readFile } from '../helper.js';
+import { getSchemaFile, readFile } from '../helper.js';
 
 const PREFIX = '\t';
-const commands = {
-  version: '更新版本，預設的 command',
+const commands: Record<string, string> = {
+  version: '更新版本',
+  deps: '更新套件',
   help: '顯示此訊息',
   init: '初始化專案',
 };
@@ -16,10 +16,20 @@ type ItemSchema = {
   description?: string;
 };
 
-export default function () {
-  console.log('Usage: (npx) bumper <command> [args]\n');
-  console.log('Commands:');
+export default function (command?: string) {
+  const pureCommand = !commands[command ?? ''] || command === 'help';
 
+  if (pureCommand) {
+    console.log('Usage: (npx) bumper <command> [args]\nCommands');
+    printCommands();
+    console.log('\nArgs:\n\t-h, --help 顯示相關 Command 的 Args');
+  } else {
+    console.log(`Usage: (npx) bumper ${command} [args]\nArgs:`);
+    printArgsFromSchema(command ?? '');
+  }
+}
+
+function printCommands() {
   const keyMaxLength = Object.keys(commands)
     .map((k) => k.length)
     .reduce((prev, curr) => (curr > prev ? curr : prev));
@@ -29,14 +39,11 @@ export default function () {
     const prefix = PREFIX + key + ' '.repeat(spaces);
     console.log(prefix + ' ' + desc);
   });
-
-  console.log('\nArgs:');
-  printArgsFromSchema();
 }
 
-function printArgsFromSchema() {
+function printArgsFromSchema(command: string) {
   const file = getSchemaFile();
-  const schema = JSON.parse(readFile(file));
+  let schema = JSON.parse(readFile(file));
 
   const options: Record<string, ItemSchema> = {
     config: {
@@ -45,12 +52,26 @@ function printArgsFromSchema() {
       type: 'string',
       underlineKey: 'config',
     },
-    stage: {
-      title: '你可以指定要使用的 Tag 類別',
-      type: 'string',
-      underlineKey: 'stage',
+    debug: {
+      title: '執行程式而不會有任何副作用',
+      default: false,
+      type: 'boolean',
+      description: '同時會輸出一些雜七雜八的日誌到 stdout',
+      underlineKey: 'debug',
     },
   };
+
+  if (command === 'deps') {
+    schema = schema.properties.deps;
+  } else {
+    delete schema.properties.deps;
+    options['stage'] = {
+      title: '你可以指定要使用的 Tag',
+      type: 'string',
+      underlineKey: 'stage',
+    };
+  }
+
   for (const option of parseObject(schema)) {
     const [key, meta] = option;
     meta.underlineKey = camelToUnderline(key);
@@ -76,14 +97,6 @@ function printArgsFromSchema() {
     def && console.log(PREFIX + ' '.repeat(prefix.length - 5) + def);
     console.log(PREFIX + ' '.repeat(prefix.length - 9) + env);
   });
-}
-
-function getSchemaFile() {
-  const file = path.join(import.meta.url, '..', '..', '..', 'schema.json');
-  const schemaIndex = file.indexOf(':');
-  if (schemaIndex === -1) return file;
-
-  return file.substring(schemaIndex + 1);
 }
 
 function* parseObject(

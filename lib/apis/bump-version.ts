@@ -5,7 +5,7 @@ import { info } from '../logger.js';
 import { Tag } from '../tag.js';
 
 export default async function () {
-  await Config.instance.init();
+  await Config.instance.init('version');
 
   const changelog = new Changelog(Config.instance.changelog);
   const info = Config.instance.latestInfo;

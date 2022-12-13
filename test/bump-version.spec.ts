@@ -1,6 +1,6 @@
 /* eslint-disable mocha/no-hooks-for-single-case */
 import { expect } from 'chai';
-import { restore, stub, reset, useFakeTimers } from 'sinon';
+import { restore, stub, useFakeTimers } from 'sinon';
 import bumpVersion from '../lib/apis/bump-version.js';
 import { Config } from '../lib/config.js';
 import { startDebug, stopDebug } from '../lib/helper.js';
@@ -14,7 +14,6 @@ describe('Bump version', function () {
   afterEach(function () {
     restore();
     setupEnv();
-    reset();
   });
 
   it('example', async function () {
@@ -95,9 +94,12 @@ First Release
 
     const calls = stdout.getCalls().map((call) => call.args[0]);
     const call1 = calls.shift();
-    expect(JSON.parse(call1)).to.eql({
+    const parsedConfig = JSON.parse(call1);
+    delete parsedConfig.deps;
+    expect(parsedConfig).to.eql({
       repoLink: 'https://github.com/example/example',
       prOnly: false,
+      releaseOnly: false,
       commitInfo: { noPush: false, message: 'chore: bump to {version}' },
       tagsInfo: {
         test: {
@@ -218,6 +220,12 @@ First Release
         "'--repo' 'example/example'",
         "'--reviewer' 'r1' '--reviewer' 'r2'",
         "'--label' 'label-1' '--label' 'label-2'",
+      ].join(' '),
+      [
+        "[cmd]: gh 'release' 'create' '--prerelease'",
+        "'--title' 'v1.0.2'",
+        "'--notes' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
+        "'v1.0.2'",
       ].join(' '),
     ]);
   });

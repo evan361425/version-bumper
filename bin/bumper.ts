@@ -57,24 +57,21 @@ ${message}`);
   process.on('uncaughtException', onFatalError);
   process.on('unhandledRejection', onFatalError);
 
-  const command =
-    process.argv.includes('-h') || process.argv.includes('--help')
-      ? 'help'
-      : process.argv[2]?.startsWith('--')
-      ? 'version'
-      : process.argv[2];
-  switch (command) {
-    case 'version':
-    case undefined:
-      await api.bumpVersion();
-      break;
-    case 'init':
-      await api.init();
-      break;
-    case 'help':
-      api.help();
-      break;
-    default:
-      console.log(`unknown command: ${command}`);
+  const command = process.argv[2];
+  const needHelp =
+    process.argv.includes('-h') ||
+    process.argv.includes('--help') ||
+    command?.startsWith('-');
+
+  if (needHelp) {
+    api.help(command);
+  } else if (command === 'version') {
+    await api.bumpVersion();
+  } else if (command === 'deps') {
+    await api.bumpDeps();
+  } else if (command === 'init') {
+    await api.init();
+  } else {
+    api.help(command);
   }
 })().catch(onFatalError);

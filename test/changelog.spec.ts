@@ -1,4 +1,5 @@
 import { assert, expect } from 'chai';
+import Sinon from 'sinon';
 import { Changelog } from '../lib/changelog.js';
 import { Tag } from '../lib/tag.js';
 
@@ -107,5 +108,13 @@ describe('Changelog', function () {
     // testing twice times avoid mutate after output
     expect(changelog.toString()).eq(expected);
     expect(changelog.toString()).eq(expected);
+  });
+
+  beforeEach(function () {
+    Sinon.stub(console, 'log');
+  });
+
+  afterEach(function () {
+    Sinon.restore();
   });
 });

@@ -1,23 +1,23 @@
 import mocha from 'mocha';
 
-mocha.before(() => setupEnv());
+mocha.before(function () {
+  setupEnv();
+});
 
-function setEnv(key: string, value: string) {
+export function setEnv(key: string, value: string) {
   process.env['BUMPER_' + key.toUpperCase()] = value;
-}
-function delEnv(key: string) {
-  delete process.env['BUMPER_' + key.toUpperCase()];
 }
 
 export function resetEnv() {
-  delEnv('repo_link');
-  delEnv('latest_version');
-  delEnv('auto_link_keys');
-  delEnv('auto_link_values');
-  delEnv('debug');
+  Object.keys(process.env)
+    .filter((k) => k.startsWith('BUMPER'))
+    .forEach((k) => {
+      delete process.env[k];
+    });
 }
 
 export function setupEnv() {
+  resetEnv();
   setEnv('repo_link', 'https://github.com/example/example');
   setEnv('latest_version', '1.1.1');
   setEnv('auto_link_keys', 'EVAN-');

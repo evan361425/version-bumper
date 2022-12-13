@@ -1,11 +1,11 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { Config } from '../config.js';
-import { isDebug } from '../helper.js';
+import { getSchemaFile, isDebug } from '../helper.js';
 import { Changelog } from '../changelog.js';
 
 export default async function () {
-  const config = new Config({});
+  const config = new Config({ latestVersion: 'unknown' as never });
   Config.instance = config;
   const files = {
     config: path.resolve('bumper.json'),
@@ -15,15 +15,11 @@ export default async function () {
   };
   Object.values(files).forEach(prepareFolder);
 
-  await config.init();
+  await config.init('version');
   const changelog = new Changelog(Config.instance.changelog);
 
   if (allowed(files.config, 'configuration')) {
-    const currFile = import.meta.url.replace(/^file:/, '');
-    const schema = path.relative(
-      path.resolve(),
-      path.join(currFile, '..', '..', '..', 'schema.json')
-    );
+    const schema = path.relative(path.resolve(), getSchemaFile());
 
     writeTo(
       files.config,
@@ -43,7 +39,7 @@ export default async function () {
     );
   }
 
-  if (allowed(files.latestVersion, 'latest version info file')) {
+  if (allowed(files.latestVersion, 'latest version info')) {
     writeTo(
       files.latestVersion,
       `---
@@ -78,6 +74,7 @@ function allowed(file: string, key: string): boolean {
     console.log(`File ${name} for ${key} exist, ignore!`);
     return false;
   }
+  console.log(`File ${name} for ${key} creating!`);
   return true;
 }
 

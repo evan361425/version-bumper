@@ -3,12 +3,6 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
 
   "properties": {
-    "debug": {
-      "type": "boolean",
-      "default": false,
-      "title": "執行程式而不會有任何副作用",
-      "description": "同時會輸出一些雜七雜八的日誌到 stdout"
-    },
     "repoLink": {
       "type": "string",
       "title": "Changelog 中會作為 tag 的連結",
@@ -155,7 +149,7 @@
           "title": "Tag 的版本模式",
           "description": "以逗號（,）做為區隔，\n例如 `^v\\d+.\\d+.\\d+-rc\\d*$,^v\\d+.\\d+.\\d+$`\n必須每個都有值"
         },
-        "tagChangelog": {
+        "tagChangelogs": {
           "title": "Tag 是否要去修改 Changelog",
           "description": "以逗號（,）做為區隔，有任一值則為 true"
         }
@@ -274,6 +268,145 @@
       "type": "string",
       "title": "最新版本的內文",
       "description": "不建議設定於此，\n請寫在 `files.latestVersion`。"
+    },
+    "deps": {
+      "type": "object",
+      "title": "更新套件相關設定",
+      "additionalProperties": false,
+      "properties": {
+        "ignored": {
+          "type": "array",
+          "title": "忽略哪些相依套件",
+          "description": "套件全名或者以 `*` 結尾代表以此開頭的套件",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "title": "套件名稱"
+          },
+          "cli": {
+            "ignored": {
+              "title": "忽略哪些相依套件",
+              "description": "以逗號（,）做為區隔，\n各值為套件全名或者以 `*` 結尾代表以此開頭的套件"
+            }
+          }
+        },
+        "output": {
+          "type": "string",
+          "title": "更新時，版本資訊的寫入位置",
+          "description": "Markdown 格式，\n無預設，所以沒給就不會寫"
+        },
+        "appendOnly": {
+          "type": "boolean",
+          "default": false,
+          "title": "更新檔案至 `deps.output` 時，用附加的方式"
+        },
+        "useExact": {
+          "type": "boolean",
+          "default": false,
+          "title": "更新套件時不要加 `^` 在前綴"
+        },
+        "latestDeps": {
+          "type": ["array", "string"],
+          "title": "使用 latest 的版本而不是 wanted 的套件",
+          "description": "各值為套件全名或者以 `*` 結尾代表以此開頭的套件\n若陣列中有一個值為 `*` 代表全部的套件都使用 latestDeps",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "title": "套件名稱"
+          },
+          "cli": {
+            "latestDeps": {
+              "title": "使用 latest 的版本而不是 wanted 的套件",
+              "description": "以逗號（,）做為區隔，\n各值為套件全名或者以 `*` 結尾代表以此開頭的套件\n若陣列中有一個值為 `*` 代表全部的套件都使用 latestDeps"
+            }
+          }
+        },
+        "preCommands": {
+          "type": "array",
+          "title": "在安裝套件前的指令",
+          "description": "各值代表一個 sub-process 的指令",
+          "items": {
+            "type": ["string", "array"],
+            "title": "若為陣列，則每個值代表該指令的參數",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cli": {
+            "preCommands": {
+              "title": "在安裝套件前的指令",
+              "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令"
+            }
+          }
+        },
+        "postCommands": {
+          "type": "array",
+          "title": "在安裝套件後的指令",
+          "description": "各值代表一個 sub-process 的指令",
+          "items": {
+            "type": ["string", "array"],
+            "title": "若為陣列，則每個值代表該指令的參數",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cli": {
+            "postCommands": {
+              "title": "在安裝套件後的指令",
+              "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令"
+            }
+          }
+        },
+        "dev": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "oneByOne": {
+              "type": "boolean",
+              "default": false,
+              "title": "更新開發套件時是否一次只更新一個套件"
+            },
+            "preCommands": {
+              "type": "array",
+              "title": "在安裝開發套件前的指令",
+              "description": "預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令",
+              "items": {
+                "type": ["string", "array"],
+                "title": "若為陣列，則每個值代表該指令的參數",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "cli": {
+                "devPreCommands": {
+                  "title": "在安裝開發套件前的指令",
+                  "default": "使用 `deps.preCommands`",
+                  "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令"
+                }
+              }
+            },
+            "postCommands": {
+              "type": "array",
+              "title": "在安裝開發套件後的指令",
+              "description": "預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令",
+              "items": {
+                "type": ["string", "array"],
+                "title": "若為陣列，則每個值代表該指令的參數",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "cli": {
+                "devPostCommands": {
+                  "title": "在安裝開發套件後的指令",
+                  "default": "使用 `deps.postCommands`",
+                  "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
