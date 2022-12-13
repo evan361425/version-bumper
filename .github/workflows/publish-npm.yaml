@@ -22,7 +22,12 @@ jobs:
       - name: Build
         run: npm i && npm run build
 
+      - name: WhoamI
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish
-        run: npm login && npm publish --access=public
+        run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
