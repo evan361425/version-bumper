@@ -29,6 +29,8 @@ export default async function () {
 
   if (deps.length) {
     console.log(`${SEPARATOR} Start Dependencies ${SEPARATOR}\n`);
+    await setUpRepo(deps);
+
     if (!config.appendOnly) {
       writeFile(config.output, TABLE_PREFIX);
     }
@@ -41,6 +43,8 @@ export default async function () {
 
   if (devDeps.length) {
     console.log(`\n${SEPARATOR} Start Dev Dependencies ${SEPARATOR}\n`);
+    await setUpRepo(devDeps);
+
     appendFile(config.output, '\n' + TABLE_PREFIX);
     const newPkg = new PackageJson();
 
@@ -70,6 +74,8 @@ class OutdatedPackage {
 
   isDev = false;
 
+  link: string | undefined;
+
   //                Package           Current    Wanted     Latest     Location
   // element from: '@types/express', '4.17.11', '4.17.12', '4.17.13', 'my-repo'
   //                Package           Current    Latest
@@ -95,12 +101,14 @@ class OutdatedPackage {
     return this;
   }
 
+  setLink(link: string) {
+    this.link = link;
+    return this;
+  }
+
   appendTo(fileName?: string): void {
-    appendFile(
-      fileName,
-      // TODO: add link
-      `| [${this.name}](TODO) | ${this.current} | ${this.target} |\n`,
-    );
+    const name = this.link ? `[${this.name}](${this.link})` : this.name;
+    appendFile(fileName, `| ${name} | ${this.current} | ${this.target} |\n`);
   }
 
   toString(): string {
@@ -157,6 +165,33 @@ async function execCommand(cmd: string | string[], dep?: OutdatedPackage) {
 
   if (exec) {
     console.log(await createCommand(exec, parsed));
+  }
+}
+
+async function setUpRepo(deps: OutdatedPackage[]) {
+  console.log('Start getting repo links');
+  const names = deps.map((d) => d.name);
+
+  /**
+   * example:
+   * got repo available at the following URL:
+   *   https://github.com/sindresorhus/got
+   *
+   * redis repo available at the following URL:
+   *   https://github.com/redis/node-redis
+   */
+  const result = await npm('repo', ...[...names, '--no-browser']);
+  const lines = result
+    .split('\n')
+    .map((e) => e.trim())
+    .filter(Boolean);
+
+  for (const d of deps) {
+    const idx = lines.indexOf(`${d.name} repo available at the following URL:`);
+    const url = lines[idx + 1];
+    if (url?.startsWith('https:/')) {
+      d.setLink(url);
+    }
   }
 }
 

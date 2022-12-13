@@ -23,6 +23,7 @@ export default function (command?: string) {
     console.log('Usage: (npx) bumper <command> [args]\nCommands');
     printCommands();
     console.log('\nArgs:\n\t-h, --help 顯示相關 Command 的 Args');
+    console.log('\n\t-v, --version 顯示版本資訊');
   } else {
     console.log(`Usage: (npx) bumper ${command} [args]\nArgs:`);
     printArgsFromSchema(command ?? '');

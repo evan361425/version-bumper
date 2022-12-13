@@ -62,6 +62,12 @@ ${message}`);
     process.argv.includes('-h') ||
     process.argv.includes('--help') ||
     command?.startsWith('-');
+  const needVersion =
+    process.argv.includes('-v') || process.argv.includes('--version');
+
+  if (needVersion) {
+    return console.log(`version-bumper: ${getVersion()}`);
+  }
 
   if (needHelp) {
     api.help(command);

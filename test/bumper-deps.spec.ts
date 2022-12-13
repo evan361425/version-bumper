@@ -92,6 +92,8 @@ describe('Bump deps', function () {
     expect(calls.filter(Boolean)).to.eql([
       "[cmd]: npm 'outdated'",
       '========== Start Dependencies ==========\n',
+      'Start getting repo links',
+      "[cmd]: npm 'repo' 'latest1' 'exactLatest' 'dep1' 'dep2' '--no-browser'",
       '|Package|Old|New|\n|-|-|-|\n',
       ...[
         ['latest1', '2.0.0'],
@@ -100,7 +102,7 @@ describe('Bump deps', function () {
         ['dep2', '1.1.0'],
       ]
         .map((p) => [
-          `| [${p[0]}](TODO) | 1.0.0 | ${p[1]} |\n`,
+          `| ${p[0]} | 1.0.0 | ${p[1]} |\n`,
           `${p[0]} 1.0.0 -> ${p[1]}`,
           ...pre,
           `[cmd]: npm 'install' '--registry=https://registry.npmjs.org/' '${p[0]}@${p[1]}'`,
@@ -108,6 +110,8 @@ describe('Bump deps', function () {
         ])
         .flat(),
       '\n========== Start Dev Dependencies ==========\n',
+      'Start getting repo links',
+      "[cmd]: npm 'repo' 'latest2' 'devDep1' 'devDep2' '--no-browser'",
       '\n|Package|Old|New|\n|-|-|-|\n',
       ...[
         ['latest2', '2.0.0'],
@@ -115,7 +119,7 @@ describe('Bump deps', function () {
         ['devDep2', '1.1.0'],
       ]
         .map((p) => [
-          `| [${p[0]}](TODO) | 1.0.0 | ${p[1]} |\n`,
+          `| ${p[0]} | 1.0.0 | ${p[1]} |\n`,
           `${p[0]} 1.0.0 -> ${p[1]}`,
         ])
         .flat(),
