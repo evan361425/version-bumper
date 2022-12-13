@@ -44,6 +44,8 @@ describe('Config', function () {
       latest_version: 'latest_version',
       latest_ticket: 'latest_ticket',
       latest_content: 'latest_content',
+      release_pre: 'release_pre',
+      release_draft: 'release_draft',
     }).forEach(([k, v]) => setEnv(k, v));
 
     const config = new Config({
@@ -105,6 +107,10 @@ describe('Config', function () {
       repoLink: 'repo_link',
       prOnly: true,
       releaseOnly: true,
+      releaseInfo: {
+        draft: true,
+        preRelease: true,
+      },
       commitInfo: {
         noPush: true,
         message: 'commit_message',

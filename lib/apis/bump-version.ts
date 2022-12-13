@@ -134,15 +134,10 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
 }
 
 function createRelease(tag: Tag) {
+  const args = ['--title', tag.key, '--notes', tag.parsedBody, tag.key];
+  Config.instance.releaseInfo.preRelease && args.unshift('--prerelease');
+  Config.instance.releaseInfo.draft && args.unshift('--draft');
+
   // https://cli.github.com/manual/gh_release_create
-  return gh(
-    'release',
-    'create',
-    '--prerelease',
-    '--title',
-    tag.key,
-    '--notes',
-    tag.parsedBody,
-    tag.key,
-  );
+  return gh('release', 'create', ...args);
 }

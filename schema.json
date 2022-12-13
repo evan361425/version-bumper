@@ -116,6 +116,25 @@
         }
       }
     },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "用來設定 GitHub Release",
+      "properties": {
+        "preRelease": {
+          "cliName": "releasePre",
+          "type": "boolean",
+          "default": false,
+          "title": "標示為 pre-release"
+        },
+        "draft": {
+          "cliName": "releaseDraft",
+          "type": "boolean",
+          "default": false,
+          "title": "標示為 draft"
+        }
+      }
+    },
     "tags": {
       "type": "object",
       "title": "Tag 的設定",

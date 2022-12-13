@@ -49,6 +49,7 @@ export class Config {
   readonly latestInfo: LatestInfo;
   readonly tagsInfo: TagsInfo;
   readonly prInfo: PRInfo;
+  readonly releaseInfo: ReleaseInfo;
 
   readonly autoLinks: Record<string, string>;
 
@@ -83,6 +84,7 @@ export class Config {
     this.prInfo = getPRInfo();
     this.latestInfo = getLatestInfo(this.files.latestVersion);
     this.autoLinks = getAutoLinks();
+    this.releaseInfo = getReleaseInfo();
     this.stage = getStage(this.latestInfo.version, this.tagsInfo);
 
     // ================ bump deps ===================
@@ -252,6 +254,14 @@ export class Config {
       });
 
       return result;
+    }
+
+    function getReleaseInfo(): ReleaseInfo {
+      const info: Partial<ReleaseInfo> = config['release'] ?? {};
+      info.preRelease = getBoolConfig('release_pre', info.preRelease);
+      info.draft = getBoolConfig('release_draft', info.draft);
+
+      return info as ReleaseInfo;
     }
 
     function getStage(v: string, tags: TagsInfo): string | undefined {
@@ -485,3 +495,4 @@ type DepsInfo = {
   preCommands: Commands;
   postCommands: Commands;
 };
+type ReleaseInfo = { preRelease: boolean; draft: boolean };

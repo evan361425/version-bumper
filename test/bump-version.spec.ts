@@ -147,6 +147,10 @@ First Release
         'ticket-': 'replace-<num>',
         'sub-ticket-': 'replace-sub-<num>',
       },
+      releaseInfo: {
+        draft: false,
+        preRelease: false,
+      },
       stage: 'test',
     });
     expect(calls).to.eql([
@@ -222,7 +226,7 @@ First Release
         "'--label' 'label-1' '--label' 'label-2'",
       ].join(' '),
       [
-        "[cmd]: gh 'release' 'create' '--prerelease'",
+        "[cmd]: gh 'release' 'create'",
         "'--title' 'v1.0.2'",
         "'--notes' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
         "'v1.0.2'",
