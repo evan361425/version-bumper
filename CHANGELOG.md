@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.2.2] - 2022-12-13
+
+-   fit: add links on deps
+
 ## [v0.2.1] - 2022-12-13
 
 -   feat: allow setting draft
@@ -20,7 +24,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.2...HEAD
+[v0.2.2]: https://github.com/evan361425/version-bumper/compare/v0.2.2...v0.2.1
 [v0.2.1]: https://github.com/evan361425/version-bumper/compare/v0.2.1...v0.2.0
 [v0.2.0]: https://github.com/evan361425/version-bumper/compare/v0.2.0...v0.1.0
 [v0.1.0]: https://github.com/evan361425/version-bumper/commits/v0.1.0
