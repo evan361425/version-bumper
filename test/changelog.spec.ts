@@ -16,7 +16,7 @@ describe('Changelog', function () {
         {
           'evan-': 'test://go-to/evan-<num>',
           'test-': 'test://go-to/test-<num>',
-        }
+        },
       );
 
       expect(body).to.eq(
@@ -25,7 +25,7 @@ describe('Changelog', function () {
           '[EVAN-123](test://go-to/evan-123)\n' +
           '[How about long link? EVAN-321 like this!](evan-321)\n' +
           'some [test-123](test://go-to/test-123) other\n' +
-          'some wrong-123 wrong'
+          'some wrong-123 wrong',
       );
     });
 
@@ -52,7 +52,7 @@ describe('Changelog', function () {
         'QQ\n\n' +
         '[unreleased]: https://hi/unreleased\n' +
         '[v1.2.3-rc1]: https://hi/v1.2.3-rc1\n' +
-        '[v1.2.2]: https://hi/v1.2.2\n'
+        '[v1.2.2]: https://hi/v1.2.2\n',
     );
   }
 

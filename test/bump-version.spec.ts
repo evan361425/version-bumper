@@ -58,7 +58,7 @@ describe('Bump version', function () {
     stub(Config, 'instance').get(() => config);
     stub(Config.instance, 'prTemplate').get(
       () =>
-        'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}'
+        'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
     );
     stub(Config.instance, 'changelog').get(
       () => `# Changelog
@@ -84,7 +84,7 @@ First Release
 
 [unreleased]: https://github.com/example/example/compare/v1.0.1...HEAD
 [v1.0.1]: https://github.com/example/example/compare/v1.0.0...v1.0.1
-[v1.0.0]: https://github.com/example/example/commits/v1.0.0`
+[v1.0.0]: https://github.com/example/example/commits/v1.0.0`,
     );
 
     const stdout = stub(console, 'log');

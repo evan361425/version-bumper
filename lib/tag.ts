@@ -34,7 +34,7 @@ export class Tag {
     return new Tag(
       version ?? '',
       splitter === -1 ? '' : raw.substring(splitter + 1).trim(),
-      { createdDate: date ?? '' }
+      { createdDate: date ?? '' },
     );
   }
 

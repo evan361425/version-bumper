@@ -99,7 +99,7 @@ class OutdatedPackage {
     appendFile(
       fileName,
       // TODO: add link
-      `| [${this.name}](TODO) | ${this.current} | ${this.target} |\n`
+      `| [${this.name}](TODO) | ${this.current} | ${this.target} |\n`,
     );
   }
 

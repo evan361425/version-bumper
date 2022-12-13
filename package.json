@@ -16,6 +16,7 @@
     "prebuild": "npm run clean",
     "build": "tsc -p tsconfig.production.json",
     "format": "jq -rc '.include[]' tsconfig.json | xargs prettier --write",
+    "format:check": "jq -rc '.include[]' tsconfig.json | xargs prettier --check",
     "lint": "jq -rc '.include[]' tsconfig.json | xargs eslint",
     "test": "mocha",
     "test:cov": "c8 npm test"

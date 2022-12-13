@@ -129,7 +129,7 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     '--repo',
     Config.instance.prInfo.repo,
     ...b.reviewers.map((reviewer) => ['--reviewer', reviewer]).flat(),
-    ...(b.labels.map((label) => ['--label', label]).flat() ?? [])
+    ...(b.labels.map((label) => ['--label', label]).flat() ?? []),
   );
 }
 
@@ -143,6 +143,6 @@ function createRelease(tag: Tag) {
     tag.key,
     '--notes',
     tag.parsedBody,
-    tag.key
+    tag.key,
   );
 }

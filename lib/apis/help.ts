@@ -100,7 +100,7 @@ function printArgsFromSchema(command: string) {
 }
 
 function* parseObject(
-  obj: Record<string, unknown>
+  obj: Record<string, unknown>,
 ): Generator<[string, ItemSchema], void, unknown> {
   if (obj['cli']) {
     for (const entry of Object.entries(obj['cli'])) {

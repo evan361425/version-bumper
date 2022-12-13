@@ -126,7 +126,7 @@ export class Changelog {
       }
 
       const [hit, prefix, target, num] = linker.exec(
-        body.substring(index)
+        body.substring(index),
       ) as unknown as [string, string, string, string];
       info(`[auto-links] hit(${hit}), target(${target}), num(${num})`);
       const rest = index + hit.length;

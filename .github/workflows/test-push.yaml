@@ -1,0 +1,23 @@
+name: Test push
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      # Setup .npmrc file to publish to npm
+      - name: Set up environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Test
+        run: npm i && npm run lint && npm run format:check && npm test && npm run build

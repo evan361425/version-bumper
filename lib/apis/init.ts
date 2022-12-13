@@ -34,8 +34,8 @@ export default async function () {
           pr: { repo: config.prInfo.repo },
         },
         undefined,
-        2
-      )
+        2,
+      ),
     );
   }
 
@@ -47,7 +47,7 @@ version: ${changelog.latestTag?.key ?? ''}
 ticket:
 ---
 ${changelog.latestTag?.body ?? ''}
-`
+`,
     );
   }
 

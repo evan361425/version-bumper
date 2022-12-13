@@ -44,7 +44,7 @@ describe('Bump deps', function () {
     dep2   1.0.0    1.1.0    2.0.0
     devDep1   1.0.0    1.1.0    2.0.0
     devDep2   1.0.0    1.1.0    2.0.0
-    `)
+    `),
     );
     const pkg = JSON.stringify({
       devDependencies: {
@@ -129,7 +129,7 @@ describe('Bump deps', function () {
           },
         },
         undefined,
-        2
+        2,
       ),
       "[cmd]: npm 'install' '--registry=https://registry.npmjs.org/'",
       ...post,

@@ -116,7 +116,7 @@ export class Config {
       ch.disable = getBoolConfig('changelog_disable', ch.disable);
       ch.ticketPrefix = getConfig(
         'changelog_ticket_prefix',
-        ch.ticketPrefix ?? df.ticketPrefix
+        ch.ticketPrefix ?? df.ticketPrefix,
       );
       ch.header = getConfig('changelog_header', ch.header ?? df.header);
 
@@ -128,15 +128,15 @@ export class Config {
       const df = DEFAULTS.files;
       fls.changelog = getConfig(
         'file_changelog',
-        fls.changelog ?? df.changelog
+        fls.changelog ?? df.changelog,
       );
       fls.latestVersion = getConfig(
         'file_latest_version',
-        fls.latestVersion ?? df.latestVersion
+        fls.latestVersion ?? df.latestVersion,
       );
       fls.prTemplate = getConfig(
         'file_pr_template',
-        fls.prTemplate ?? df.prTemplate
+        fls.prTemplate ?? df.prTemplate,
       );
 
       return fls as FilesInfo;
@@ -244,7 +244,7 @@ export class Config {
         const allowed = /[a-zA-Z\-]+/.test(e[0]);
         if (!allowed) {
           error(
-            `The key of auto link (${e[0]}) should not contains other character beside alphabet, dash(-)`
+            `The key of auto link (${e[0]}) should not contains other character beside alphabet, dash(-)`,
           );
           return;
         }
@@ -270,7 +270,7 @@ export class Config {
     function getDevInfo(
       deps: Record<string, never>,
       pre: Commands,
-      post: Commands
+      post: Commands,
     ) {
       const dev: Partial<DevInfo> = deps['dev'] ?? {};
       const d = dev as Record<string, never>;
@@ -285,7 +285,7 @@ export class Config {
     function getConfig<T>(
       key: string,
       other?: T,
-      cfg?: Record<string, never>
+      cfg?: Record<string, never>,
     ): T extends string ? string : string | undefined {
       const k = underLine2Camel(key);
 
@@ -302,7 +302,7 @@ export class Config {
     function getListConfig(
       key: string,
       cfg: Record<string, never>,
-      other?: string[]
+      other?: string[],
     ): string[] {
       return stf(getConfig(key)) ?? cfg[underLine2Camel(key)] ?? other;
     }
@@ -310,7 +310,7 @@ export class Config {
     function getBoolConfig(
       key: string,
       other = false,
-      cfg?: Record<string, never>
+      cfg?: Record<string, never>,
     ): boolean {
       if (process.env['BUMPER_' + key.toUpperCase()]) return true;
 
@@ -361,7 +361,7 @@ export class Config {
       for (const [key, meta] of Object.entries(this.prInfo.branches)) {
         if (!this.tagsInfo[key]) {
           throw new Error(
-            `Missing ${key} in tags config, PR.branches should mappable to tags' keys`
+            `Missing ${key} in tags config, PR.branches should mappable to tags' keys`,
           );
         }
         if (!meta.base) {
@@ -425,7 +425,7 @@ function loadConfig() {
 
 function stf<T>(
   a?: T,
-  delimiter = ','
+  delimiter = ',',
 ): T extends string ? string[] : undefined {
   return (
     typeof a === 'string' ? a.split(delimiter).map((e) => e.trim()) : undefined
