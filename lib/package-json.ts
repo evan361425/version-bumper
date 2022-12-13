@@ -2,7 +2,7 @@ import path from 'node:path';
 import { readFile, writeFile } from './helper.js';
 
 export class PackageJson {
-  private readonly internal: Record<string, unknown>;
+  readonly internal: Record<string, unknown>;
 
   constructor() {
     try {
