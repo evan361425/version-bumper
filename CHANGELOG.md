@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.2.3] - 2022-12-13
+
+-   fix: correct version command
+
 ## [v0.2.2] - 2022-12-13
 
 -   fit: add links on deps
@@ -24,7 +28,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.2...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.3...HEAD
+[v0.2.3]: https://github.com/evan361425/version-bumper/compare/v0.2.3...v0.2.2
 [v0.2.2]: https://github.com/evan361425/version-bumper/compare/v0.2.2...v0.2.1
 [v0.2.1]: https://github.com/evan361425/version-bumper/compare/v0.2.1...v0.2.0
 [v0.2.0]: https://github.com/evan361425/version-bumper/compare/v0.2.0...v0.1.0

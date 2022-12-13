@@ -1,5 +1,5 @@
 ---
-version: v0.2.2
+version: v0.2.3
 ---
 
--   fit: add links on deps
+-   fix: correct version command
