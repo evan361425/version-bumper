@@ -144,6 +144,16 @@ export function getSchemaFile() {
   return file.substring(schemaIndex + 1);
 }
 
+export function getPackageJsonFile() {
+  const paths = ['..', '..', 'package.json'];
+  if (import.meta.url.endsWith('.js')) paths.unshift('..');
+  const file = path.join(import.meta.url, ...paths);
+  const schemaIndex = file.indexOf(':');
+  if (schemaIndex === -1) return file;
+
+  return file.substring(schemaIndex + 1);
+}
+
 export function mockCommand(target: Promise<string>) {
   if (mockedCommands) mockedCommands.push(target);
   else mockedCommands = [target];

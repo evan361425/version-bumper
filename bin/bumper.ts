@@ -5,7 +5,7 @@
  */
 
 import api from '../lib/api.js';
-import { PackageJson } from '../lib/package-json.js';
+import { getPackageJsonFile, readFile } from '../lib/helper.js';
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -30,8 +30,7 @@ function getErrorMessage(error: unknown) {
 
 function getVersion(): string {
   try {
-    const pkg = new PackageJson();
-    return pkg.internal['version'] as string;
+    return JSON.parse(readFile(getPackageJsonFile())).version;
   } catch (error) {
     return "can't find package.json";
   }
