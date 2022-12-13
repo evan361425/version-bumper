@@ -8,9 +8,14 @@
 
 Please check git diff.
 
+## [v0.2.0] - 2022-12-13
+
+-   feat: allow bump dependencies
+
 ## [v0.1.0] - 2022-12-12
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.0...HEAD
+[v0.2.0]: https://github.com/evan361425/version-bumper/compare/v0.2.0...v0.1.0
 [v0.1.0]: https://github.com/evan361425/version-bumper/commits/v0.1.0
