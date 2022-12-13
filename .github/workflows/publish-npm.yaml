@@ -23,6 +23,6 @@ jobs:
         run: npm i && npm run build
 
       - name: Publish
-        run: npm publish --access=public
+        run: npm publish --access=public @evan361425/version-bumper
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
