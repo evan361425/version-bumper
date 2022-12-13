@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.2.4] - 2022-12-13
+
+-   fix: use relative path for getting version
+
 ## [v0.2.3] - 2022-12-13
 
 -   fix: correct version command
@@ -28,7 +32,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.3...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.4...HEAD
+[v0.2.4]: https://github.com/evan361425/version-bumper/compare/v0.2.4...v0.2.3
 [v0.2.3]: https://github.com/evan361425/version-bumper/compare/v0.2.3...v0.2.2
 [v0.2.2]: https://github.com/evan361425/version-bumper/compare/v0.2.2...v0.2.1
 [v0.2.1]: https://github.com/evan361425/version-bumper/compare/v0.2.1...v0.2.0

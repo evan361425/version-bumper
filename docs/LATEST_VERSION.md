@@ -1,5 +1,5 @@
 ---
-version: v0.2.3
+version: v0.2.4
 ---
 
--   fix: correct version command
+-   fix: use relative path for getting version
