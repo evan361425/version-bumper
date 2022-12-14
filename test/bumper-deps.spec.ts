@@ -20,7 +20,6 @@ describe('Bump deps', function () {
     const config = new Config({
       deps: {
         ignored: ['ignored*', 'exactIgnored'],
-        output: 'output',
         saveExact: true,
         latestDeps: ['latest*', 'exactLatest'],
         preCommands: ['do some pre thing', ['do', 'some', 'pre thing']],
@@ -74,7 +73,6 @@ describe('Bump deps', function () {
       },
       ignored: ['ignored*', 'exactIgnored'],
       latestDeps: ['latest*', 'exactLatest'],
-      output: 'output',
       postCommands: ['do some post thing', ['do', 'some', 'post thing']],
       preCommands: ['do some pre thing', ['do', 'some', 'pre thing']],
       saveExact: false,
@@ -102,7 +100,6 @@ describe('Bump deps', function () {
         ['dep2', '1.1.0'],
       ]
         .map((p) => [
-          `| ${p[0]} | 1.0.0 | ${p[1]} |\n`,
           `${p[0]} 1.0.0 -> ${p[1]}`,
           ...pre,
           `[cmd]: npm 'install' '--registry=https://registry.npmjs.org/' '${p[0]}@${p[1]}'`,
@@ -117,12 +114,7 @@ describe('Bump deps', function () {
         ['latest2', '2.0.0'],
         ['devDep1', '1.1.0'],
         ['devDep2', '1.1.0'],
-      ]
-        .map((p) => [
-          `| ${p[0]} | 1.0.0 | ${p[1]} |\n`,
-          `${p[0]} 1.0.0 -> ${p[1]}`,
-        ])
-        .flat(),
+      ].map((p) => `${p[0]} 1.0.0 -> ${p[1]}`),
       JSON.stringify(
         {
           devDependencies: {
@@ -137,6 +129,14 @@ describe('Bump deps', function () {
       ),
       "[cmd]: npm 'install' '--registry=https://registry.npmjs.org/'",
       ...post,
+      `latest1\t1.0.0\t2.0.0\tundefined
+exactLatest\t1.0.0\t2.0.0\tundefined
+dep1\t1.0.0\t1.1.0\tundefined
+dep2\t1.0.0\t1.1.0\tundefined
+latest2\t1.0.0\t2.0.0\tundefined
+devDep1\t1.0.0\t1.1.0\tundefined
+devDep2\t1.0.0\t1.1.0\tundefined
+`,
     ]);
   });
 });

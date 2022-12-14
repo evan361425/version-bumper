@@ -26,6 +26,7 @@ export default async function () {
 
   const deps = outdated.filter((e) => !pkg.isDev(e.name));
   const devDeps = outdated.filter((e) => pkg.isDev(e.name) && e.markDev());
+  let output = '';
 
   if (deps.length) {
     console.log(`${SEPARATOR} Start Dependencies ${SEPARATOR}\n`);
@@ -36,7 +37,7 @@ export default async function () {
     }
 
     for (const dep of deps) {
-      dep.appendTo(config.output);
+      writeDep(dep);
       await update(config, dep);
     }
   }
@@ -49,7 +50,7 @@ export default async function () {
     const newPkg = new PackageJson();
 
     for (const dep of devDeps) {
-      dep.appendTo(config.output);
+      writeDep(dep);
       if (config.devInfo.oneByOne) {
         await update(config.devInfo, dep);
       } else {
@@ -61,6 +62,20 @@ export default async function () {
     if (!config.devInfo.oneByOne) {
       newPkg.writeBackToFile();
       await update(config.devInfo);
+    }
+  }
+
+  if (!config.output) {
+    console.log(output);
+  }
+
+  function writeDep(dep: OutdatedPackage) {
+    const [name, current, target, link] = dep.properties;
+    const nWL = link ? `[${name}](${link})` : name;
+    if (config.output) {
+      appendFile(config.output, `| ${nWL} | ${current} | ${target} |\n`);
+    } else {
+      output += `${name}\t${current}\t${target}\t${link}\n`;
     }
   }
 }
@@ -96,6 +111,13 @@ class OutdatedPackage {
     );
   }
 
+  get properties(): string[] {
+    const p = [this.name, this.current, this.target];
+    if (this.link) p.push(this.link);
+
+    return p;
+  }
+
   markDev() {
     this.isDev = true;
     return this;
@@ -104,11 +126,6 @@ class OutdatedPackage {
   setLink(link: string) {
     this.link = link;
     return this;
-  }
-
-  appendTo(fileName?: string): void {
-    const name = this.link ? `[${this.name}](${this.link})` : this.name;
-    appendFile(fileName, `| ${name} | ${this.current} | ${this.target} |\n`);
   }
 
   toString(): string {
