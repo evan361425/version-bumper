@@ -312,7 +312,7 @@
         "output": {
           "type": "string",
           "title": "更新時，版本資訊的寫入位置",
-          "description": "Markdown 格式，\n無預設，所以沒給就不會寫"
+          "description": "Markdown 格式，\n若無，則會輸出到 `stdout`"
         },
         "appendOnly": {
           "type": "boolean",
@@ -343,7 +343,7 @@
         "preCommands": {
           "type": "array",
           "title": "在安裝套件前的指令",
-          "description": "各值代表一個 sub-process 的指令",
+          "description": "各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
           "items": {
             "type": ["string", "array"],
             "title": "若為陣列，則每個值代表該指令的參數",
@@ -354,14 +354,14 @@
           "cli": {
             "preCommands": {
               "title": "在安裝套件前的指令",
-              "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令"
+              "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令\n支援的變數有：name, current, target"
             }
           }
         },
         "postCommands": {
           "type": "array",
           "title": "在安裝套件後的指令",
-          "description": "各值代表一個 sub-process 的指令",
+          "description": "各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
           "items": {
             "type": ["string", "array"],
             "title": "若為陣列，則每個值代表該指令的參數",
@@ -372,12 +372,13 @@
           "cli": {
             "postCommands": {
               "title": "在安裝套件後的指令",
-              "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令"
+              "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令\n支援的變數有：name, current, target"
             }
           }
         },
         "dev": {
           "type": "object",
+          "title": "用來設定開發相依套件的升版設定",
           "additionalProperties": false,
           "properties": {
             "oneByOne": {
@@ -388,7 +389,7 @@
             "preCommands": {
               "type": "array",
               "title": "在安裝開發套件前的指令",
-              "description": "預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令",
+              "description": "預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
               "items": {
                 "type": ["string", "array"],
                 "title": "若為陣列，則每個值代表該指令的參數",
@@ -400,14 +401,14 @@
                 "devPreCommands": {
                   "title": "在安裝開發套件前的指令",
                   "default": "使用 `deps.preCommands`",
-                  "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令"
+                  "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令\n支援的變數有：name, current, target"
                 }
               }
             },
             "postCommands": {
               "type": "array",
               "title": "在安裝開發套件後的指令",
-              "description": "預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令",
+              "description": "預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
               "items": {
                 "type": ["string", "array"],
                 "title": "若為陣列，則每個值代表該指令的參數",
@@ -419,7 +420,7 @@
                 "devPostCommands": {
                   "title": "在安裝開發套件後的指令",
                   "default": "使用 `deps.postCommands`",
-                  "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令"
+                  "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令\n支援的變數有：name, current, target"
                 }
               }
             }
