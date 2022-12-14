@@ -8,6 +8,12 @@
 
 Please check git diff.
 
+## [v0.3.0] - 2022-12-14
+
+單號：
+
+-   Changing configuration format for more intuitive structure.
+
 ## [v0.2.5] - 2022-12-14
 
 -   feat: add `--verbose` to get noisy output with actual process.
@@ -37,7 +43,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.5...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/evan361425/version-bumper/compare/v0.3.0...v0.2.5
 [v0.2.5]: https://github.com/evan361425/version-bumper/compare/v0.2.5...v0.2.4
 [v0.2.4]: https://github.com/evan361425/version-bumper/compare/v0.2.4...v0.2.3
 [v0.2.3]: https://github.com/evan361425/version-bumper/compare/v0.2.3...v0.2.2

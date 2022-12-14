@@ -1,6 +1,5 @@
 ---
-version: v0.2.5
+version: v0.3.0
 ---
 
--   feat: add `--verbose` to get noisy output with actual process.
--   feat: `deps` now send data to stdout if no `deps.output` setup.
+-   Changing configuration format for more intuitive structure.

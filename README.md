@@ -13,10 +13,13 @@ Features:
 
 ## Usage
 
-Install it globally.
+Install it globally or in specific project.
 
 ```bash
+# Globally
 npm i -g @evan361425/version-bumper
+# In project
+npm i -D @evan361425/version-bumper
 ```
 
 You can see how to play with bumper by:
@@ -25,14 +28,14 @@ You can see how to play with bumper by:
 $ bumper help
 Usage: (npx) bumper <command> [args]
 Commands
-        version 更新版本, Update the version of NPM project
-        deps    更新套件, Update dependencies with hooking
-        help    顯示此訊息
-        init    初始化專案, Setup configuration files
+        version Update the version of NPM project
+        deps    Update dependencies with hooking
+        help    Show this message
+        init    Setup configuration files
 
 Args:
-        -h, --help 顯示相關 Command 的 Args
-        -v, --version 顯示版本資訊
+        -h, --help Show command's arguments
+        -v, --version version info
 ```
 
 Usually you will use `init` for a new project:
@@ -49,7 +52,7 @@ File CHANGELOG.md for changelog creating!
 Add `-h/--help` to get information on command:
 
 ```bash
-$ bumper deps --help
+$ bumper deps -h | less
 Usage: (npx) bumper deps [args]
 Args:
 ...
@@ -62,7 +65,7 @@ You should add `./bumper.json` on the project root folder, else set it by the ar
 > The JSON file is follow the [./schema.json](schema.json)'s schema.
 > After `bumper init`, you should automatically bind to the schema.
 
-Example:
+You can start by `bumper init` or write it yourself, for example:
 
 ```json
 {
@@ -155,4 +158,15 @@ Please check git diff.
 [unreleased]: {diff}
 [{tag1}]: {diff1}
 [{tag2}]: {diff2}
+```
+
+Set the format by `--changelogTemplate` or `changelog.template` in configuration, for example:
+
+```text
+- ticket: {ticket}
+- version: {version}
+- stage: {stage}
+- [diff]({diff})
+
+{content}
 ```
