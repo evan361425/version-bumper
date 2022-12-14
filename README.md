@@ -8,6 +8,7 @@ Features:
 -   Autolink for tickets (e.g. Jira)
 -   GitHub PR
 -   GitHub release
+-   Configuration
 -   Small without any dependencies
 
 ## Usage
@@ -24,23 +25,23 @@ You can see how to play with bumper by:
 $ bumper help
 Usage: (npx) bumper <command> [args]
 Commands
-        version 更新版本
-        deps    更新套件
+        version 更新版本, Update the version of NPM project
+        deps    更新套件, Update dependencies with hooking
         help    顯示此訊息
-        init    初始化專案
+        init    初始化專案, Setup configuration files
 
 Args:
         -h, --help 顯示相關 Command 的 Args
+        -v, --version 顯示版本資訊
 ```
 
-Usually you should start it by `init` it!
+Usually you will use `init` for a new project:
 
 ```bash
 $ bumper init
 File bumper.json for configuration creating!
 File docs/LATEST_VERSION.md for latest version info creating!
 File CHANGELOG.md for changelog creating!
-File docs/PR_TEMPLATE.md for PR template creating!
 ```
 
 ### Args
@@ -56,9 +57,10 @@ Args:
 
 ## Configuration
 
-You should use `./bumper.json` on the project root folder, else set in the command arguments.
+You should add `./bumper.json` on the project root folder, else set it by the arguments.
 
 > The JSON file is follow the [./schema.json](schema.json)'s schema.
+> After `bumper init`, you should automatically bind to the schema.
 
 Example:
 
@@ -66,8 +68,10 @@ Example:
 {
   "$schema": "node_modules/@evan361425/version-bumper/schema.json",
   "repoLink": "https://github.com/example/example",
-  "commit": {
-    "message": "chore: bump to {version}"
+  "changelog": {
+    "header": "# Changelog\nThis is my awesome changelog.",
+    "template": "ticket: {ticket}\n\n{content}",
+    "commitMessage": "chore: bump to {version}\nticket: {ticket}\nstage: {stage}"
   },
   "tags": {
     "develop": {
@@ -83,6 +87,7 @@ Example:
   },
   "pr": {
     "repo": "example/other-repo",
+    "template": "This PR is auto-generated from bumper\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}",
     "branches": {
       "develop": {
         "base": "main",
@@ -113,7 +118,7 @@ Example:
       "git add package.json package-lock.json",
       ["git", "commit", "-m", "chore: bump {name} to {target}\n\nOrigin: {current}"]
     ],
-    "ignored": ["oidc-provider", "@types/oidc-provider"],
+    "ignored": ["some-package", "dev-package"],
     "appendOnly": true,
     "useExact": true,
     "output": "docs/LATEST_UPGRADE.md",
@@ -126,4 +131,28 @@ Example:
     }
   }
 }
+```
+
+## Changelog
+
+Changelog using bellow format:
+
+```text
+{changelog.header}
+
+- [Unreleased]
+
+Please check git diff.
+
+- [{tag1}] - {date1}
+
+{template}
+
+- [{tag2}] - {date2}
+
+{template}
+
+[unreleased]: {diff}
+[{tag1}]: {diff1}
+[{tag2}]: {diff2}
 ```

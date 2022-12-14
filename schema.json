@@ -20,25 +20,11 @@
       "title": "根據設定只建立 Release 而不做任何升版",
       "description": "只會建立 pre-release"
     },
-    "commit": {
-      "type": "object",
-      "description": "Commit 相關設定",
-      "properties": {
-        "message": {
-          "cliName": "commitMessage",
-          "type": "string",
-          "default": "chore: bump to {version}",
-          "title": "每次升版的 commit 訊息",
-          "description": "支援的變數有：\n`version`、`ticket`、`stage`"
-        },
-        "noPush": {
-          "cliName": "commitNoPush",
-          "type": "boolean",
-          "default": false,
-          "title": "是否把 Commit 推至 remote repo",
-          "description": "這裡包括自動打的 tag"
-        }
-      }
+    "noPush": {
+      "cliName": "noPush",
+      "type": "boolean",
+      "default": false,
+      "title": "是否把 Tag 和 Commit 推至 remote repo"
     },
     "changelog": {
       "type": "object",
@@ -51,12 +37,18 @@
           "default": false,
           "title": "不對 Changelog 做任何事"
         },
-        "ticketPrefix": {
-          "cliName": "changelogTicketPrefix",
+        "file": {
+          "cliName": "changelogFile",
           "type": "string",
-          "default": "票號：",
-          "title": "在 Changelog 中票號的前綴詞",
-          "description": "如果有給票號，\n在 Changelog 中每個版本的資訊中都會有票的訊息，\n這就是其的前綴。"
+          "default": "CHANGELOG.md",
+          "title": "Changelog 位置"
+        },
+        "template": {
+          "cliName": "changelogTemplate",
+          "type": "string",
+          "default": "票號：{ticket}\n\n{content}",
+          "title": "Changelog 每次 tag 的範本",
+          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
         },
         "header": {
           "cliName": "changelogHeader",
@@ -64,33 +56,43 @@
           "default": "# Changelog\n\n所有本專案的版本紀錄將於此說明之\n\n文件依照 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 內所描述的格式撰寫，版本號碼依照 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。",
           "title": "Changelog 的標題",
           "description": "在這之後就是 unreleased 的資訊。"
+        },
+        "commitMessage": {
+          "cliName": "changelogCommitMessage",
+          "type": "string",
+          "default": "chore: bump to {version}\nticket: {ticket}\nstage: {stage}",
+          "title": "修改 changelog 後 commit 訊息",
+          "description": "支援的變數有：\n`version`、`ticket`、`stage`"
         }
       }
     },
-    "files": {
+    "latestInfo": {
       "type": "object",
       "additionalProperties": false,
-      "title": "相關文件的位置",
+      "title": "最新版本的資訊",
       "properties": {
-        "changelog": {
-          "cliName": "fileChangelog",
-          "type": "string",
-          "default": "CHANGELOG.md",
-          "title": "Changelog 位置"
-        },
-        "latestVersion": {
-          "cliName": "fileLatestVersion",
+        "file": {
+          "cliName": "latestFile",
           "type": "string",
           "default": "docs/LATEST_VERSION.md",
-          "title": "最新版本的內文位置",
-          "description": "其中的票號會被 `autoLinks` 自動補上連結。\n支援的 metadata 有：version, ticket"
+          "title": "最新版本的範本位置",
+          "description": "Markdown 格式\n支援的 metadata 有：version, ticket"
         },
-        "prTemplate": {
-          "cliName": "filePrTemplate",
+        "version": {
+          "cliName": "latestVersion",
           "type": "string",
-          "default": "docs/PR_TEMPLATE.md",
-          "title": "PR 文本的位置",
-          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
+          "title": "最新版本號",
+          "description": "會覆寫 `latestInfo.file` 中的 metadata"
+        },
+        "ticket": {
+          "type": "string",
+          "title": "最新票號",
+          "description": "會覆寫 `latestInfo.file` 中的 metadata"
+        },
+        "content": {
+          "type": "string",
+          "title": "最新版本的內文",
+          "description": "會覆寫 `latestInfo.file` 中的內文"
         }
       }
     },
@@ -185,6 +187,19 @@
           "title": "要開 PR 的 Repo",
           "description": "預設是用 `repoLink` 的值，\n例如：`example/example`"
         },
+        "template": {
+          "cliName": "prTemplate",
+          "type": "string",
+          "default": "This PR is auto-generated from bumper\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}",
+          "title": "PR 範本",
+          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
+        },
+        "templateFile": {
+          "cliName": "prTemplateFile",
+          "type": "string",
+          "title": "PR 範本的位置，優先權高於 `prTemplate`",
+          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
+        },
         "branches": {
           "type": "object",
           "title": "PR 的分支管理",
@@ -272,21 +287,6 @@
         }
       },
       "additionalProperties": false
-    },
-    "latestVersion": {
-      "type": "string",
-      "title": "最新版本號",
-      "description": "不建議設定於此，\n請在 `files.latestVersion` 中透過 metadata 注入。"
-    },
-    "latestTicket": {
-      "type": "string",
-      "title": "最新票號",
-      "description": "不建議設定於此，\n請在 `files.latestVersion` 中透過 metadata 注入。"
-    },
-    "latestContent": {
-      "type": "string",
-      "title": "最新版本的內文",
-      "description": "不建議設定於此，\n請寫在 `files.latestVersion`。"
     },
     "deps": {
       "type": "object",

@@ -22,25 +22,26 @@ describe('Config', function () {
       repo_link: 'repo_link',
       pr_only: 'pr_only',
       release_only: 'release_only',
-      commit_message: 'commit_message',
-      commit_no_push: 'commit_no_push',
+      no_push: 'no_push',
       changelog_disable: 'changelog_disable',
-      changelog_ticket_prefix: 'changelog_ticket_prefix',
+      changelog_template: 'changelog_template',
+      changelog_file: 'changelog_file',
       changelog_header: 'changelog_header',
-      file_changelog: 'file_changelog',
-      file_latest_version: 'file_latest_version',
-      file_pr_template: 'file_pr_template',
+      changelog_commit_message: 'changelog_commit_message',
       auto_link_keys: 'auto_link_keys',
       auto_link_values: 'auto_link_values',
       tag_names: 'tag_names',
       tag_patterns: 'tag_patterns',
       tag_changelogs: 'tag_changelog',
       pr_repo: 'pr_repo',
+      pr_template: 'pr_template',
+      pr_template_file: 'pr_template_file',
       branch_names: 'branch_names',
       branch_bases: 'branch_bases',
       branch_heads: 'branch_heads',
       branch_reviewers: 'branch_reviewers',
       branch_labels: 'branch_labels',
+      latest_file: 'latest_file',
       latest_version: 'latest_version',
       latest_ticket: 'latest_ticket',
       latest_content: 'latest_content',
@@ -52,19 +53,12 @@ describe('Config', function () {
       repoLink: 'shouldNotShow',
       prOnly: false,
       releaseOnly: false,
-      commit: {
-        noPush: false,
-        message: 'shouldNotShow',
-      },
+      noPush: false,
       changelog: {
         disable: false,
-        ticketPrefix: 'shouldNotShow',
+        template: 'shouldNotShow',
         header: 'shouldNotShow',
-      },
-      files: {
-        changelog: 'shouldNotShow',
-        latestVersion: 'shouldNotShow',
-        prTemplate: 'shouldNotShow',
+        commitMessage: 'shouldNotShow',
       },
       tags: {
         shouldNotShow: {
@@ -74,6 +68,7 @@ describe('Config', function () {
       },
       pr: {
         repo: 'shouldNotShow',
+        template: 'shouldNotShow',
         branches: {
           shouldNotShow: {
             head: 'shouldNotShow',
@@ -81,9 +76,12 @@ describe('Config', function () {
           },
         },
       },
-      latestVersion: 'shouldNotShow',
-      latestTicket: 'shouldNotShow',
-      latestBody: 'shouldNotShow',
+      latestInfo: {
+        version: 'shouldNotShow',
+        ticket: 'shouldNotShow',
+        content: 'shouldNotShow',
+        file: 'shouldNotShow',
+      },
       autoLinks: {
         autoLinkKeys: 'shouldNotShow',
       },
@@ -107,23 +105,17 @@ describe('Config', function () {
       repoLink: 'repo_link',
       prOnly: true,
       releaseOnly: true,
+      noPush: true,
       releaseInfo: {
         draft: true,
         preRelease: true,
       },
-      commitInfo: {
-        noPush: true,
-        message: 'commit_message',
-      },
       changelogInfo: {
         disable: true,
-        ticketPrefix: 'changelog_ticket_prefix',
+        template: 'changelog_template',
+        file: 'changelog_file',
         header: 'changelog_header',
-      },
-      files: {
-        changelog: 'file_changelog',
-        latestVersion: 'file_latest_version',
-        prTemplate: 'file_pr_template',
+        commitMessage: 'changelog_commit_message',
       },
       tagsInfo: {
         tag_names: {
@@ -133,6 +125,7 @@ describe('Config', function () {
       },
       prInfo: {
         repo: 'pr_repo',
+        template: 'pr_template',
         branches: {
           branch_names: {
             head: 'branch_heads',
@@ -145,9 +138,10 @@ describe('Config', function () {
         },
       },
       latestInfo: {
+        file: 'latest_file',
         version: 'latest_version',
         ticket: 'latest_ticket',
-        body: 'latest_content',
+        content: 'latest_content',
       },
       autoLinks: {
         auto_link_keys: 'auto_link_values',

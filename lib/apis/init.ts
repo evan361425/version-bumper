@@ -10,9 +10,8 @@ export default async function () {
   Config.instance = config;
   const files = {
     config: path.resolve('bumper.json'),
-    changelog: path.resolve(config.files.changelog),
-    prTemplate: path.resolve(config.files.prTemplate),
-    latestVersion: path.resolve(config.files.latestVersion),
+    changelog: path.resolve(config.changelogInfo.file),
+    latestInfo: path.resolve(config.latestInfo.file),
   };
   Object.values(files).forEach(prepareFolder);
 
@@ -28,11 +27,22 @@ export default async function () {
         {
           $schema: schema,
           repoLink: config.repoLink,
-          commit: { message: config.commitInfo.message },
+          changelog: {
+            template: '單號：{ticket}\n\n{content}',
+            commitMessage:
+              'chore: bump to {version}\nticket: {ticket}\nstage: {stage}',
+          },
+          latestInfo: {
+            file: 'docs/LATEST_VERSION.md',
+          },
           tags: {
             release: { pattern: 'v[0-9]+.[0-9]+.[0-9]+', changelog: true },
           },
-          pr: { repo: config.prInfo.repo },
+          pr: {
+            repo: config.prInfo.repo,
+            template:
+              'This PR is auto-generated from bumper\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}',
+          },
         },
         undefined,
         2,
@@ -40,9 +50,9 @@ export default async function () {
     );
   }
 
-  if (allowed(files.latestVersion, 'latest version info')) {
+  if (allowed(files.latestInfo, 'latest version info')) {
     writeFile(
-      files.latestVersion,
+      files.latestInfo,
       `---
 version: ${changelog.latestTag?.key ?? ''}
 ticket:
@@ -54,10 +64,6 @@ ${changelog.latestTag?.body ?? ''}
 
   if (allowed(files.changelog, 'changelog')) {
     writeFile(files.changelog, changelog.toString());
-  }
-
-  if (allowed(files.prTemplate, 'PR template')) {
-    writeFile(files.prTemplate, config.prTemplate);
   }
 }
 

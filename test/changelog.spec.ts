@@ -92,8 +92,10 @@ describe('Changelog', function () {
       '## [Unreleased]\n\n' +
       'Some unreleased\n\n' +
       '## [new-version-1.2.4] - 2022-12-31\n\n' +
+      '單號：\n\n' +
       'Newer one\n\nhi there\n\n' +
       '## [new-version-1.2.3] - 2022-12-30\n\n' +
+      '單號：\n\n' +
       'This is body\n\n' +
       '## [v1.2.3-rc1] - 2022-02-03\n\n' +
       'Hi there\n\n' +

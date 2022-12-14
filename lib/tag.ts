@@ -4,12 +4,15 @@ type TagConfig = {
   createdDate: string;
   link: string;
   ticket: string;
+  raw: boolean;
 };
 
 export class Tag {
   readonly key: string;
-  body: string;
   readonly ticket?: string;
+  readonly raw: boolean;
+
+  body: string;
   link?: string;
   createdDate!: string;
 
@@ -17,6 +20,7 @@ export class Tag {
     this.key = key.trim();
     this.body = body.trim();
     this.ticket = config.ticket;
+    this.raw = config.raw ?? false;
 
     this.setCreatedDate(config.createdDate);
     this.setLink(config.link);
@@ -34,7 +38,7 @@ export class Tag {
     return new Tag(
       version ?? '',
       splitter === -1 ? '' : raw.substring(splitter + 1).trim(),
-      { createdDate: date ?? '' },
+      { createdDate: date ?? '', raw: true },
     );
   }
 
@@ -42,28 +46,33 @@ export class Tag {
     return new Tag(this.veryFirstTagKey, 'Please check git diff.', {
       createdDate: '',
       link: Config.instance.repoLink + '/commits',
+      raw: true,
     });
   }
 
   static readonly veryFirstTagKey = 'Unreleased';
 
+  get parsedBody() {
+    if (this.raw) return this.body;
+
+    const body = this.body
+      .replace(/{version}/g, this.key)
+      .replace(/{diff}/g, this.link ?? '')
+      .replace(/{stage}/g, Config.instance.stage ?? '')
+      .replace(/{ticket}/g, this.ticket ?? '');
+
+    return Config.instance.changelogInfo.template
+      .replace(/{content}/g, body)
+      .replace(/{version}/g, this.key)
+      .replace(/{diff}/g, this.link ?? '')
+      .replace(/{stage}/g, Config.instance.stage ?? '')
+      .replace(/{ticket}/g, this.ticket ?? '');
+  }
+
   getPrTitle(branch: BaseBranchInfo) {
     return this.ticket
       ? `${this.ticket} - ${this.key}(${branch.name})`
       : `${this.key}(${branch.name})`;
-  }
-
-  get parsedBody() {
-    let body = this.body;
-
-    if (this.ticket && !this.body.includes(this.ticket)) {
-      const pre = Config.instance.changelogInfo.ticketPrefix + this.ticket;
-      body = `${pre}\n\n${this.body}`;
-    }
-    return body
-      .replace(/{version}/g, this.key)
-      .replace(/{stage}/g, Config.instance.stage ?? '')
-      .replace(/{ticket}/g, this.ticket ?? '');
   }
 
   setLink(link?: string): Tag {

@@ -11,38 +11,34 @@ import { error, info } from './logger.js';
 
 const DEFAULTS = {
   configFile: 'bumper.json',
-  commit: {
-    message: 'chore: bump to {version}',
-  },
-  prTemplate: `This PR is auto-generated from bumper
+  pr: {
+    template: `This PR is auto-generated from bumper
 
--   ticket: {ticket}
--   stage: {stage}
--   version: {version}
--   [diff]({diff})
+- ticket: {ticket}
+- stage: {stage}
+- version: {version}
+- [diff]({diff})
 
 {content}
 `,
+  },
   changelog: {
-    ticketPrefix: '單號：',
+    file: 'CHANGELOG.md',
+    commitMessage: 'chore: bump to {version}\nticket: {ticket}\nstage: {stage}',
+    template: '單號：{ticket}\n\n{content}',
     header: `# Changelog
 
 所有本專案的版本紀錄將於此說明之。
 
 文件依照 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 內所描述的格式撰寫，版本號碼依照 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。`,
   },
-  files: {
-    changelog: 'CHANGELOG.md',
-    latestVersion: 'docs/LATEST_VERSION.md',
-    prTemplate: 'docs/PR_TEMPLATE.md',
-    latestDeps: 'docs/LATEST_DEPS.md',
+  latestInfo: {
+    file: 'docs/LATEST_VERSION.md',
   },
 };
 
 export class Config {
   static #instance: Config;
-
-  readonly files: FilesInfo;
 
   // ====== For bump version =======
 
@@ -50,8 +46,8 @@ export class Config {
   readonly stage?: string;
   readonly prOnly: boolean;
   readonly releaseOnly: boolean;
+  readonly noPush: boolean;
 
-  readonly commitInfo: CommitInfo;
   readonly changelogInfo: ChangelogInfo;
   readonly latestInfo: LatestInfo;
   readonly tagsInfo: TagsInfo;
@@ -84,15 +80,15 @@ export class Config {
     this.repoLink = getConfig('repo_link') ?? '';
     this.prOnly = getBoolConfig('pr_only');
     this.releaseOnly = getBoolConfig('release_only');
+    this.noPush = getBoolConfig('no_push');
 
-    this.commitInfo = getCommitInfo();
     this.changelogInfo = getChangelogInfo();
-    this.files = getFilesInfo();
     this.tagsInfo = getTagsInfo();
     this.prInfo = getPRInfo();
-    this.latestInfo = getLatestInfo(this.files.latestVersion);
-    this.autoLinks = getAutoLinks();
+    this.latestInfo = getLatestInfo();
     this.releaseInfo = getReleaseInfo();
+    this.autoLinks = getAutoLinks();
+
     this.stage = getStage(this.latestInfo.version, this.tagsInfo);
 
     // ================ bump deps ===================
@@ -112,44 +108,16 @@ export class Config {
 
     // ================ helpers =====================
 
-    function getCommitInfo() {
-      const cm: Partial<CommitInfo> = config['commit'] ?? {};
-      const df = DEFAULTS.commit;
-      cm.noPush = getBoolConfig('commit_no_push', cm.noPush);
-      cm.message = getConfig('commit_message', cm.message ?? df.message);
-      return cm as CommitInfo;
-    }
-
     function getChangelogInfo() {
       const ch: Partial<ChangelogInfo> = config['changelog'] ?? {};
-      const df = DEFAULTS.changelog;
+      const d = DEFAULTS.changelog;
+      ch.commitMessage = getConfig('changelog_commit_message', d.commitMessage);
       ch.disable = getBoolConfig('changelog_disable', ch.disable);
-      ch.ticketPrefix = getConfig(
-        'changelog_ticket_prefix',
-        ch.ticketPrefix ?? df.ticketPrefix,
-      );
-      ch.header = getConfig('changelog_header', ch.header ?? df.header);
+      ch.file = getConfig('changelog_file', d.file);
+      ch.header = getConfig('changelog_header', ch.header ?? d.header);
+      ch.template = getConfig('changelog_template', ch.template ?? d.template);
 
       return ch as ChangelogInfo;
-    }
-
-    function getFilesInfo() {
-      const fls: Partial<FilesInfo> = config['files'] ?? {};
-      const df = DEFAULTS.files;
-      fls.changelog = getConfig(
-        'file_changelog',
-        fls.changelog ?? df.changelog,
-      );
-      fls.latestVersion = getConfig(
-        'file_latest_version',
-        fls.latestVersion ?? df.latestVersion,
-      );
-      fls.prTemplate = getConfig(
-        'file_pr_template',
-        fls.prTemplate ?? df.prTemplate,
-      );
-
-      return fls as FilesInfo;
     }
 
     function getTagsInfo(): TagsInfo {
@@ -180,7 +148,15 @@ export class Config {
 
     function getPRInfo(): PRInfo {
       const pr: Partial<PRInfo> = config['pr'] ?? {};
+      const d = DEFAULTS.pr;
       pr.repo = getConfig('pr_repo', pr.repo);
+      pr.template = getConfig('pr_template', pr.template ?? d.template);
+
+      const file = getConfig('pr_template_file');
+      if (file) {
+        const content = readFile(file);
+        pr.template = content ? content : pr.template;
+      }
 
       const names = stf(getConfig('branch_names'));
       const heads = stf(getConfig('branch_heads'));
@@ -229,13 +205,17 @@ export class Config {
       return pr as PRInfo;
     }
 
-    function getLatestInfo(file: string): LatestInfo {
-      const [fMeta, fBody] = parseMarkdown(file);
-      const version = getConfig('latest_version') ?? fMeta?.version ?? '';
-      const ticket = getConfig('latest_ticket') ?? fMeta?.ticket;
-      const body = getConfig('latest_content') ?? fBody;
+    function getLatestInfo(): LatestInfo {
+      const li: Partial<LatestInfo> = config['latestInfo'] ?? {};
 
-      return { version, ticket, body };
+      li.file = getConfig('latest_file', DEFAULTS.latestInfo.file);
+      const [fMeta, fBody] = li.file ? parseMarkdown(li.file) : [];
+
+      li.version = getConfig('latest_version') ?? li.version ?? fMeta?.version;
+      li.ticket = getConfig('latest_ticket') ?? li.ticket ?? fMeta?.ticket;
+      li.content = getConfig('latest_content') ?? li.content ?? fBody;
+
+      return li as LatestInfo;
     }
 
     function getAutoLinks(): Record<string, string> {
@@ -400,12 +380,7 @@ export class Config {
   }
 
   get changelog(): string {
-    return readFile(this.files.changelog);
-  }
-
-  get prTemplate(): string {
-    const temp = readFile(this.files.prTemplate);
-    return temp ? temp : DEFAULTS.prTemplate;
+    return readFile(this.changelogInfo.file);
   }
 }
 
@@ -473,18 +448,23 @@ type BranchInfo = BaseBranchInfo & {
 };
 type ChangelogInfo = {
   disable: boolean;
-  ticketPrefix: string;
+  file: string;
+  template: string;
   header: string;
+  commitMessage: string;
 };
-type FilesInfo = {
-  changelog: string;
-  latestVersion: string;
-  prTemplate: string;
+type PRInfo = {
+  repo: string;
+  template: string;
+  branches: Record<string, BranchInfo>;
 };
-type PRInfo = { repo: string; branches: Record<string, BranchInfo> };
 type TagsInfo = Record<string, TagInfo>;
-type CommitInfo = { message: string; noPush: boolean };
-type LatestInfo = { version: string; body: string; ticket?: string };
+type LatestInfo = {
+  version: string;
+  content: string;
+  ticket?: string;
+  file: string;
+};
 type DevInfo = {
   oneByOne: boolean;
   preCommands: Commands;

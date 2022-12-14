@@ -21,13 +21,15 @@ describe('Bump version', function () {
     useFakeTimers(now.getTime());
     const config = new Config({
       repoLink: 'https://github.com/example/example',
-      latestVersion: 'v1.0.2',
-      latestTicket: 'TICKET-200',
-      latestContent:
-        'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
+      latestInfo: {
+        version: 'v1.0.2',
+        ticket: 'TICKET-200',
+        content:
+          'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
+      },
       changelog: {
         header: 'test default header',
-        ticketPrefix: 'ticket prefix:',
+        template: 'ticket prefix:{ticket}\n\n{content}',
       },
       files: { latestVersion: 'non-exit-file' },
       autoLinks: {
@@ -41,6 +43,8 @@ describe('Bump version', function () {
         },
       },
       pr: {
+        template:
+          'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
         branches: {
           test: {
             head: 'test-head',
@@ -56,10 +60,6 @@ describe('Bump version', function () {
     } as unknown as never);
 
     stub(Config, 'instance').get(() => config);
-    stub(Config.instance, 'prTemplate').get(
-      () =>
-        'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
-    );
     stub(Config.instance, 'changelog').get(
       () => `# Changelog
 
@@ -100,7 +100,7 @@ First Release
       repoLink: 'https://github.com/example/example',
       prOnly: false,
       releaseOnly: false,
-      commitInfo: { noPush: false, message: 'chore: bump to {version}' },
+      noPush: false,
       tagsInfo: {
         test: {
           pattern: '^v1.0.\\d+$',
@@ -109,6 +109,8 @@ First Release
       },
       prInfo: {
         repo: 'example/example',
+        template:
+          'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
         branches: {
           test: {
             name: 'test',
@@ -130,18 +132,18 @@ First Release
       },
       changelogInfo: {
         header: 'test default header',
-        ticketPrefix: 'ticket prefix:',
+        template: 'ticket prefix:{ticket}\n\n{content}',
         disable: false,
-      },
-      files: {
-        latestVersion: 'non-exit-file',
-        changelog: 'CHANGELOG.md',
-        prTemplate: 'docs/PR_TEMPLATE.md',
+        commitMessage:
+          'chore: bump to {version}\nticket: {ticket}\nstage: {stage}',
+        file: 'CHANGELOG.md',
       },
       latestInfo: {
         version: 'v1.0.2',
         ticket: 'TICKET-200',
-        body: 'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
+        content:
+          'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
+        file: 'docs/LATEST_VERSION.md',
       },
       autoLinks: {
         'ticket-': 'replace-<num>',
@@ -195,7 +197,7 @@ First Release
 [v1.0.1]: https://github.com/example/example/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/example/example/commits/v1.0.0
 `,
-      "[cmd]: git 'commit' '.' '-m' 'chore: bump to v1.0.2' '--no-verify'",
+      "[cmd]: git 'commit' '.' '-m' 'chore: bump to v1.0.2\nticket: TICKET-200\nstage: test' '--no-verify'",
       "[cmd]: git 'tag' 'v1.0.2' '-m' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
       "[cmd]: git 'push' '--no-verify'",
       "[cmd]: git 'push' '--tag' '--no-verify'",

@@ -9,7 +9,7 @@ export default async function () {
 
   const changelog = new Changelog(Config.instance.changelog);
   const info = Config.instance.latestInfo;
-  const tag = new Tag(info.version, info.body, { ticket: info.ticket });
+  const tag = new Tag(info.version, info.content, { ticket: info.ticket });
 
   let tagExist;
   try {
@@ -37,7 +37,7 @@ export default async function () {
   await git('tag', tag.key, '-m', tag.parsedBody);
 
   // 把變動（含 tag）推上去
-  if (!Config.instance.commitInfo.noPush) {
+  if (!Config.instance.noPush) {
     await git('push', '--no-verify');
     await git('push', '--tag', '--no-verify');
   }
@@ -56,7 +56,7 @@ async function bump(changelog: Changelog) {
   if (!tag || !stage || !tagInfo) return;
   info('[bump] Requirements checked');
 
-  const msg = Config.instance.commitInfo.message
+  const msg = Config.instance.changelogInfo.commitMessage
     .replace(/{version}/g, tag.key ?? '')
     .replace(/{stage}/g, stage)
     .replace(/{ticket}/g, tag.ticket ?? '');
@@ -69,7 +69,7 @@ async function bump(changelog: Changelog) {
 
     if (!Config.instance.changelogInfo.disable) {
       info('[bump] Start updating changelog');
-      writeFile(Config.instance.files.changelog, changelog.toString());
+      writeFile(Config.instance.changelogInfo.file, changelog.toString());
     }
 
     // commit both npm version and changelog
@@ -100,7 +100,7 @@ async function createPRs(tag: Tag) {
 
 async function createPR(tag: Tag, b: BaseBranchInfo) {
   const repo = Config.instance.prInfo.repo;
-  const temp = Config.instance.prTemplate;
+  const temp = Config.instance.prInfo.template;
   const body = temp
     .replace(/{stage}/g, b.name)
     .replace(/{ticket}/g, tag.ticket ?? '')
