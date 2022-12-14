@@ -8,6 +8,11 @@
 
 Please check git diff.
 
+## [v0.2.5] - 2022-12-14
+
+-   feat: add `--verbose` to get noisy output with actual process.
+-   feat: `deps` now send data to stdout if no `deps.output` setup.
+
 ## [v0.2.4] - 2022-12-13
 
 -   fix: use relative path for getting version
@@ -32,7 +37,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.4...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.2.5...HEAD
+[v0.2.5]: https://github.com/evan361425/version-bumper/compare/v0.2.5...v0.2.4
 [v0.2.4]: https://github.com/evan361425/version-bumper/compare/v0.2.4...v0.2.3
 [v0.2.3]: https://github.com/evan361425/version-bumper/compare/v0.2.3...v0.2.2
 [v0.2.2]: https://github.com/evan361425/version-bumper/compare/v0.2.2...v0.2.1
