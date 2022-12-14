@@ -23,7 +23,7 @@ export default function (command?: string) {
     console.log('Usage: (npx) bumper <command> [args]\nCommands');
     printCommands();
     console.log('\nArgs:\n\t-h, --help 顯示相關 Command 的 Args');
-    console.log('\n\t-v, --version 顯示版本資訊');
+    console.log('\t-v, --version 顯示版本資訊');
   } else {
     console.log(`Usage: (npx) bumper ${command} [args]\nArgs:`);
     printArgsFromSchema(command ?? '');
@@ -59,6 +59,14 @@ function printArgsFromSchema(command: string) {
       type: 'boolean',
       description: '同時會輸出一些雜七雜八的日誌到 stdout',
       underlineKey: 'debug',
+    },
+    verbose: {
+      title: '執行程式時輸出雜七雜八的東西',
+      default: false,
+      type: 'boolean',
+      description:
+        '他和 debug 只差在 debug 不會真的執行且會輸出 IO 的操作\ndebug 會覆寫此設定',
+      underlineKey: 'verbose',
     },
   };
 

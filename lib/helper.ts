@@ -8,20 +8,28 @@ import {
 import path from 'node:path';
 import { info } from './logger.js';
 
-let debug = false;
+let mode: 'debug' | 'normal' | 'verbose' = 'normal';
 let mockedCommands: undefined | Promise<string>[];
 let mockedFiles: undefined | string[];
 
 export function startDebug(): void {
-  debug = true;
+  mode = 'debug';
+}
+
+export function startVerbose(): void {
+  mode = 'verbose';
 }
 
 export function stopDebug(): void {
-  debug = false;
+  mode = 'normal';
 }
 
 export function isDebug(): boolean {
-  return debug;
+  return mode === 'debug';
+}
+
+export function isVerbose(): boolean {
+  return mode === 'verbose' || mode === 'debug';
 }
 
 export function createCommand(name: string, args: string[]): Promise<string> {
@@ -58,6 +66,7 @@ export async function git(...args: string[]): Promise<string> {
   try {
     return await createCommand('git', args);
   } catch (err) {
+    isVerbose() && console.log(err);
     return '';
   }
 }

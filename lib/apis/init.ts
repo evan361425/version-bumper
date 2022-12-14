@@ -1,8 +1,9 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { Config } from '../config.js';
-import { getSchemaFile, isDebug } from '../helper.js';
+import { getSchemaFile, isDebug, writeFile } from '../helper.js';
 import { Changelog } from '../changelog.js';
+import { info } from '../logger.js';
 
 export default async function () {
   const config = new Config({ latestVersion: 'unknown' as never });
@@ -21,7 +22,7 @@ export default async function () {
   if (allowed(files.config, 'configuration')) {
     const schema = path.relative(path.resolve(), getSchemaFile());
 
-    writeTo(
+    writeFile(
       files.config,
       JSON.stringify(
         {
@@ -40,10 +41,10 @@ export default async function () {
   }
 
   if (allowed(files.latestVersion, 'latest version info')) {
-    writeTo(
+    writeFile(
       files.latestVersion,
       `---
-version: ${changelog.latestTag?.key ?? ''} 
+version: ${changelog.latestTag?.key ?? ''}
 ticket:
 ---
 ${changelog.latestTag?.body ?? ''}
@@ -52,11 +53,11 @@ ${changelog.latestTag?.body ?? ''}
   }
 
   if (allowed(files.changelog, 'changelog')) {
-    writeTo(files.changelog, changelog.toString());
+    writeFile(files.changelog, changelog.toString());
   }
 
   if (allowed(files.prTemplate, 'PR template')) {
-    writeTo(files.prTemplate, config.prTemplate);
+    writeFile(files.prTemplate, config.prTemplate);
   }
 }
 
@@ -67,7 +68,7 @@ function prepareFolder(file: string) {
 function allowed(file: string, key: string): boolean {
   const name = file.substring(path.resolve().length + 1);
   if (isDebug()) {
-    console.log(`Debug always allowed write to ${name}`);
+    info(`Debug always allowed write to ${name}`);
     return true;
   }
   if (fs.existsSync(file)) {
@@ -76,12 +77,4 @@ function allowed(file: string, key: string): boolean {
   }
   console.log(`File ${name} for ${key} creating!`);
   return true;
-}
-
-function writeTo(file: string, data: string) {
-  if (isDebug()) {
-    console.log(data);
-    return;
-  }
-  fs.writeFileSync(file, data);
 }

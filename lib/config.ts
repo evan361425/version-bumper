@@ -1,5 +1,12 @@
 import path from 'node:path';
-import { breaker, git, parseMarkdown, readFile, startDebug } from './helper.js';
+import {
+  breaker,
+  git,
+  parseMarkdown,
+  readFile,
+  startDebug,
+  startVerbose,
+} from './helper.js';
 import { error, info } from './logger.js';
 
 const DEFAULTS = {
@@ -70,6 +77,7 @@ export class Config {
   }
 
   constructor(config: Record<string, never>) {
+    getBoolConfig('verbose') && startVerbose();
     getBoolConfig('debug') && startDebug();
 
     // ================ bump versions ================

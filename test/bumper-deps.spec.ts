@@ -90,9 +90,8 @@ describe('Bump deps', function () {
     expect(calls.filter(Boolean)).to.eql([
       "[cmd]: npm 'outdated'",
       '========== Start Dependencies ==========\n',
-      'Start getting repo links',
+      '[dep] start getting repo links',
       "[cmd]: npm 'repo' 'latest1' 'exactLatest' 'dep1' 'dep2' '--no-browser'",
-      '|Package|Old|New|\n|-|-|-|\n',
       ...[
         ['latest1', '2.0.0'],
         ['exactLatest', '2.0.0'],
@@ -107,9 +106,8 @@ describe('Bump deps', function () {
         ])
         .flat(),
       '\n========== Start Dev Dependencies ==========\n',
-      'Start getting repo links',
+      '[dep] start getting repo links',
       "[cmd]: npm 'repo' 'latest2' 'devDep1' 'devDep2' '--no-browser'",
-      '\n|Package|Old|New|\n|-|-|-|\n',
       ...[
         ['latest2', '2.0.0'],
         ['devDep1', '1.1.0'],

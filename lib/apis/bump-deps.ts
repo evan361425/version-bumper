@@ -6,6 +6,7 @@ import {
   npm,
   writeFile,
 } from '../helper.js';
+import { info, notice } from '../logger.js';
 import { PackageJson } from '../package-json.js';
 
 const TABLE_PREFIX = '|Package|Old|New|\n|-|-|-|\n';
@@ -29,11 +30,11 @@ export default async function () {
   let output = '';
 
   if (deps.length) {
-    console.log(`${SEPARATOR} Start Dependencies ${SEPARATOR}\n`);
+    notice(`${SEPARATOR} Start Dependencies ${SEPARATOR}\n`);
     await setUpRepo(deps);
 
     if (!config.appendOnly) {
-      writeFile(config.output, TABLE_PREFIX);
+      config.output && writeFile(config.output, TABLE_PREFIX);
     }
 
     for (const dep of deps) {
@@ -43,10 +44,10 @@ export default async function () {
   }
 
   if (devDeps.length) {
-    console.log(`\n${SEPARATOR} Start Dev Dependencies ${SEPARATOR}\n`);
+    notice(`\n${SEPARATOR} Start Dev Dependencies ${SEPARATOR}\n`);
     await setUpRepo(devDeps);
 
-    appendFile(config.output, '\n' + TABLE_PREFIX);
+    config.output && appendFile(config.output, '\n' + TABLE_PREFIX);
     const newPkg = new PackageJson();
 
     for (const dep of devDeps) {
@@ -54,7 +55,7 @@ export default async function () {
       if (config.devInfo.oneByOne) {
         await update(config.devInfo, dep);
       } else {
-        console.log(dep.toString());
+        notice(dep.toString());
         newPkg.fixDev(dep.name, dep.target);
       }
     }
@@ -124,6 +125,7 @@ class OutdatedPackage {
   }
 
   setLink(link: string) {
+    info(`[dep] found ${this.name}'s link ${link}`);
     this.link = link;
     return this;
   }
@@ -134,7 +136,7 @@ class OutdatedPackage {
 }
 
 async function update(info: PrePost, dep?: OutdatedPackage) {
-  dep && console.log(dep.toString());
+  dep && notice(dep.toString());
   for (const cmd of info.preCommands) {
     await execCommand(cmd, dep);
   }
@@ -145,12 +147,11 @@ async function update(info: PrePost, dep?: OutdatedPackage) {
   if (dep?.isDev) cmd.push('--save-dev');
 
   const response = await npm(...cmd);
-  response && console.log(response);
+  response && notice(response);
 
   for (const cmd of info.postCommands) {
     await execCommand(cmd, dep);
   }
-  dep && console.log('');
 }
 
 function match(target: string, list: string[]): boolean {
@@ -181,12 +182,12 @@ async function execCommand(cmd: string | string[], dep?: OutdatedPackage) {
   });
 
   if (exec) {
-    console.log(await createCommand(exec, parsed));
+    notice(await createCommand(exec, parsed));
   }
 }
 
 async function setUpRepo(deps: OutdatedPackage[]) {
-  console.log('Start getting repo links');
+  info('[dep] start getting repo links');
   const names = deps.map((d) => d.name);
 
   /**
