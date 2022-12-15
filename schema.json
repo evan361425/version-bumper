@@ -212,14 +212,14 @@
               "properties": {
                 "base": {
                   "type": "string",
-                  "title": "做 PR 時的來源分支",
-                  "description": "需要為 git 上的名稱，\n例如 `production` 的 base 可能為 `deploy/staging`"
+                  "title": "做 PR 時的目標分支",
+                  "description": "需要為 git 上的名稱，\n例如 `production` 的 base 可能為 `deploy/production`"
                 },
                 "head": {
                   "type": "string",
-                  "title": "做 PR 時的目標分支",
+                  "title": "做 PR 時的來源分支",
                   "default": "deploy/{name}",
-                  "description": "需要為 git 上的名稱，\n例如 `production` 的 head 可能為 `deploy/production`"
+                  "description": "需要為 git 上的名稱，\n例如 `production` 的 head 可能為 `deploy/staging`"
                 },
                 "reviewers": {
                   "type": "array",
