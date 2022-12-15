@@ -1,7 +1,7 @@
 import { Changelog } from '../changelog.js';
 import { BaseBranchInfo, Config } from '../config.js';
 import { gh, git, npm, writeFile } from '../helper.js';
-import { info } from '../logger.js';
+import { notice } from '../logger.js';
 import { Tag } from '../tag.js';
 
 export default async function () {
@@ -54,7 +54,7 @@ async function bump(changelog: Changelog) {
   const stage = Config.instance.stage;
   const tagInfo = Config.instance.tag;
   if (!tag || !stage || !tagInfo) return;
-  info('[bump] Requirements checked');
+  notice('[bump] Requirements checked');
 
   const msg = Config.instance.changelogInfo.commitMessage
     .replace(/{version}/g, tag.key ?? '')
@@ -68,7 +68,7 @@ async function bump(changelog: Changelog) {
     await npm('version', '--no-commit-hooks', '--no-git-tag-version', tag.key);
 
     if (!Config.instance.changelogInfo.disable) {
-      info('[bump] Start updating changelog');
+      notice('[bump] Start updating changelog');
       writeFile(Config.instance.changelogInfo.file, changelog.toString());
     }
 
@@ -109,7 +109,7 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     .replace(/{diff}/g, tag.link ?? '')
     .concat(`\n\n${tag.toLink()}`);
 
-  info(`[pr] Creating branch ${b.name} in ${repo} (${b.base} -> ${b.head})`);
+  notice(`[pr] Creating branch ${b.name} in ${repo} (${b.base} -> ${b.head})`);
 
   // https://cli.github.com/manual/gh_pr_create
   return gh(

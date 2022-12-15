@@ -4,6 +4,11 @@
 
   "additionalProperties": false,
   "properties": {
+    "$schema": {
+      "type": "string",
+      "title": "Bumper schema",
+      "description": "如果你不想看到相對路徑，請把本套件安裝到開發套件中。\n然後執行 npx bumper init"
+    },
     "repoLink": {
       "type": "string",
       "title": "Changelog 中會作為 tag 的連結",

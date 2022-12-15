@@ -6,6 +6,7 @@
 
 import api from '../lib/api.js';
 import { getPackageJsonFile, readFile } from '../lib/helper.js';
+import { notice } from '../lib/logger.js';
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -73,7 +74,7 @@ ${message}`);
   }
 
   if (needHelp) {
-    api.help(command);
+    return api.help(command);
   } else if (command === 'version') {
     await api.version();
   } else if (command === 'deps') {
@@ -81,6 +82,8 @@ ${message}`);
   } else if (command === 'init') {
     await api.init();
   } else {
-    api.help(command);
+    return api.help(command);
   }
+
+  notice(`${command} done`);
 })().catch(onFatalError);
