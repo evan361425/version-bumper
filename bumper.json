@@ -5,7 +5,8 @@
     "draft": true
   },
   "changelog": {
-    "commitMessage": "chore: bump to {version}\n\nstage: {stage}"
+    "commitMessage": "chore: bump to {version}\n\nstage: {stage}",
+    "template": "{content}"
   },
   "tags": {
     "release": { "pattern": "v[0-9]+.[0-9]+.[0-9]+", "changelog": true }

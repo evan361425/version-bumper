@@ -10,8 +10,6 @@ Please check git diff.
 
 ## [v0.4.1] - 2022-12-15
 
-單號：
-
 -   fix: config should respect pr template from file
 
 ## [v0.4.0] - 2022-12-15
@@ -20,8 +18,6 @@ Please check git diff.
 -   fix: schema title on PR base/head is wrong
 
 ## [v0.3.0] - 2022-12-14
-
-單號：
 
 -   Changing configuration format for more intuitive structure.
 
