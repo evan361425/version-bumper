@@ -61,9 +61,12 @@ ${message}`);
   const needHelp =
     process.argv.includes('-h') ||
     process.argv.includes('--help') ||
+    process.argv.includes('--h') ||
     command?.startsWith('-');
   const needVersion =
-    process.argv.includes('-v') || process.argv.includes('--version');
+    process.argv.includes('-v') ||
+    process.argv.includes('--version') ||
+    process.argv.includes('--v');
 
   if (needVersion) {
     return console.log(`version-bumper: ${getVersion()}`);
@@ -72,9 +75,9 @@ ${message}`);
   if (needHelp) {
     api.help(command);
   } else if (command === 'version') {
-    await api.bumpVersion();
+    await api.version();
   } else if (command === 'deps') {
-    await api.bumpDeps();
+    await api.deps();
   } else if (command === 'init') {
     await api.init();
   } else {

@@ -1,7 +1,7 @@
 /* eslint-disable mocha/no-hooks-for-single-case */
 import { expect } from 'chai';
 import { restore, stub, useFakeTimers } from 'sinon';
-import bumpVersion from '../lib/apis/bump-version.js';
+import bumpVersion from '../lib/apis/version.js';
 import { Config } from '../lib/config.js';
 import { startDebug, stopDebug } from '../lib/helper.js';
 import { resetEnv, setupEnv } from './warm-up.js';

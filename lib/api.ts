@@ -1,11 +1,11 @@
-import bumpVersion from './apis/bump-version.js';
-import bumpDeps from './apis/bump-deps.js';
+import version from './apis/version.js';
+import deps from './apis/deps.js';
 import help from './apis/help.js';
 import init from './apis/init.js';
 
 export default {
-  bumpVersion,
-  bumpDeps,
+  version,
+  deps,
   help,
   init,
 };

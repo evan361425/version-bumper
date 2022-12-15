@@ -58,7 +58,7 @@ describe('Bump deps', function () {
 
     const stdout = Sinon.stub(console, 'log');
     startDebug();
-    await api.bumpDeps();
+    await api.deps();
     stopDebug();
 
     const calls = stdout.getCalls().map((call) => call.args[0]);
