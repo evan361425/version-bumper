@@ -34,7 +34,7 @@ export default async function () {
     await setUpRepo(deps);
 
     if (!config.appendOnly) {
-      config.output && writeFile(config.output, TABLE_PREFIX);
+      writeFile(config.outputFile, TABLE_PREFIX);
     }
 
     for (const dep of deps) {
@@ -47,7 +47,7 @@ export default async function () {
     notice(`\n${SEPARATOR} Start Dev Dependencies ${SEPARATOR}\n`);
     await setUpRepo(devDeps);
 
-    config.output && appendFile(config.output, '\n' + TABLE_PREFIX);
+    config.outputFile && appendFile(config.outputFile, '\n' + TABLE_PREFIX);
     const newPkg = new PackageJson();
 
     for (const dep of devDeps) {
@@ -66,15 +66,15 @@ export default async function () {
     }
   }
 
-  if (!config.output) {
+  if (!config.outputFile) {
     console.log(output);
   }
 
   function writeDep(dep: OutdatedPackage) {
     const [name, current, target, link] = dep.properties;
     const nWL = link ? `[${name}](${link})` : name;
-    if (config.output) {
-      appendFile(config.output, `| ${nWL} | ${current} | ${target} |\n`);
+    if (config.outputFile) {
+      appendFile(config.outputFile, `| ${nWL} | ${current} | ${target} |\n`);
     } else {
       output += `${name}\t${current}\t${target}\t${link}\n`;
     }

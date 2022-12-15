@@ -99,13 +99,12 @@ export function readFile(fileName: string): string {
 }
 
 export function writeFile(fileName: string | undefined, data: string) {
-  if (isDebug()) {
-    console.log(data);
-    return;
-  }
-
   if (fileName) {
-    writeFileSync(fileName, data);
+    if (isDebug()) {
+      console.log(data);
+    } else {
+      writeFileSync(fileName, data);
+    }
   }
 }
 

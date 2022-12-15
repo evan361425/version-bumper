@@ -310,7 +310,7 @@
             }
           }
         },
-        "output": {
+        "outputFile": {
           "type": "string",
           "title": "更新時，版本資訊的寫入位置",
           "description": "Markdown 格式，\n若無，則會輸出到 `stdout`"

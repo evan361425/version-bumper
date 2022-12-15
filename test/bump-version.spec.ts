@@ -201,7 +201,6 @@ First Release
       "[cmd]: git 'tag' 'v1.0.2' '-m' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
       "[cmd]: git 'push' '--no-verify'",
       "[cmd]: git 'push' '--tag' '--no-verify'",
-      '[pr] body: Test PR body\n\nWith ticket: TICKET-200\nstage: test\nversion: v1.0.2\ndiff: https://github.com/example/example/compare/v1.0.2...v1.0.1\n\n[v1.0.2]: https://github.com/example/example/compare/v1.0.2...v1.0.1',
       '[pr] Creating branch test in example/example (test-base -> test-head)',
       [
         "[cmd]: gh 'pr' 'create'",
@@ -214,7 +213,6 @@ First Release
         "'--reviewer' 'r1' '--reviewer' 'r2'",
         "'--label' 'label-1' '--label' 'label-2'",
       ].join(' '),
-      '[pr] body: Test PR body\n\nWith ticket: TICKET-200\nstage: dr\nversion: v1.0.2\ndiff: https://github.com/example/example/compare/v1.0.2...v1.0.1\n\n[v1.0.2]: https://github.com/example/example/compare/v1.0.2...v1.0.1',
       '[pr] Creating branch dr in example/example (test-base -> deploy/dr)',
       [
         "[cmd]: gh 'pr' 'create'",

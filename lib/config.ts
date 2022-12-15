@@ -96,7 +96,7 @@ export class Config {
     const depsCfg: Record<string, never> = config['deps'] ?? {};
     const deps: Partial<DepsInfo> = {};
     deps.ignored = getListConfig('ignored', depsCfg, []);
-    deps.output = getConfig('output', undefined, depsCfg);
+    deps.outputFile = getConfig('output_file', undefined, depsCfg);
     deps.appendOnly = getBoolConfig('append_only', undefined, depsCfg);
     deps.saveExact = getBoolConfig('use_exact', undefined, depsCfg);
     deps.latestDeps = getListConfig('latest_deps', depsCfg, []);
@@ -152,7 +152,7 @@ export class Config {
       pr.repo = getConfig('pr_repo', pr.repo);
       pr.template = getConfig('pr_template', pr.template ?? d.template);
 
-      const file = getConfig('pr_template_file');
+      const file = getConfig('pr_template_file', pr.templateFile);
       if (file) {
         const content = readFile(file);
         pr.template = content ? content : pr.template;
@@ -456,6 +456,7 @@ type ChangelogInfo = {
 type PRInfo = {
   repo: string;
   template: string;
+  templateFile: string;
   branches: Record<string, BranchInfo>;
 };
 type TagsInfo = Record<string, TagInfo>;
@@ -474,7 +475,7 @@ type AllowedCommand = 'version' | 'deps';
 type Commands = string[] | string[][];
 type DepsInfo = {
   ignored: string[];
-  output?: string;
+  outputFile?: string;
   appendOnly: boolean;
   saveExact: boolean;
   allLatest: boolean;

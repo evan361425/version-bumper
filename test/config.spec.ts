@@ -1,15 +1,23 @@
 import { expect } from 'chai';
 import { Config } from '../lib/config.js';
+import { mockFile } from '../lib/helper.js';
 import { resetEnv, setEnv, setupEnv } from './warm-up.js';
 
 describe('Config', function () {
-  it('env must overwrite config', function () {
+  beforeEach(function () {
     resetEnv();
+  });
+
+  afterEach(function () {
+    setupEnv();
+  });
+
+  it('env must overwrite config', function () {
     Object.entries({
       config: 'config',
       debug: 'debug',
       ignored: 'ignored',
-      output: 'output',
+      output_file: 'output_file',
       append_only: 'append_only',
       use_exact: 'use_exact',
       latest_deps: 'latest_deps',
@@ -87,7 +95,7 @@ describe('Config', function () {
       },
       deps: {
         ignored: ['shouldNotShow'],
-        output: 'shouldNotShow',
+        outputFile: 'shouldNotShow',
         appendOnly: false,
         saveExact: false,
         latestDeps: ['shouldNotShow'],
@@ -101,6 +109,7 @@ describe('Config', function () {
         },
       },
     } as unknown as Record<string, never>);
+
     expect(JSON.parse(JSON.stringify(config))).to.eql({
       repoLink: 'repo_link',
       prOnly: true,
@@ -148,7 +157,7 @@ describe('Config', function () {
       },
       deps: {
         ignored: ['ignored'],
-        output: 'output',
+        outputFile: 'output_file',
         appendOnly: true,
         saveExact: true,
         latestDeps: ['latest_deps'],
@@ -162,7 +171,19 @@ describe('Config', function () {
         },
       },
     });
+  });
 
-    setupEnv();
+  it('should response file in PR template', function () {
+    setEnv('pr_template', 'some pr message');
+
+    mockFile('pr template from file');
+
+    const config = new Config({
+      pr: {
+        templateFile: 'my-file',
+      },
+    } as unknown as Record<string, never>);
+
+    expect(config.prInfo.template).to.be.eq('pr template from file');
   });
 });

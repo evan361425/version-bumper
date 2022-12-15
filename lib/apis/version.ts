@@ -109,7 +109,6 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     .replace(/{diff}/g, tag.link ?? '')
     .concat(`\n\n${tag.toLink()}`);
 
-  info(`[pr] body: ${body}`);
   info(`[pr] Creating branch ${b.name} in ${repo} (${b.base} -> ${b.head})`);
 
   // https://cli.github.com/manual/gh_pr_create
