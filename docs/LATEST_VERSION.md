@@ -1,5 +1,5 @@
 ---
-version: v0.4.1
+version: v0.4.2
 ---
 
--   fix: config should respect pr template from file
+-   feat: add PR title in configuration
