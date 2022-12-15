@@ -1,6 +1,5 @@
 ---
-version: v0.4.0
+version: v0.4.1
 ---
 
--   refactor: rename api's name
--   fix: schema title on PR base/head is wrong
+-   fix: config should respect pr template from file

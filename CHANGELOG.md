@@ -8,6 +8,12 @@
 
 Please check git diff.
 
+## [v0.4.1] - 2022-12-15
+
+單號：
+
+-   fix: config should respect pr template from file
+
 ## [v0.4.0] - 2022-12-15
 
 -   refactor: rename api's name
@@ -48,7 +54,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.4.1...HEAD
+[v0.4.1]: https://github.com/evan361425/version-bumper/compare/v0.4.1...v0.4.0
 [v0.4.0]: https://github.com/evan361425/version-bumper/compare/v0.4.0...v0.3.0
 [v0.3.0]: https://github.com/evan361425/version-bumper/compare/v0.3.0...v0.2.5
 [v0.2.5]: https://github.com/evan361425/version-bumper/compare/v0.2.5...v0.2.4
