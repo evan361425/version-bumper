@@ -1,5 +1,6 @@
 ---
-version: v0.3.0
+version: v0.4.0
 ---
 
--   Changing configuration format for more intuitive structure.
+-   refactor: rename api's name
+-   fix: schema title on PR base/head is wrong

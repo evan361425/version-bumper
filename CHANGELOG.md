@@ -8,6 +8,11 @@
 
 Please check git diff.
 
+## [v0.4.0] - 2022-12-15
+
+-   refactor: rename api's name
+-   fix: schema title on PR base/head is wrong
+
 ## [v0.3.0] - 2022-12-14
 
 單號：
@@ -43,7 +48,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.4.0...HEAD
+[v0.4.0]: https://github.com/evan361425/version-bumper/compare/v0.4.0...v0.3.0
 [v0.3.0]: https://github.com/evan361425/version-bumper/compare/v0.3.0...v0.2.5
 [v0.2.5]: https://github.com/evan361425/version-bumper/compare/v0.2.5...v0.2.4
 [v0.2.4]: https://github.com/evan361425/version-bumper/compare/v0.2.4...v0.2.3
