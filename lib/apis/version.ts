@@ -101,6 +101,10 @@ async function createPRs(tag: Tag) {
 async function createPR(tag: Tag, b: BaseBranchInfo) {
   const repo = Config.instance.prInfo.repo;
   const temp = Config.instance.prInfo.template;
+  const title = Config.instance.prInfo.title
+    .replace(/{version}/g, tag.key)
+    .replace(/{ticket}/g, tag.ticket ?? '')
+    .replace(/{stage}/g, b.name);
   const body = temp
     .replace(/{stage}/g, b.name)
     .replace(/{ticket}/g, tag.ticket ?? '')
@@ -116,7 +120,7 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     'pr',
     'create',
     '--title',
-    tag.getPrTitle(b),
+    title,
     '--body',
     body,
     '--assignee',

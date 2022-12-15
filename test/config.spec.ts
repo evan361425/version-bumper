@@ -42,6 +42,7 @@ describe('Config', function () {
       tag_patterns: 'tag_patterns',
       tag_changelogs: 'tag_changelog',
       pr_repo: 'pr_repo',
+      pr_title: 'pr_title',
       pr_template: 'pr_template',
       pr_template_file: 'pr_template_file',
       branch_names: 'branch_names',
@@ -76,6 +77,7 @@ describe('Config', function () {
       },
       pr: {
         repo: 'shouldNotShow',
+        title: 'shouldNotShow',
         template: 'shouldNotShow',
         branches: {
           shouldNotShow: {
@@ -135,6 +137,7 @@ describe('Config', function () {
       prInfo: {
         repo: 'pr_repo',
         template: 'pr_template',
+        title: 'pr_title',
         branches: {
           branch_names: {
             head: 'branch_heads',

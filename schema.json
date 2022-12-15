@@ -194,6 +194,13 @@
           "title": "要開 PR 的 Repo",
           "description": "預設是用 `repoLink` 的值，\n例如：`example/example`"
         },
+        "title": {
+          "cliName": "prTitle",
+          "type": "string",
+          "default": "{ticket} - {version}({stage})",
+          "title": "PR 標題",
+          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key"
+        },
         "template": {
           "cliName": "prTemplate",
           "type": "string",

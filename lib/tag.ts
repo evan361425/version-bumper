@@ -1,4 +1,4 @@
-import { BaseBranchInfo, Config } from './config.js';
+import { Config } from './config.js';
 
 type TagConfig = {
   createdDate: string;
@@ -67,12 +67,6 @@ export class Tag {
       .replace(/{diff}/g, this.link ?? '')
       .replace(/{stage}/g, Config.instance.stage ?? '')
       .replace(/{ticket}/g, this.ticket ?? '');
-  }
-
-  getPrTitle(branch: BaseBranchInfo) {
-    return this.ticket
-      ? `${this.ticket} - ${this.key}(${branch.name})`
-      : `${this.key}(${branch.name})`;
   }
 
   setLink(link?: string): Tag {

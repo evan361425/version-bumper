@@ -109,6 +109,7 @@ First Release
       },
       prInfo: {
         repo: 'example/example',
+        title: '{ticket} - {version}({stage})',
         template:
           'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
         branches: {

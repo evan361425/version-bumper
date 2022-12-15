@@ -12,6 +12,7 @@ import { error, info } from './logger.js';
 const DEFAULTS = {
   configFile: 'bumper.json',
   pr: {
+    title: '{ticket} - {version}({stage})',
     template: `This PR is auto-generated from bumper
 
 - ticket: {ticket}
@@ -151,6 +152,7 @@ export class Config {
       const d = DEFAULTS.pr;
       pr.repo = getConfig('pr_repo', pr.repo);
       pr.template = getConfig('pr_template', pr.template ?? d.template);
+      pr.title = getConfig('pr_title', pr.title ?? d.title);
 
       const file = getConfig('pr_template_file', pr.templateFile);
       if (file) {
@@ -455,6 +457,7 @@ type ChangelogInfo = {
 };
 type PRInfo = {
   repo: string;
+  title: string;
   template: string;
   templateFile: string;
   branches: Record<string, BranchInfo>;
