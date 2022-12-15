@@ -2,6 +2,7 @@
   "title": "Bumper JSON configuration",
   "$schema": "http://json-schema.org/draft-04/schema#",
 
+  "additionalProperties": false,
   "properties": {
     "repoLink": {
       "type": "string",
@@ -139,6 +140,7 @@
     },
     "tags": {
       "type": "object",
+      "additionalProperties": false,
       "title": "Tag 的設定",
       "patternProperties": {
         "^[a-zA-Z\\-_0-9]+$": {
@@ -174,12 +176,12 @@
           "title": "Tag 是否要去修改 Changelog",
           "description": "以逗號（,）做為區隔，有任一值則為 true"
         }
-      },
-      "additionalProperties": false
+      }
     },
     "pr": {
       "type": "object",
       "title": "PR 的設定",
+      "additionalProperties": false,
       "properties": {
         "repo": {
           "cliName": "prRepo",
@@ -203,6 +205,7 @@
         "branches": {
           "type": "object",
           "title": "PR 的分支管理",
+          "additionalProperties": false,
           "patternProperties": {
             "^[a-zA-Z\\-_0-9]+$": {
               "type": "object",
@@ -282,11 +285,9 @@
               "title": "做 PR 時的 labels",
               "description": "以逗號（,）做為區隔不同分支，\n再以空白（ ）區分不同 label，\n例如 `stag-label,prod-label1 prod-label2`"
             }
-          },
-          "additionalProperties": false
+          }
         }
-      },
-      "additionalProperties": false
+      }
     },
     "deps": {
       "type": "object",
