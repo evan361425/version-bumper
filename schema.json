@@ -110,7 +110,7 @@
         "^[a-zA-Z-]+$": {
           "type": "string",
           "title": "票號前綴對上連結模板",
-          "description": "只支援 a-z, A-Z 和 - 作為鍵，\n支援變數：\n<num> 來用做票號。例如 `TICKET-`（不分大小寫）對上 `https://example/ticket-<num>?k=v`，\n就會把 tIcKet-123 轉成 https://example/tIcKet-123?k=v"
+          "description": "只支援 a-z, A-Z 和 - 作為鍵，\n支援變數：\n{num} 來用做票號。例如 `TICKET-`（不分大小寫）對上 `https://example/ticket-{num}?k=v`，\n就會把 tIcKet-123 轉成 https://example/tIcKet-123?k=v"
         }
       },
       "cli": {
@@ -120,7 +120,7 @@
         },
         "autoLinkValues": {
           "title": "連結模板",
-          "description": "以逗號（,）做為區隔，\n照順序對應 `autoLinkKeys`，\n支援變數：\n<num> 來用做票號"
+          "description": "以逗號（,）做為區隔，\n照順序對應 `autoLinkKeys`，\n支援變數：\n{num} 來用做票號"
         }
       }
     },

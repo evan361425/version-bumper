@@ -33,8 +33,8 @@ describe('Bump version', function () {
       },
       files: { latestVersion: 'non-exit-file' },
       autoLinks: {
-        'ticket-': 'replace-<num>',
-        'sub-ticket-': 'replace-sub-<num>',
+        'ticket-': 'replace-{num}',
+        'sub-ticket-': 'replace-sub-{num}',
       },
       tags: {
         test: {
@@ -147,8 +147,8 @@ First Release
         file: 'docs/LATEST_VERSION.md',
       },
       autoLinks: {
-        'ticket-': 'replace-<num>',
-        'sub-ticket-': 'replace-sub-<num>',
+        'ticket-': 'replace-{num}',
+        'sub-ticket-': 'replace-sub-{num}',
       },
       releaseInfo: {
         draft: false,

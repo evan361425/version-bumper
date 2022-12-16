@@ -14,8 +14,8 @@ describe('Changelog', function () {
           'some test-123 other\n' +
           'some wrong-123 wrong',
         {
-          'evan-': 'test://go-to/evan-<num>',
-          'test-': 'test://go-to/test-<num>',
+          'evan-': 'test://go-to/evan-{num}',
+          'test-': 'test://go-to/test-{num}',
         },
       );
 

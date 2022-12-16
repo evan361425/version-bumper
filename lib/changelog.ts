@@ -138,7 +138,7 @@ export class Changelog {
       if (!isInLink) {
         info(`[auto-links] is not in link`);
         const rawLink = casedLinks[target.toLowerCase()];
-        const link = rawLink?.replace(/<num>/g, num ?? '');
+        const link = rawLink?.replace(/{num}/g, num ?? '');
         const origin = num ? target.concat(num) : target;
         result += `${prefix}[${origin}](${link})`;
       }
