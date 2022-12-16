@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.4.3] - 2022-12-16
+
+-   fix: auto-links using `{num}` instead of `<num>`
+
 ## [v0.4.2] - 2022-12-15
 
 -   feat: add PR title in configuration
@@ -54,7 +58,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.4.2...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.4.3...HEAD
+[v0.4.3]: https://github.com/evan361425/version-bumper/compare/v0.4.3...v0.4.2
 [v0.4.2]: https://github.com/evan361425/version-bumper/compare/v0.4.2...v0.4.1
 [v0.4.1]: https://github.com/evan361425/version-bumper/compare/v0.4.1...v0.4.0
 [v0.4.0]: https://github.com/evan361425/version-bumper/compare/v0.4.0...v0.3.0

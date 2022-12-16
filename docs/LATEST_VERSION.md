@@ -1,5 +1,5 @@
 ---
-version: v0.4.2
+version: v0.4.3
 ---
 
--   feat: add PR title in configuration
+-   fix: auto-links using `{num}` instead of `<num>`
