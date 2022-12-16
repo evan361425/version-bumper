@@ -200,6 +200,7 @@ First Release
 `,
       "[cmd]: git 'commit' '.' '-m' 'chore: bump to v1.0.2\nticket: TICKET-200\nstage: test' '--no-verify'",
       "[cmd]: git 'tag' 'v1.0.2' '-m' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
+      '[bump] Pushing commit and tag',
       "[cmd]: git 'push' '--no-verify'",
       "[cmd]: git 'push' '--tag' '--no-verify'",
       '[pr] Creating branch test in example/example (test-base -> test-head)',
@@ -226,6 +227,7 @@ First Release
         "'--reviewer' 'r1' '--reviewer' 'r2'",
         "'--label' 'label-1' '--label' 'label-2'",
       ].join(' '),
+      '[bump] Creating GitHub release',
       [
         "[cmd]: gh 'release' 'create'",
         "'--title' 'v1.0.2'",

@@ -38,6 +38,7 @@ export default async function () {
 
   // 把變動（含 tag）推上去
   if (!Config.instance.noPush) {
+    notice('[bump] Pushing commit and tag');
     await git('push', '--no-verify');
     await git('push', '--tag', '--no-verify');
   }
@@ -140,6 +141,7 @@ function createRelease(tag: Tag) {
   const args = ['--title', tag.key, '--notes', tag.parsedBody, tag.key];
   Config.instance.releaseInfo.preRelease && args.unshift('--prerelease');
   Config.instance.releaseInfo.draft && args.unshift('--draft');
+  notice('[bump] Creating GitHub release');
 
   // https://cli.github.com/manual/gh_release_create
   return gh('release', 'create', ...args);
