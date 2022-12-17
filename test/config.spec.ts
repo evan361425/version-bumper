@@ -187,6 +187,6 @@ describe('Config', function () {
       },
     } as unknown as Record<string, never>);
 
-    expect(config.prInfo.template).to.be.eq('pr template from file');
+    expect(config.prInfo.template).to.be.eq('some pr message');
   });
 });
