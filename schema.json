@@ -91,11 +91,13 @@
           "description": "會覆寫 `latestInfo.file` 中的 metadata"
         },
         "ticket": {
+          "cliName": "latestTicket",
           "type": "string",
           "title": "最新票號",
           "description": "會覆寫 `latestInfo.file` 中的 metadata"
         },
         "content": {
+          "cliName": "latestContent",
           "type": "string",
           "title": "最新版本的內文",
           "description": "會覆寫 `latestInfo.file` 中的內文"
@@ -205,13 +207,13 @@
           "cliName": "prTemplate",
           "type": "string",
           "default": "This PR is auto-generated from bumper\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}",
-          "title": "PR 範本",
+          "title": "PR 範本，優先權高於 `prTemplateFile`",
           "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
         },
         "templateFile": {
           "cliName": "prTemplateFile",
           "type": "string",
-          "title": "PR 範本的位置，優先權高於 `prTemplate`",
+          "title": "PR 範本的位置",
           "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
         },
         "branches": {
