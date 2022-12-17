@@ -203,7 +203,7 @@ First Release
       '[bump] Pushing commit and tag',
       "[cmd]: git 'push' '--no-verify'",
       "[cmd]: git 'push' '--tag' '--no-verify'",
-      '[pr] Creating branch test in example/example (test-base -> test-head)',
+      '[pr] Creating branch test in example/example (test-head -> test-base)',
       [
         "[cmd]: gh 'pr' 'create'",
         "'--title' 'TICKET-200 - v1.0.2(test)'",
@@ -215,7 +215,7 @@ First Release
         "'--reviewer' 'r1' '--reviewer' 'r2'",
         "'--label' 'label-1' '--label' 'label-2'",
       ].join(' '),
-      '[pr] Creating branch dr in example/example (test-base -> deploy/dr)',
+      '[pr] Creating branch dr in example/example (deploy/dr -> test-base)',
       [
         "[cmd]: gh 'pr' 'create'",
         "'--title' 'TICKET-200 - v1.0.2(dr)'",

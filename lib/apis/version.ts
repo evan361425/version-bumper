@@ -1,7 +1,7 @@
 import { Changelog } from '../changelog.js';
 import { BaseBranchInfo, Config } from '../config.js';
 import { gh, git, npm, writeFile } from '../helper.js';
-import { notice } from '../logger.js';
+import { error, notice } from '../logger.js';
 import { Tag } from '../tag.js';
 
 export default async function () {
@@ -99,7 +99,7 @@ async function createPRs(tag: Tag) {
   }
 }
 
-async function createPR(tag: Tag, b: BaseBranchInfo) {
+function createPR(tag: Tag, b: BaseBranchInfo) {
   const repo = Config.instance.prInfo.repo;
   const temp = Config.instance.prInfo.template;
   const title = Config.instance.prInfo.title
@@ -114,7 +114,7 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     .replace(/{diff}/g, tag.link ?? '')
     .concat(`\n\n${tag.toLink()}`);
 
-  notice(`[pr] Creating branch ${b.name} in ${repo} (${b.base} -> ${b.head})`);
+  notice(`[pr] Creating branch ${b.name} in ${repo} (${b.head} -> ${b.base})`);
 
   // https://cli.github.com/manual/gh_pr_create
   return gh(
@@ -134,7 +134,7 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     Config.instance.prInfo.repo,
     ...b.reviewers.map((reviewer) => ['--reviewer', reviewer]).flat(),
     ...(b.labels.map((label) => ['--label', label]).flat() ?? []),
-  );
+  ).catch((e) => error(e));
 }
 
 function createRelease(tag: Tag) {
