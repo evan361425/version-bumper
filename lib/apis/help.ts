@@ -74,6 +74,7 @@ function printArgsFromSchema(command: string) {
     schema = schema.properties.deps;
   } else {
     delete schema.properties.deps;
+    delete schema.properties['$schema'];
     options['stage'] = {
       title: '你可以指定要使用的 Tag',
       type: 'string',

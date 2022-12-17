@@ -150,15 +150,17 @@ export class Config {
     function getPRInfo(): PRInfo {
       const pr: Partial<PRInfo> = config['pr'] ?? {};
       const d = DEFAULTS.pr;
-      pr.repo = getConfig('pr_repo', pr.repo);
-      pr.template = getConfig('pr_template', pr.template ?? d.template);
-      pr.title = getConfig('pr_title', pr.title ?? d.title);
 
       const file = getConfig('pr_template_file', pr.templateFile);
+      let dTemplate = d.template;
       if (file) {
         const content = readFile(file);
-        pr.template = content ? content : pr.template;
+        dTemplate = content ? content : dTemplate;
       }
+
+      pr.repo = getConfig('pr_repo', pr.repo);
+      pr.template = getConfig('pr_template', pr.template ?? dTemplate);
+      pr.title = getConfig('pr_title', pr.title ?? d.title);
 
       const names = stf(getConfig('branch_names'));
       const heads = stf(getConfig('branch_heads'));

@@ -136,6 +136,17 @@ You can start by `bumper init` or write it yourself, for example:
 }
 ```
 
+### Priority
+
+Arguments can be sent in environment/command/file (detail in `bumper <command> -h`),
+and the highest priority will be the environment variables.
+
+The lowest priority will be argument in config file.
+
+```txt
+Env > Command > Configuration file
+```
+
 ## Changelog
 
 Changelog using bellow format:
