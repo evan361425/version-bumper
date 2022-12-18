@@ -106,13 +106,16 @@ function createPR(tag: Tag, b: BaseBranchInfo) {
     .replace(/{version}/g, tag.key)
     .replace(/{ticket}/g, tag.ticket ?? '')
     .replace(/{stage}/g, b.name);
-  const body = temp
-    .replace(/{stage}/g, b.name)
-    .replace(/{ticket}/g, tag.ticket ?? '')
-    .replace(/{version}/g, tag.key)
-    .replace(/{content}/g, tag.toString())
-    .replace(/{diff}/g, tag.link ?? '')
-    .concat(`\n\n${tag.toLink()}`);
+  const body = Changelog.fitAutoLinks(
+    temp
+      .replace(/{stage}/g, b.name)
+      .replace(/{ticket}/g, tag.ticket ?? '')
+      .replace(/{version}/g, tag.key)
+      .replace(/{content}/g, tag.toString())
+      .replace(/{diff}/g, tag.link ?? '')
+      .concat(`\n\n${tag.toLink()}`),
+    Config.instance.autoLinks,
+  );
 
   notice(`[pr] Creating branch ${b.name} in ${repo} (${b.head} -> ${b.base})`);
 
