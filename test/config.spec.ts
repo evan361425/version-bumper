@@ -207,6 +207,7 @@ describe('Config', function () {
 
   it('setup latest content by diff commits', async function () {
     Sinon.stub(console, 'log');
+    setEnv('latest_version', 'latest');
     setEnv('latest_diff_enable', 'true');
     setEnv('latest_content', 'shouldNotShow');
     mockCommand(Promise.resolve('tag'));
@@ -240,6 +241,7 @@ describe('Config', function () {
 
   it('use allowed diff commits', async function () {
     Sinon.stub(console, 'log');
+    setEnv('latest_version', 'latest');
     setEnv('latest_diff_enable', 'true');
     setEnv('latest_diff_allowed', 'abc, def');
     mockCommand(Promise.resolve('tag'));

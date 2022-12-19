@@ -112,9 +112,12 @@ export class Config {
     function getChangelogInfo() {
       const ch: Partial<ChangelogInfo> = config['changelog'] ?? {};
       const d = DEFAULTS.changelog;
-      ch.commitMessage = getConfig('changelog_commit_message', d.commitMessage);
+      ch.commitMessage = getConfig(
+        'changelog_commit_message',
+        ch.commitMessage ?? d.commitMessage,
+      );
       ch.disable = getBoolConfig('changelog_disable', ch.disable);
-      ch.file = getConfig('changelog_file', d.file);
+      ch.file = getConfig('changelog_file', ch.file ?? d.file);
       ch.header = getConfig('changelog_header', ch.header ?? d.header);
       ch.template = getConfig('changelog_template', ch.template ?? d.template);
 
