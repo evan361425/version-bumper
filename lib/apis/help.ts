@@ -7,6 +7,8 @@ const commands: Record<string, string> = {
   help: '顯示此訊息',
   init: '初始化專案',
 };
+const allowedTypes = ['array', 'number', 'string', 'boolean'];
+const arrayPrefix = '以逗號（,）做為區隔';
 
 type ItemSchema = {
   title: string;
@@ -122,8 +124,25 @@ function* parseObject(
   for (const key in obj) {
     if (typeof obj[key] === 'object') {
       const child = obj[key] as Record<string, never>;
-      if (['number', 'string', 'boolean'].includes(child['type'] ?? '')) {
-        yield [child['cliName'] ?? key, child as unknown as ItemSchema];
+
+      if (Array.isArray(child['type'])) {
+        child['type'] = 'array' as never;
+      }
+
+      if (allowedTypes.includes(child['type'] ?? '')) {
+        if (child['type'] === 'array') {
+          const d = child['description'];
+          child['type'] = 'string' as never;
+          child['description'] = (
+            d ? arrayPrefix + '\n' + d : arrayPrefix
+          ) as never;
+        }
+
+        const k = child['cliName'] ?? key;
+
+        if (k) {
+          yield [k, child as unknown as ItemSchema];
+        }
       } else if (typeof child === 'object') {
         yield* parseObject(child);
       }

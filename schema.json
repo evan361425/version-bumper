@@ -307,25 +307,30 @@
           },
           "cli": {
             "branchNames": {
+              "type": "array",
               "title": "分支名稱",
-              "description": "以逗號（,）做為區隔，必須每個都有值\n需要和 Tag 的名稱對齊"
+              "description": "必須每個都有值且會和 Tag 的名稱對齊"
             },
             "branchBases": {
-              "title": "做 PR 時的來源分支",
-              "description": "以逗號（,）做為區隔，必須每個都有值"
+              "type": "array",
+              "title": "做 PR 時的目標分支",
+              "description": "必須每個都有值\n例如 `production` 的 base 可能為 `deploy/production`"
             },
             "branchHeads": {
-              "title": "做 PR 時的目標分支",
+              "type": "array",
+              "title": "做 PR 時的來源分支",
               "default": "deploy/{name}",
-              "description": "以逗號（,）做為區隔"
+              "description": "例如 `production` 的 head 可能為 `deploy/staging`"
             },
             "branchReviewers": {
+              "type": "array",
               "title": "做 PR 時的 reviewers",
-              "description": "以逗號（,）做為區隔不同分支，\n再以斜線（/）區分不同 reviewer，\n例如 `stag-rev,prod-rev1/prod-rev2`"
+              "description": "再以斜線（/）區分不同 reviewer，\n例如 `stag-rev,prod-rev1/prod-rev2`"
             },
             "branchLabels": {
+              "type": "array",
               "title": "做 PR 時的 labels",
-              "description": "以逗號（,）做為區隔不同分支，\n再以空白（ ）區分不同 label，\n例如 `stag-label,prod-label1 prod-label2`"
+              "description": "再以空白（ ）區分不同 label，\n例如 `stag-label,prod-label1 prod-label2`"
             }
           }
         }
@@ -339,17 +344,11 @@
         "ignored": {
           "type": "array",
           "title": "忽略哪些相依套件",
-          "description": "套件全名或者以 `*` 結尾代表以此開頭的套件",
+          "description": "各值為套件全名或者以 `*` 結尾代表以此開頭的套件",
           "uniqueItems": true,
           "items": {
             "type": "string",
             "title": "套件名稱"
-          },
-          "cli": {
-            "ignored": {
-              "title": "忽略哪些相依套件",
-              "description": "以逗號（,）做為區隔，\n各值為套件全名或者以 `*` 結尾代表以此開頭的套件"
-            }
           }
         },
         "outputFile": {
@@ -375,12 +374,6 @@
           "items": {
             "type": "string",
             "title": "套件名稱"
-          },
-          "cli": {
-            "latestDeps": {
-              "title": "使用 latest 的版本而不是 wanted 的套件",
-              "description": "以逗號（,）做為區隔，\n各值為套件全名或者以 `*` 結尾代表以此開頭的套件\n若陣列中有一個值為 `*` 代表全部的套件都使用 latestDeps"
-            }
           }
         },
         "preCommands": {
@@ -392,12 +385,6 @@
             "title": "若為陣列，則每個值代表該指令的參數",
             "items": {
               "type": "string"
-            }
-          },
-          "cli": {
-            "preCommands": {
-              "title": "在安裝套件前的指令",
-              "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令\n支援的變數有：name, current, target"
             }
           }
         },
@@ -411,12 +398,6 @@
             "items": {
               "type": "string"
             }
-          },
-          "cli": {
-            "postCommands": {
-              "title": "在安裝套件後的指令",
-              "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令\n支援的變數有：name, current, target"
-            }
           }
         },
         "dev": {
@@ -426,11 +407,13 @@
           "properties": {
             "oneByOne": {
               "type": "boolean",
+              "cliName": "oneByOne",
               "default": false,
               "title": "更新開發套件時是否一次只更新一個套件"
             },
             "preCommands": {
               "type": "array",
+              "cliName": "",
               "title": "在安裝開發套件前的指令",
               "description": "預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
               "items": {
@@ -439,17 +422,11 @@
                 "items": {
                   "type": "string"
                 }
-              },
-              "cli": {
-                "devPreCommands": {
-                  "title": "在安裝開發套件前的指令",
-                  "default": "使用 `deps.preCommands`",
-                  "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令\n支援的變數有：name, current, target"
-                }
               }
             },
             "postCommands": {
               "type": "array",
+              "cliName": "",
               "title": "在安裝開發套件後的指令",
               "description": "預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
               "items": {
@@ -457,13 +434,6 @@
                 "title": "若為陣列，則每個值代表該指令的參數",
                 "items": {
                   "type": "string"
-                }
-              },
-              "cli": {
-                "devPostCommands": {
-                  "title": "在安裝開發套件後的指令",
-                  "default": "使用 `deps.postCommands`",
-                  "description": "以逗號（,）做為區隔，\n各值代表一個 sub-process 的指令\n支援的變數有：name, current, target"
                 }
               }
             }

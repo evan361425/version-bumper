@@ -296,8 +296,8 @@ export class Config {
       const d = dev as Record<string, never>;
 
       dev.oneByOne = getBoolConfig('one_by_one', undefined, d);
-      dev.preCommands = getListConfig('pre_commands', d) ?? pre;
-      dev.postCommands = getListConfig('post_commands', d) ?? post;
+      dev.preCommands = dev.preCommands ?? pre;
+      dev.postCommands = dev.postCommands ?? post;
 
       return dev as DevInfo;
     }
