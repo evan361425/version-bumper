@@ -80,17 +80,17 @@
         "version": {
           "cliName": "latestVersion",
           "type": "string",
-          "description": "最新版本號，\n會覆寫 #{LatestInfo} #LatestInfo **LatestInfo.file** 中的 metadata"
+          "description": "最新版本號，\n會覆寫 **LatestInfo.file** 中的 metadata"
         },
         "ticket": {
           "cliName": "latestTicket",
           "type": "string",
-          "description": "最新票號\n會覆寫 `LatestInfo.file` 中的 metadata"
+          "description": "最新票號\n會覆寫 **LatestInfo.file** 中的 metadata"
         },
         "content": {
           "cliName": "latestContent",
           "type": "string",
-          "description": "最新版本的內文，會覆寫 `LatestInfo.file` 中的內文"
+          "description": "最新版本的內文，會覆寫 **LatestInfo.file** 中的內文"
         },
         "diff": {
           "type": "object",
@@ -350,7 +350,7 @@
         "appendOnly": {
           "type": "boolean",
           "default": false,
-          "description": "更新檔案至 `deps.outputFile` 時，用附加的方式"
+          "description": "更新檔案至 **DepsInfo.outputFile** 時，用附加的方式"
         },
         "useExact": {
           "type": "boolean",
@@ -404,7 +404,7 @@
             "preCommands": {
               "type": "array",
               "cliName": "",
-              "description": "在安裝開發套件前的指令，\n預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
+              "description": "在安裝開發套件前的指令，\n預設使用 **DepsInfo.preCommands**，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
               "items": {
                 "type": ["string", "array"],
                 "title": "若為陣列，則每個值代表該指令的參數",
@@ -416,7 +416,7 @@
             "postCommands": {
               "type": "array",
               "cliName": "",
-              "description": "在安裝開發套件後的指令，\n預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
+              "description": "在安裝開發套件後的指令，\n預設使用 **DepsInfo.postCommands**，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
               "items": {
                 "type": ["string", "array"],
                 "title": "若為陣列，則每個值代表該指令的參數",
