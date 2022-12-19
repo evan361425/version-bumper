@@ -10,7 +10,8 @@ Please check git diff.
 
 ## [v0.5.0] - 2022-12-19
 
--   (400ba0f) feat: allow using diff for latest info - Shueh Chou Lu
+-   ([400ba0f](https://github.com/evan361425/version-bumper/commit/400ba0fd9dc4a6b5e3b76597823fb0e83739aeaa)) feat: allow using diff for latest info - Shueh Chou Lu
+-   ([f7e1b59](https://github.com/evan361425/version-bumper/commit/f7e1b59d5167b5e51b384bf774103a67e238f4d9)) fix: respect commit message in changelog - Shueh Chou Lu
 
 ## [v0.4.5] - 2022-12-18
 

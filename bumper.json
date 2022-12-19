@@ -5,7 +5,7 @@
     "draft": true
   },
   "changelog": {
-    "commitMessage": "chore: bump to {version}\n\nstage: {stage}",
+    "commitMessage": "chore: bump to {version}",
     "template": "{content}"
   },
   "latestInfo": {
