@@ -68,7 +68,8 @@
     "latestInfo": {
       "type": "object",
       "additionalProperties": false,
-      "title": "最新版本的資訊",
+      "title": "latestInfo",
+      "description": "最新版本的資訊",
       "properties": {
         "file": {
           "cliName": "latestFile",
@@ -79,7 +80,7 @@
         "version": {
           "cliName": "latestVersion",
           "type": "string",
-          "description": "最新版本號，\n會覆寫 ${最新版本的資訊}.file 中的 metadata"
+          "description": "最新版本號，\n會覆寫 $latestInfo ${latestInfo} 中的 metadata"
         },
         "ticket": {
           "cliName": "latestTicket",
@@ -93,8 +94,8 @@
         },
         "diff": {
           "type": "object",
-          "title": "使用 Git Diff 來作為新版內文",
-          "description": "會覆寫 `content` 和 `file` 中的內文，\n但先後順序仍是`環境變數`和`指令`大於設定檔",
+          "title": "LatestDiffInfo",
+          "description": "使用 Git Diff 來作為新版內文，\n會覆寫 `content` 和 `file` 中的內文，\n但先後順序仍是`環境變數`和`指令`大於設定檔",
           "additionalProperties": false,
           "properties": {
             "enable": {
@@ -122,8 +123,8 @@
     "autoLinks": {
       "type": "object",
       "additionalProperties": false,
-      "title": "用來對票號自動補上連結",
-      "description": "只支援 a-z, A-Z 和 - 作為鍵，\n支援變數：\n票號：`num`。\n例如 `TICKET-`（不分大小寫）對上 `https://example/ticket-{num}?k=v`，\n就會把 `tIcKet-123` 轉成 `https://example/tIcKet-123?k=v`",
+      "title": "AutoLinksInfo",
+      "description": "用來對票號自動補上連結，只支援 a-z, A-Z 和 - 作為鍵，\n支援變數：\n票號：`num`。\n例如 `TICKET-`（不分大小寫）對上 `https://example/ticket-{num}?k=v`，\n就會把 `tIcKet-123` 轉成 `https://example/tIcKet-123?k=v`",
       "patternProperties": {
         "^[a-zA-Z-]+$": {
           "type": "string",
@@ -147,7 +148,8 @@
     "release": {
       "type": "object",
       "additionalProperties": false,
-      "title": "GitHub Release 設定",
+      "title": "ReleaseInfo",
+      "description": "GitHub Release 設定",
       "properties": {
         "preRelease": {
           "cliName": "releasePre",
@@ -166,12 +168,14 @@
     "tags": {
       "type": "object",
       "additionalProperties": false,
-      "title": "多個 Tag 的設定",
+      "title": "TagsInfo",
+      "description": "多個 Tag 的設定",
       "patternProperties": {
         "^[a-zA-Z\\-_0-9]+$": {
           "type": "object",
           "additionalProperties": false,
-          "title": "Tag 的設定",
+          "title": "TagInfo",
+          "description": "Tag 的設定",
           "required": ["pattern"],
           "properties": {
             "pattern": {
@@ -203,7 +207,8 @@
     },
     "pr": {
       "type": "object",
-      "title": "PR 的設定",
+      "title": "PRInfo",
+      "description": "PR 的設定",
       "additionalProperties": false,
       "properties": {
         "repo": {
@@ -230,14 +235,15 @@
         },
         "branches": {
           "type": "object",
-          "title": "PR 的分支管理",
+          "title": "PRBranchesInfo",
+          "description": "PR 的分支管理",
           "additionalProperties": false,
           "patternProperties": {
             "^[a-zA-Z\\-_0-9]+$": {
               "type": "object",
               "additionalProperties": false,
-              "title": "分支設定",
-              "description": "和 ${Tag 的設定} 對齊",
+              "title": "PRBranchInfo",
+              "description": "分支設定，和 `TagInfo` 的鍵對齊",
               "required": ["base"],
               "properties": {
                 "base": {
@@ -265,12 +271,12 @@
                 },
                 "siblings": {
                   "type": "object",
-                  "title": "發 PR 時會一起發的額外 PR",
-                  "description": "這是為了 DR 環境而設計的，例如線上環境要同時開 DR 的 PR\n其設定會繼承所有父系設定",
+                  "title": "PRBranchSiblingsInfo",
+                  "description": "發 PR 時會一起發的額外 PR，\n這是為了 DR 環境而設計的，例如線上環境要同時開 DR 的 PR\n其設定會繼承所有父系設定",
                   "patternProperties": {
                     "[a-zA-Z\\-_/0-9]": {
                       "type": "object",
-                      "title": "分支設定",
+                      "title": "PRBranchInfo",
                       "properties": {
                         "base": { "type": "string", "title": "來源分支" },
                         "head": { "type": "string", "title": "目標分支" },
@@ -324,7 +330,8 @@
     },
     "deps": {
       "type": "object",
-      "title": "更新套件相關設定",
+      "title": "DepsInfo",
+      "description": "更新套件相關設定",
       "additionalProperties": false,
       "properties": {
         "ignored": {
@@ -338,7 +345,7 @@
         },
         "outputFile": {
           "type": "string",
-          "description": "更新時，版本資訊的寫入位置，\nMarkdown 格式，\n若無，則會輸出到 `stdout`"
+          "description": "更新時，版本資訊的寫入位置，\n*Markdown* 格式，\n若無，則會輸出到 `stdout`"
         },
         "appendOnly": {
           "type": "boolean",
@@ -384,7 +391,8 @@
         },
         "dev": {
           "type": "object",
-          "title": "用來設定開發相依套件的升版設定",
+          "title": "DepsDevInfo",
+          "description": "用來設定開發相依套件的升版設定",
           "additionalProperties": false,
           "properties": {
             "oneByOne": {
