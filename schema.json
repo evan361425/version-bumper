@@ -68,7 +68,7 @@
     "latestInfo": {
       "type": "object",
       "additionalProperties": false,
-      "title": "latestInfo",
+      "title": "LatestInfo",
       "description": "最新版本的資訊",
       "properties": {
         "file": {
@@ -80,17 +80,17 @@
         "version": {
           "cliName": "latestVersion",
           "type": "string",
-          "description": "最新版本號，\n會覆寫 $latestInfo ${latestInfo} 中的 metadata"
+          "description": "最新版本號，\n會覆寫 #{LatestInfo} #LatestInfo **LatestInfo.file** 中的 metadata"
         },
         "ticket": {
           "cliName": "latestTicket",
           "type": "string",
-          "description": "最新票號\n會覆寫 `latestInfo.file` 中的 metadata"
+          "description": "最新票號\n會覆寫 `LatestInfo.file` 中的 metadata"
         },
         "content": {
           "cliName": "latestContent",
           "type": "string",
-          "description": "最新版本的內文，會覆寫 `latestInfo.file` 中的內文"
+          "description": "最新版本的內文，會覆寫 `LatestInfo.file` 中的內文"
         },
         "diff": {
           "type": "object",
