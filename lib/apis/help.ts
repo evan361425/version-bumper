@@ -11,7 +11,7 @@ const allowedTypes = ['array', 'number', 'string', 'boolean'];
 const arrayPrefix = '以逗號（,）做為區隔';
 
 type ItemSchema = {
-  title: string;
+  title?: string;
   default?: string | boolean;
   type?: string;
   underlineKey: string;
@@ -103,8 +103,8 @@ function printArgsFromSchema(command: string) {
     const def = meta.default ? '預設：' + meta.default.toString() : null;
     const env = '環境變數：BUMPER_' + meta.underlineKey.toUpperCase();
 
-    console.log(PREFIX + prefix + ' ' + meta.title);
-    desc && console.log(descSpaces + desc);
+    console.log(PREFIX + prefix + ' ' + (meta.title ?? desc));
+    meta.title && desc && console.log(descSpaces + desc);
     typ && console.log(PREFIX + ' '.repeat(prefix.length - 5) + typ);
     def && console.log(PREFIX + ' '.repeat(prefix.length - 5) + def);
     console.log(PREFIX + ' '.repeat(prefix.length - 9) + env);

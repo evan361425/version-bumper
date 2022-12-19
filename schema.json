@@ -6,68 +6,62 @@
   "properties": {
     "$schema": {
       "type": "string",
-      "title": "Bumper schema",
-      "description": "如果你不想看到相對路徑，請把本套件安裝到開發套件中。\n然後執行 npx bumper init"
+      "description": "Bumper schema，\n如果你不想看到相對路徑，請把本套件安裝到開發套件中。\n然後執行 npx bumper init"
     },
     "repoLink": {
       "type": "string",
-      "title": "Changelog 中會作為 tag 的連結",
-      "description": "預設使用 `git remote get-url origin` 的輸出，\n若無則為 `https://github.com/example/example`"
+      "description": "Changelog 中會作為 tag 的連結，\n預設使用 `git remote get-url origin` 的輸出，\n若無則為 `https://github.com/example/example`"
     },
     "prOnly": {
       "type": "boolean",
       "default": false,
-      "title": "根據設定只建立 PR 而不做任何升版",
-      "description": "通常需要重新建立 PR 的時候會用到"
+      "description": "根據設定只建立 PR 而不做任何升版，\n通常需要重新建立 PR 的時候會用到"
     },
     "releaseOnly": {
       "type": "boolean",
       "default": false,
-      "title": "根據設定只建立 Release 而不做任何升版",
-      "description": "只會建立 pre-release"
+      "description": "根據設定只建立 Release 而不做任何升版"
     },
     "noPush": {
       "type": "boolean",
       "default": false,
-      "title": "是否把 Tag 和 Commit 推至 remote repo"
+      "description": "是否把 Tag 和 Commit 推至 remote repo"
     },
     "changelog": {
       "type": "object",
       "additionalProperties": false,
-      "title": "針對 Changelog 的設定",
+      "title": "ChangelogInfo",
+      "description": "針對 Changelog 的設定",
       "properties": {
         "disable": {
           "cliName": "changelogDisable",
           "type": "boolean",
           "default": false,
-          "title": "不對 Changelog 做任何事"
+          "description": "不對 Changelog 做任何事"
         },
         "file": {
           "cliName": "changelogFile",
           "type": "string",
           "default": "CHANGELOG.md",
-          "title": "Changelog 位置"
+          "description": "Changelog 位置"
         },
         "template": {
           "cliName": "changelogTemplate",
           "type": "string",
           "default": "票號：{ticket}\n\n{content}",
-          "title": "Changelog 每次 tag 的範本",
-          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
+          "description": "Tag 更新的範本，\n支援的變數有：\n版本：`version`、票號：`ticket`、環境：`stage`\n最新內文：`content`、差異連結：`diff`"
         },
         "header": {
           "cliName": "changelogHeader",
           "type": "string",
           "default": "# Changelog\n\n所有本專案的版本紀錄將於此說明之\n\n文件依照 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 內所描述的格式撰寫，版本號碼依照 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。",
-          "title": "Changelog 的標題",
-          "description": "在這之後就是 unreleased 的資訊。"
+          "description": "Changelog 的標題，\n在這之後就是 unreleased 的資訊。"
         },
         "commitMessage": {
           "cliName": "changelogCommitMessage",
           "type": "string",
           "default": "chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}",
-          "title": "修改 changelog 後 commit 訊息",
-          "description": "支援的變數有：\n版本：`version`、票號：`ticket`、環境：`stage`"
+          "description": "修改 changelog 後 commit 訊息，\n支援的變數有：\n版本：`version`、票號：`ticket`、環境：`stage`"
         }
       }
     },
@@ -80,54 +74,48 @@
           "cliName": "latestFile",
           "type": "string",
           "default": "docs/LATEST_VERSION.md",
-          "title": "最新版本的範本位置",
-          "description": "Markdown 格式\n支援的 metadata 有：\n版本：`version`、票號：`ticket`"
+          "description": "最新版本的範本位置，\n*Markdown* 格式\n支援的 metadata 有：\n版本：`version`、票號：`ticket`"
         },
         "version": {
           "cliName": "latestVersion",
           "type": "string",
-          "title": "最新版本號",
-          "description": "會覆寫 [latestInfo.file] 中的 metadata"
+          "description": "最新版本號，\n會覆寫 ${最新版本的資訊}.file 中的 metadata"
         },
         "ticket": {
           "cliName": "latestTicket",
           "type": "string",
-          "title": "最新票號",
-          "description": "會覆寫 `latestInfo.file` 中的 metadata"
+          "description": "最新票號\n會覆寫 `latestInfo.file` 中的 metadata"
         },
         "content": {
           "cliName": "latestContent",
           "type": "string",
-          "title": "最新版本的內文",
-          "description": "會覆寫 `latestInfo.file` 中的內文"
+          "description": "最新版本的內文，會覆寫 `latestInfo.file` 中的內文"
         },
         "diff": {
           "type": "object",
           "title": "使用 Git Diff 來作為新版內文",
+          "description": "會覆寫 `content` 和 `file` 中的內文，\n但先後順序仍是`環境變數`和`指令`大於設定檔",
           "additionalProperties": false,
           "properties": {
             "enable": {
               "type": "boolean",
               "cliName": "latestDiffEnable",
               "default": false,
-              "title": "是否使用 Diff 來做新版內文"
+              "description": "是否使用 Diff 來做新版內文"
             },
             "allowed": {
               "type": "array",
               "cliName": "latestDiffAllowed",
-              "title": "允許的前綴，若無則所有 Commit 都會被使用",
-              "description": "`latestDiffIgnored` 會優先使用",
+              "description": "允許的前綴，若無則所有 Commit 都會被使用，\n`latestDiffIgnored` 會優先使用",
               "items": { "type": "string" }
             },
             "ignored": {
               "type": "array",
               "cliName": "latestDiffIgnored",
-              "title": "忽略的前綴",
-              "description": "凡是 commit 的標題前綴於特定字眼，就忽略他",
+              "description": "忽略的前綴，\n凡是 commit 的標題前綴於特定字眼，就忽略他",
               "items": { "type": "string" }
             }
-          },
-          "description": "會覆寫 `content` 和 `file` 中的內文，\n但先後順序仍是`環境變數`和`指令`大於設定檔"
+          }
         }
       }
     },
@@ -159,19 +147,19 @@
     "release": {
       "type": "object",
       "additionalProperties": false,
-      "title": "用來設定 GitHub Release",
+      "title": "GitHub Release 設定",
       "properties": {
         "preRelease": {
           "cliName": "releasePre",
           "type": "boolean",
           "default": false,
-          "title": "在 `gh` 指令中增加 `--pre-release`"
+          "description": "在 `gh` 指令中增加 `--pre-release`"
         },
         "draft": {
           "cliName": "releaseDraft",
           "type": "boolean",
           "default": false,
-          "title": "在 `gh` 指令中增加 `--draft`"
+          "description": "在 `gh` 指令中增加 `--draft`"
         }
       }
     },
@@ -188,14 +176,12 @@
           "properties": {
             "pattern": {
               "type": "string",
-              "title": "這個 Tag 對應的版本號模式",
-              "description": "會使用 `latestVersion` 來最為版本資訊，\n例如 staging 環境的標籤模式可能為 `v\\d+.\\d+.\\d+-rc\\d*`"
+              "description": "這個 Tag 對應的版本號模式，\n會使用 `latestVersion` 來最為版本資訊，\n例如 staging 環境的標籤模式可能為 `v\\d+.\\d+.\\d+-rc\\d*`"
             },
             "changelog": {
               "type": "boolean",
               "default": false,
-              "title": "當這個 Tag 被觸發時，修改 Changelog",
-              "description": "如果 `prOnly` 為是，則不會去改 Changelog"
+              "description": "當這個 Tag 被觸發時，是否修改 Changelog，\n如果 `prOnly` 為是，則不會去改 Changelog"
             }
           }
         }
@@ -223,27 +209,24 @@
         "repo": {
           "cliName": "prRepo",
           "type": "string",
-          "title": "要開 PR 的 Repo",
-          "description": "預設是用 `repoLink` 的值，\n例如：`example/example`"
+          "description": "要開 PR 的 Repo，\n預設是用 `repoLink` 的值，\n例如：`example/example`"
         },
         "title": {
           "cliName": "prTitle",
           "type": "string",
           "default": "{ticket} - {version}({stage})",
-          "title": "PR 標題",
-          "description": "支援的變數有：\n版本：`version`、版號：`ticket`、環境：`stage`"
+          "description": "PR 標題，\n支援的變數有：\n版本：`version`、版號：`ticket`、環境：`stage`"
         },
         "template": {
           "cliName": "prTemplate",
           "type": "string",
           "default": "This PR is auto-generated from bumper\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}",
-          "title": "PR 範本，優先權高於 `prTemplateFile`",
-          "description": "支援的變數有：\n版本：`version`、票號：`ticket`、環境：`stage`、\n最新內文：`content`、差異連結：`diff`"
+          "description": "PR 範本，優先權高於 `prTemplateFile`，\n支援的變數有：\n版本：`version`、票號：`ticket`、環境：`stage`、\n最新內文：`content`、差異連結：`diff`"
         },
         "templateFile": {
           "cliName": "prTemplateFile",
           "type": "string",
-          "title": "PR 範本的位置"
+          "description": "PR 範本的位置，\n支援的變數和 `template` 相同"
         },
         "branches": {
           "type": "object",
@@ -253,48 +236,19 @@
             "^[a-zA-Z\\-_0-9]+$": {
               "type": "object",
               "additionalProperties": false,
-              "title": "分支名稱，和 [Tag 的設定] 對齊",
+              "title": "分支設定",
+              "description": "和 ${Tag 的設定} 對齊",
               "required": ["base"],
               "properties": {
                 "base": {
                   "type": "string",
-                  "title": "做 PR 時的目標分支",
-                  "description": "需要為 git 上的名稱，\n例如 `production` 的 base 可能為 `deploy/production`"
+                  "description": "做 PR 時的目標分支，\n需要為 git 上的名稱，\n例如 `production` 的 base 可能為 `deploy/production`"
                 },
                 "head": {
                   "type": "string",
                   "title": "做 PR 時的來源分支",
                   "default": "deploy/{name}",
-                  "description": "需要為 git 上的名稱，\n例如 `production` 的 head 可能為 `deploy/staging`"
-                },
-                "reviewers": {
-                  "type": "array",
-                  "uniqueItems": true,
-                  "items": { "type": "string" },
-                  "title": "發 PR 時的 reviewers",
-                  "description": "不可以重複"
-                },
-                "siblings": {
-                  "type": "object",
-                  "patternProperties": {
-                    "[a-zA-Z\\-_/0-9]": {
-                      "type": "object",
-                      "properties": {
-                        "base": { "type": "string" },
-                        "head": { "type": "string" },
-                        "labels": {
-                          "type": "array",
-                          "items": { "type": "string" }
-                        },
-                        "reviewers": {
-                          "type": "array",
-                          "items": { "type": "string" }
-                        }
-                      }
-                    }
-                  },
-                  "title": "發 PR 時會一起發的額外 PR",
-                  "description": "這是為了 DR 環境而設計的，例如線上環境要同時開 DR 的 PR\n其設定會繼承所有父系設定"
+                  "description": "做 PR 時的來源分支，\n需要為 git 上的名稱，\n例如 `production` 的 head 可能為 `deploy/staging`"
                 },
                 "labels": {
                   "type": "array",
@@ -302,6 +256,37 @@
                   "items": { "type": "string" },
                   "title": "發 PR 時的 labels",
                   "description": "不可以重複"
+                },
+                "reviewers": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "type": "string" },
+                  "description": "發 PR 時的 reviewers，\n不可以重複"
+                },
+                "siblings": {
+                  "type": "object",
+                  "title": "發 PR 時會一起發的額外 PR",
+                  "description": "這是為了 DR 環境而設計的，例如線上環境要同時開 DR 的 PR\n其設定會繼承所有父系設定",
+                  "patternProperties": {
+                    "[a-zA-Z\\-_/0-9]": {
+                      "type": "object",
+                      "title": "分支設定",
+                      "properties": {
+                        "base": { "type": "string", "title": "來源分支" },
+                        "head": { "type": "string", "title": "目標分支" },
+                        "labels": {
+                          "type": "array",
+                          "title": "發 PR 時的 labels",
+                          "items": { "type": "string" }
+                        },
+                        "reviewers": {
+                          "type": "array",
+                          "title": "發 PR 時的 reviewers",
+                          "items": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -344,8 +329,7 @@
       "properties": {
         "ignored": {
           "type": "array",
-          "title": "忽略哪些相依套件",
-          "description": "各值為套件全名或者以 `*` 結尾代表以此開頭的套件",
+          "description": "忽略哪些相依套件，\n各值為套件全名或者以 `*` 結尾代表以此開頭的套件",
           "uniqueItems": true,
           "items": {
             "type": "string",
@@ -354,23 +338,21 @@
         },
         "outputFile": {
           "type": "string",
-          "title": "更新時，版本資訊的寫入位置",
-          "description": "Markdown 格式，\n若無，則會輸出到 `stdout`"
+          "description": "更新時，版本資訊的寫入位置，\nMarkdown 格式，\n若無，則會輸出到 `stdout`"
         },
         "appendOnly": {
           "type": "boolean",
           "default": false,
-          "title": "更新檔案至 `deps.output` 時，用附加的方式"
+          "description": "更新檔案至 `deps.outputFile` 時，用附加的方式"
         },
         "useExact": {
           "type": "boolean",
           "default": false,
-          "title": "更新套件時不要加 `^` 在前綴"
+          "description": "更新套件時不要加 `^` 在前綴"
         },
         "latestDeps": {
           "type": ["array", "string"],
-          "title": "使用 latest 的版本而不是 wanted 的套件",
-          "description": "各值為套件全名或者以 `*` 結尾代表以此開頭的套件\n若陣列中有一個值為 `*` 代表全部的套件都使用 `latestDeps`",
+          "description": "使用 `latest` 的版本而不是 `wanted` 的套件，\n各值為套件全名或者以 `*` 結尾代表以此開頭的套件\n若陣列中有一個值為 `*` 代表全部的套件都使用 `latestDeps`",
           "uniqueItems": true,
           "items": {
             "type": "string",
@@ -379,8 +361,7 @@
         },
         "preCommands": {
           "type": "array",
-          "title": "在安裝套件前的指令",
-          "description": "各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
+          "description": "在安裝套件前的指令，\n各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
           "items": {
             "type": ["string", "array"],
             "title": "若為陣列，則每個值代表該指令的參數",
@@ -392,7 +373,7 @@
         "postCommands": {
           "type": "array",
           "title": "在安裝套件後的指令",
-          "description": "各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
+          "description": "在安裝套件後的指令，\n各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
           "items": {
             "type": ["string", "array"],
             "title": "若為陣列，則每個值代表該指令的參數",
@@ -410,13 +391,12 @@
               "type": "boolean",
               "cliName": "oneByOne",
               "default": false,
-              "title": "更新開發套件時是否一次只更新一個套件"
+              "description": "更新開發套件時是否一次只更新一個套件"
             },
             "preCommands": {
               "type": "array",
               "cliName": "",
-              "title": "在安裝開發套件前的指令",
-              "description": "預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
+              "description": "在安裝開發套件前的指令，\n預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
               "items": {
                 "type": ["string", "array"],
                 "title": "若為陣列，則每個值代表該指令的參數",
@@ -428,8 +408,7 @@
             "postCommands": {
               "type": "array",
               "cliName": "",
-              "title": "在安裝開發套件後的指令",
-              "description": "預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
+              "description": "在安裝開發套件後的指令，\n預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
               "items": {
                 "type": ["string", "array"],
                 "title": "若為陣列，則每個值代表該指令的參數",
