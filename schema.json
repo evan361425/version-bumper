@@ -101,6 +101,34 @@
           "type": "string",
           "title": "最新版本的內文",
           "description": "會覆寫 `latestInfo.file` 中的內文"
+        },
+        "diff": {
+          "type": "object",
+          "title": "使用 Git Diff 來作為新版內文",
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "cliName": "latestDiffEnable",
+              "default": false,
+              "title": "是否使用 Diff 來做新版內文"
+            },
+            "allowed": {
+              "type": "array",
+              "cliName": "latestDiffAllowed",
+              "title": "允許的前綴，若無則所有 Commit 都會被使用",
+              "description": "`latestDiffIgnored` 會優先使用",
+              "items": { "type": "string" }
+            },
+            "ignored": {
+              "type": "array",
+              "cliName": "latestDiffIgnored",
+              "title": "忽略的前綴",
+              "description": "凡是 commit 的標題前綴於特定字眼，就忽略他",
+              "items": { "type": "string" }
+            }
+          },
+          "description": "會覆寫 `content` 和 `file` 中的內文，\n但先後順序仍是`環境變數`和`指令`大於設定檔"
         }
       }
     },

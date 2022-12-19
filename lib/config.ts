@@ -212,6 +212,21 @@ export class Config {
     function getLatestInfo(): LatestInfo {
       const li: Partial<LatestInfo> = config['latestInfo'] ?? {};
 
+      li.diff ??= { enable: false, allowed: [], ignored: [] };
+      li.diff.enable =
+        getBoolConfig('latest_diff_enable') ||
+        (!getConfig('latest_content') && li.diff.enable);
+      li.diff.allowed = getListConfig(
+        'latest_diff_allowed',
+        {},
+        li.diff.allowed ?? [],
+      );
+      li.diff.ignored = getListConfig(
+        'latest_diff_ignored',
+        {},
+        li.diff.ignored ?? [],
+      );
+
       li.file = getConfig('latest_file', DEFAULTS.latestInfo.file);
       const [fMeta, fBody] = li.file ? parseMarkdown(li.file) : [];
 
@@ -338,6 +353,42 @@ export class Config {
       if (!this.prInfo.repo) {
         this.prInfo.repo =
           breaker(this.repoLink, 3, '/')[3] ?? 'example/example';
+      }
+
+      if (this.latestInfo.diff.enable) {
+        // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
+        const t = (await git(true, 'describe', '--abbrev=0')).trim();
+        // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
+        const d = await git(true, 'log', '--pretty=%h "%an" %s', `HEAD...${t}`);
+
+        const commits = d
+          .split('\n')
+          .map((e) => {
+            const [hash, rest] = breaker(e.trim(), 1, ' "');
+            if (!hash || !rest) return;
+            const [name, title] = breaker(rest, 1, '" ');
+
+            return name && title ? [hash, name, title] : undefined;
+          })
+          .filter((e) => {
+            if (!e) return;
+
+            const title = e[2] ?? '';
+            const igs = this.latestInfo.diff.ignored;
+            if (igs.some((ig) => title.startsWith(ig))) {
+              return;
+            }
+            const als = this.latestInfo.diff.allowed;
+            return als.length ? als.some((al) => title.startsWith(al)) : true;
+          })
+          .map((e) => {
+            const [hash, name, title] = e as [string, string, string];
+            return `-   (${hash}) ${title} - ${name}`;
+          }) as string[];
+
+        if (commits.length) {
+          this.latestInfo.content = commits.join('\n');
+        }
       }
     }
 
@@ -470,6 +521,11 @@ type LatestInfo = {
   content: string;
   ticket?: string;
   file: string;
+  diff: {
+    enable: boolean;
+    allowed: string[];
+    ignored: string[];
+  };
 };
 type DevInfo = {
   oneByOne: boolean;

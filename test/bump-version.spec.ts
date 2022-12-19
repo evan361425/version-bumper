@@ -94,68 +94,56 @@ First Release
 
     const calls = stdout.getCalls().map((call) => call.args[0]);
     const call1 = calls.shift();
-    const parsedConfig = JSON.parse(call1);
-    delete parsedConfig.deps;
-    expect(parsedConfig).to.eql({
-      repoLink: 'https://github.com/example/example',
-      prOnly: false,
-      releaseOnly: false,
-      noPush: false,
-      tagsInfo: {
-        test: {
-          pattern: '^v1.0.\\d+$',
-          changelog: true,
-        },
+    const cfg = JSON.parse(call1);
+    expect(cfg.repoLink).to.eql('https://github.com/example/example');
+    expect(cfg.tagsInfo).to.eql({
+      test: {
+        pattern: '^v1.0.\\d+$',
+        changelog: true,
       },
-      prInfo: {
-        repo: 'example/example',
-        title: '{ticket} - {version}({stage})',
-        template:
-          'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
-        branches: {
-          test: {
-            name: 'test',
-            head: 'test-head',
-            base: 'test-base',
-            reviewers: ['r1', 'r2'],
-            labels: ['label-1', 'label-2'],
-            siblings: {
-              dr: {
-                name: 'dr',
-                base: 'test-base',
-                head: 'deploy/dr',
-                labels: ['label-1', 'label-2'],
-                reviewers: ['r1', 'r2'],
-              },
+    });
+    expect(cfg.prInfo).to.eql({
+      repo: 'example/example',
+      title: '{ticket} - {version}({stage})',
+      template:
+        'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
+      branches: {
+        test: {
+          name: 'test',
+          head: 'test-head',
+          base: 'test-base',
+          reviewers: ['r1', 'r2'],
+          labels: ['label-1', 'label-2'],
+          siblings: {
+            dr: {
+              name: 'dr',
+              base: 'test-base',
+              head: 'deploy/dr',
+              labels: ['label-1', 'label-2'],
+              reviewers: ['r1', 'r2'],
             },
           },
         },
       },
-      changelogInfo: {
-        header: 'test default header',
-        template: 'ticket prefix:{ticket}\n\n{content}',
-        disable: false,
-        commitMessage:
-          'chore: bump to {version}\nticket: {ticket}\nstage: {stage}',
-        file: 'CHANGELOG.md',
-      },
-      latestInfo: {
-        version: 'v1.0.2',
-        ticket: 'TICKET-200',
-        content:
-          'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
-        file: 'docs/LATEST_VERSION.md',
-      },
-      autoLinks: {
-        'ticket-': 'replace-{num}',
-        'sub-ticket-': 'replace-sub-{num}',
-      },
-      releaseInfo: {
-        draft: false,
-        preRelease: false,
-      },
-      stage: 'test',
     });
+    expect(cfg.changelogInfo).to.eql({
+      header: 'test default header',
+      template: 'ticket prefix:{ticket}\n\n{content}',
+      disable: false,
+      commitMessage:
+        'chore: bump to {version}\nticket: {ticket}\nstage: {stage}',
+      file: 'CHANGELOG.md',
+    });
+    expect(cfg.latestInfo.version).to.eql('v1.0.2');
+    expect(cfg.latestInfo.ticket).to.eql('TICKET-200');
+    expect(cfg.latestInfo.content).to.eql(
+      'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
+    );
+    expect(cfg.autoLinks).to.eql({
+      'ticket-': 'replace-{num}',
+      'sub-ticket-': 'replace-sub-{num}',
+    });
+    expect(cfg.stage).to.eql('test');
     expect(calls).to.eql([
       '[changelog] Start parsing',
       '[bump] Requirements checked',

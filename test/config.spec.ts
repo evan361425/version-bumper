@@ -1,6 +1,7 @@
 import { expect } from 'chai';
+import Sinon from 'sinon';
 import { Config } from '../lib/config.js';
-import { mockFile } from '../lib/helper.js';
+import { mockCommand, mockFile } from '../lib/helper.js';
 import { resetEnv, setEnv, setupEnv } from './warm-up.js';
 
 describe('Config', function () {
@@ -10,6 +11,7 @@ describe('Config', function () {
 
   afterEach(function () {
     setupEnv();
+    Sinon.restore();
   });
 
   it('env must overwrite config', function () {
@@ -54,6 +56,9 @@ describe('Config', function () {
       latest_version: 'latest_version',
       latest_ticket: 'latest_ticket',
       latest_content: 'latest_content',
+      latest_diff_enable: 'latest_diff_enable',
+      latest_diff_allowed: 'latest_diff_allowed',
+      latest_diff_ignored: 'latest_diff_ignored',
       release_pre: 'release_pre',
       release_draft: 'release_draft',
     }).forEach(([k, v]) => setEnv(k, v));
@@ -91,6 +96,11 @@ describe('Config', function () {
         ticket: 'shouldNotShow',
         content: 'shouldNotShow',
         file: 'shouldNotShow',
+        diff: {
+          enable: false,
+          allowed: ['shouldNotShow'],
+          ignored: ['shouldNotShow'],
+        },
       },
       autoLinks: {
         autoLinkKeys: 'shouldNotShow',
@@ -154,6 +164,11 @@ describe('Config', function () {
         version: 'latest_version',
         ticket: 'latest_ticket',
         content: 'latest_content',
+        diff: {
+          enable: true,
+          allowed: ['latest_diff_allowed'],
+          ignored: ['latest_diff_ignored'],
+        },
       },
       autoLinks: {
         auto_link_keys: 'auto_link_values',
@@ -188,5 +203,68 @@ describe('Config', function () {
     } as unknown as Record<string, never>);
 
     expect(config.prInfo.template).to.be.eq('some pr message');
+  });
+
+  it('setup latest content by diff commits', async function () {
+    Sinon.stub(console, 'log');
+    setEnv('latest_diff_enable', 'true');
+    setEnv('latest_content', 'shouldNotShow');
+    mockCommand(Promise.resolve('tag'));
+    mockCommand(
+      Promise.resolve(
+        [
+          'hash1 "Author 1" this is msg',
+          'hash2 "Author 1" ',
+          'hash3 ',
+          'hash4 author',
+          'hash5 "Author 2" this is other msg',
+          'hash6 "Author 2" ignored msg',
+        ].join('\n'),
+      ),
+    );
+
+    const config = new Config({
+      repoLink: 'some-link',
+      latestInfo: { content: 'shouldNotShow', diff: { ignored: ['ign'] } },
+    } as unknown as Record<string, never>);
+
+    await config.init('version');
+
+    expect(config.latestInfo.content).to.eql(
+      [
+        '-   (hash1) this is msg - Author 1',
+        '-   (hash5) this is other msg - Author 2',
+      ].join('\n'),
+    );
+  });
+
+  it('use allowed diff commits', async function () {
+    Sinon.stub(console, 'log');
+    setEnv('latest_diff_enable', 'true');
+    setEnv('latest_diff_allowed', 'abc, def');
+    mockCommand(Promise.resolve('tag'));
+    mockCommand(
+      Promise.resolve(
+        [
+          'hash1 "Author 1" this is msg',
+          'hash2 "Author 1" abc this is msg',
+          'hash3 "Author 2" this is other msg',
+          'hash4 "Author 2" def msg',
+        ].join('\n'),
+      ),
+    );
+
+    const config = new Config({
+      repoLink: 'some-link',
+    } as unknown as Record<string, never>);
+
+    await config.init('version');
+
+    expect(config.latestInfo.content).to.eql(
+      [
+        '-   (hash2) abc this is msg - Author 1',
+        '-   (hash4) def msg - Author 2',
+      ].join('\n'),
+    );
   });
 });
