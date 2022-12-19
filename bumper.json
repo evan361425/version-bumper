@@ -8,6 +8,12 @@
     "commitMessage": "chore: bump to {version}\n\nstage: {stage}",
     "template": "{content}"
   },
+  "latestInfo": {
+    "diff": {
+      "enable": true,
+      "ignored": ["doc:", "chore"]
+    }
+  },
   "tags": {
     "release": { "pattern": "v[0-9]+.[0-9]+.[0-9]+", "changelog": true }
   }
