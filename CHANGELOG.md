@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.5.0] - 2022-12-19
+
+-   (400ba0f) feat: allow using diff for latest info - Shueh Chou Lu
+
 ## [v0.4.5] - 2022-12-18
 
 -   fix: add auto-links on PR body
@@ -67,7 +71,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.4.5...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.5.0...HEAD
+[v0.5.0]: https://github.com/evan361425/version-bumper/compare/v0.5.0...v0.4.5
 [v0.4.5]: https://github.com/evan361425/version-bumper/compare/v0.4.5...v0.4.4
 [v0.4.4]: https://github.com/evan361425/version-bumper/compare/v0.4.4...v0.4.3
 [v0.4.3]: https://github.com/evan361425/version-bumper/compare/v0.4.3...v0.4.2
