@@ -362,7 +362,7 @@ export class Config {
         // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
         const t = (await git(true, 'describe', '--abbrev=0')).trim();
         // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-        const d = await git(true, 'log', '--pretty=%h "%an" %s', `HEAD...${t}`);
+        const d = await git(true, 'log', '--pretty=%H "%an" %s', `HEAD...${t}`);
 
         const commits = d
           .split('\n')
@@ -386,7 +386,9 @@ export class Config {
           })
           .map((e) => {
             const [hash, name, title] = e as [string, string, string];
-            return `-   (${hash}) ${title} - ${name}`;
+            const h = hash.substring(0, 7);
+            const l = `${this.repoLink}/commit/${hash}`;
+            return `-   ([${h}](${l})) ${title} - ${name}`;
           }) as string[];
 
         if (commits.length) {
