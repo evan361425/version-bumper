@@ -1,6 +1,6 @@
 {
   "title": "Bumper JSON configuration",
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
 
   "additionalProperties": false,
   "properties": {
@@ -27,7 +27,6 @@
       "description": "只會建立 pre-release"
     },
     "noPush": {
-      "cliName": "noPush",
       "type": "boolean",
       "default": false,
       "title": "是否把 Tag 和 Commit 推至 remote repo"
@@ -66,9 +65,9 @@
         "commitMessage": {
           "cliName": "changelogCommitMessage",
           "type": "string",
-          "default": "chore: bump to {version}\nticket: {ticket}\nstage: {stage}",
+          "default": "chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}",
           "title": "修改 changelog 後 commit 訊息",
-          "description": "支援的變數有：\n`version`、`ticket`、`stage`"
+          "description": "支援的變數有：\n版本：`version`、票號：`ticket`、環境：`stage`"
         }
       }
     },
@@ -82,13 +81,13 @@
           "type": "string",
           "default": "docs/LATEST_VERSION.md",
           "title": "最新版本的範本位置",
-          "description": "Markdown 格式\n支援的 metadata 有：version, ticket"
+          "description": "Markdown 格式\n支援的 metadata 有：\n版本：`version`、票號：`ticket`"
         },
         "version": {
           "cliName": "latestVersion",
           "type": "string",
           "title": "最新版本號",
-          "description": "會覆寫 `latestInfo.file` 中的 metadata"
+          "description": "會覆寫 [latestInfo.file] 中的 metadata"
         },
         "ticket": {
           "cliName": "latestTicket",
@@ -135,53 +134,56 @@
     "autoLinks": {
       "type": "object",
       "additionalProperties": false,
-      "description": "用來對票號自動補上連結",
+      "title": "用來對票號自動補上連結",
+      "description": "只支援 a-z, A-Z 和 - 作為鍵，\n支援變數：\n票號：`num`。\n例如 `TICKET-`（不分大小寫）對上 `https://example/ticket-{num}?k=v`，\n就會把 `tIcKet-123` 轉成 `https://example/tIcKet-123?k=v`",
       "patternProperties": {
         "^[a-zA-Z-]+$": {
           "type": "string",
           "title": "票號前綴對上連結模板",
-          "description": "只支援 a-z, A-Z 和 - 作為鍵，\n支援變數：\n{num} 來用做票號。例如 `TICKET-`（不分大小寫）對上 `https://example/ticket-{num}?k=v`，\n就會把 tIcKet-123 轉成 https://example/tIcKet-123?k=v"
+          "description": "只支援 a-z, A-Z 和 - 作為鍵，\n支援變數：\n票號：`num`。\n例如 `TICKET-`（不分大小寫）對上 `https://example/ticket-{num}?k=v`，\n就會把 `tIcKet-123` 轉成 `https://example/tIcKet-123?k=v`"
         }
       },
       "cli": {
         "autoLinkKeys": {
           "title": "票號前綴",
-          "description": "以逗號（,）做為區隔，\n每個值只支援 a-z, A-Z 和 -"
+          "type": "array",
+          "description": "每個值只支援 a-z, A-Z 和 -"
         },
         "autoLinkValues": {
           "title": "連結模板",
-          "description": "以逗號（,）做為區隔，\n照順序對應 `autoLinkKeys`，\n支援變數：\n{num} 來用做票號"
+          "type": "array",
+          "description": "照順序對應 `autoLinkKeys`，\n支援變數：\n票號：`num`"
         }
       }
     },
     "release": {
       "type": "object",
       "additionalProperties": false,
-      "description": "用來設定 GitHub Release",
+      "title": "用來設定 GitHub Release",
       "properties": {
         "preRelease": {
           "cliName": "releasePre",
           "type": "boolean",
           "default": false,
-          "title": "標示為 pre-release"
+          "title": "在 `gh` 指令中增加 `--pre-release`"
         },
         "draft": {
           "cliName": "releaseDraft",
           "type": "boolean",
           "default": false,
-          "title": "標示為 draft"
+          "title": "在 `gh` 指令中增加 `--draft`"
         }
       }
     },
     "tags": {
       "type": "object",
       "additionalProperties": false,
-      "title": "Tag 的設定",
+      "title": "多個 Tag 的設定",
       "patternProperties": {
         "^[a-zA-Z\\-_0-9]+$": {
           "type": "object",
           "additionalProperties": false,
-          "description": "鍵值只是代表名稱",
+          "title": "Tag 的設定",
           "required": ["pattern"],
           "properties": {
             "pattern": {
@@ -200,7 +202,7 @@
       },
       "cli": {
         "tagNames": {
-          "title": "Tag 名稱",
+          "title": "Tag 名稱（或稱環境）",
           "description": "以逗號（,）做為區隔，必須每個都有值"
         },
         "tagPatterns": {
@@ -229,20 +231,19 @@
           "type": "string",
           "default": "{ticket} - {version}({stage})",
           "title": "PR 標題",
-          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key"
+          "description": "支援的變數有：\n版本：`version`、版號：`ticket`、環境：`stage`"
         },
         "template": {
           "cliName": "prTemplate",
           "type": "string",
           "default": "This PR is auto-generated from bumper\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}",
           "title": "PR 範本，優先權高於 `prTemplateFile`",
-          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
+          "description": "支援的變數有：\n版本：`version`、票號：`ticket`、環境：`stage`、\n最新內文：`content`、差異連結：`diff`"
         },
         "templateFile": {
           "cliName": "prTemplateFile",
           "type": "string",
-          "title": "PR 範本的位置",
-          "description": "支援的變數有：\nversion, ticket, stage 這個 PR 的 branches key, content 最新版本的內文, diff 連結"
+          "title": "PR 範本的位置"
         },
         "branches": {
           "type": "object",
@@ -252,7 +253,7 @@
             "^[a-zA-Z\\-_0-9]+$": {
               "type": "object",
               "additionalProperties": false,
-              "description": "鍵值只是代表名稱",
+              "title": "分支名稱，和 [Tag 的設定] 對齊",
               "required": ["base"],
               "properties": {
                 "base": {
@@ -369,7 +370,7 @@
         "latestDeps": {
           "type": ["array", "string"],
           "title": "使用 latest 的版本而不是 wanted 的套件",
-          "description": "各值為套件全名或者以 `*` 結尾代表以此開頭的套件\n若陣列中有一個值為 `*` 代表全部的套件都使用 latestDeps",
+          "description": "各值為套件全名或者以 `*` 結尾代表以此開頭的套件\n若陣列中有一個值為 `*` 代表全部的套件都使用 `latestDeps`",
           "uniqueItems": true,
           "items": {
             "type": "string",
@@ -379,7 +380,7 @@
         "preCommands": {
           "type": "array",
           "title": "在安裝套件前的指令",
-          "description": "各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
+          "description": "各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
           "items": {
             "type": ["string", "array"],
             "title": "若為陣列，則每個值代表該指令的參數",
@@ -391,7 +392,7 @@
         "postCommands": {
           "type": "array",
           "title": "在安裝套件後的指令",
-          "description": "各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
+          "description": "各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
           "items": {
             "type": ["string", "array"],
             "title": "若為陣列，則每個值代表該指令的參數",
@@ -415,7 +416,7 @@
               "type": "array",
               "cliName": "",
               "title": "在安裝開發套件前的指令",
-              "description": "預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
+              "description": "預設使用 `deps.preCommands`，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
               "items": {
                 "type": ["string", "array"],
                 "title": "若為陣列，則每個值代表該指令的參數",
@@ -428,7 +429,7 @@
               "type": "array",
               "cliName": "",
               "title": "在安裝開發套件後的指令",
-              "description": "預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令\n支援的變數有：name, current, target",
+              "description": "預設使用 `deps.postCommands`，各值代表一個 sub-process 的指令\n支援的變數有：\n套件名稱：`name`、現在版本：`current`、\n升版後版本：`target`",
               "items": {
                 "type": ["string", "array"],
                 "title": "若為陣列，則每個值代表該指令的參數",

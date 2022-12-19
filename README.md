@@ -64,6 +64,8 @@ You should add `./bumper.json` on the project root folder, else set it by the ar
 
 > The JSON file is follow the [./schema.json](schema.json)'s schema.
 > After `bumper init`, you should automatically bind to the schema.
+>
+> You can see the schema prettier in [JSON Schema Viewer](https://json-schema.app/view/%23/%23%2Fproperties%2Fdeps?url=https%3A%2F%2Fraw.githubusercontent.com%2Fevan361425%2Fversion-bumper%2Fmaster%2Fschema.json)
 
 You can start by `bumper init` or write it yourself, for example:
 
