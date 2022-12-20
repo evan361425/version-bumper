@@ -94,7 +94,7 @@ export class Tag {
   setDiffLink(ref?: string, base?: string) {
     base = base ? base : this.key;
     if (ref) {
-      this.setLink(Config.instance.repoLink + '/compare/' + base + '...' + ref);
+      this.setLink(Config.instance.repoLink + '/compare/' + ref + '...' + base);
     } else {
       this.setLink(Config.instance.repoLink + '/commits/' + this.key);
     }

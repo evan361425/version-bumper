@@ -100,8 +100,8 @@ describe('Changelog', function () {
       '## [V1.2.2] - 2022-02-01\n\n' +
       'QQ\n\n' +
       '[unreleased]: https://github.com/example/example/compare/new-version-1.2.4...HEAD\n' +
-      '[new-version-1.2.4]: https://github.com/example/example/compare/new-version-1.2.4...new-version-1.2.3\n' +
-      '[new-version-1.2.3]: https://github.com/example/example/compare/new-version-1.2.3...v1.2.3-rc1\n' +
+      '[new-version-1.2.4]: https://github.com/example/example/compare/new-version-1.2.3...new-version-1.2.4\n' +
+      '[new-version-1.2.3]: https://github.com/example/example/compare/v1.2.3-rc1...new-version-1.2.3\n' +
       '[v1.2.3-rc1]: https://hi/v1.2.3-rc1\n' +
       '[v1.2.2]: https://hi/v1.2.2\n';
 

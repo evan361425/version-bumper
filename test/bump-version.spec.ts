@@ -182,7 +182,7 @@ ticket: TICKET-200
 First Release
 
 [unreleased]: https://github.com/example/example/compare/v1.0.2...HEAD
-[v1.0.2]: https://github.com/example/example/compare/v1.0.2...v1.0.1
+[v1.0.2]: https://github.com/example/example/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/example/example/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/example/example/commits/v1.0.0
 `,
@@ -197,7 +197,7 @@ First Release
       [
         "[cmd]: gh 'pr' 'create'",
         "'--title' 'TICKET-200 - v1.0.2(test)'",
-        "'--body' 'Test PR body\n\nWith ticket: [TICKET-200](replace-200)\nstage: test\nversion: v1.0.2\ndiff: https://github.com/example/example/compare/v1.0.2...v1.0.1\n\n[v1.0.2]: https://github.com/example/example/compare/v1.0.2...v1.0.1'",
+        "'--body' 'Test PR body\n\nWith ticket: [TICKET-200](replace-200)\nstage: test\nversion: v1.0.2\ndiff: https://github.com/example/example/compare/v1.0.1...v1.0.2\n\n[v1.0.2]: https://github.com/example/example/compare/v1.0.1...v1.0.2'",
         "'--assignee' '@me'",
         "'--base' 'test-base'",
         "'--head' 'test-head'",
@@ -211,7 +211,7 @@ First Release
       [
         "[cmd]: gh 'pr' 'create'",
         "'--title' 'TICKET-200 - v1.0.2(dr)'",
-        "'--body' 'Test PR body\n\nWith ticket: [TICKET-200](replace-200)\nstage: dr\nversion: v1.0.2\ndiff: https://github.com/example/example/compare/v1.0.2...v1.0.1\n\n[v1.0.2]: https://github.com/example/example/compare/v1.0.2...v1.0.1'",
+        "'--body' 'Test PR body\n\nWith ticket: [TICKET-200](replace-200)\nstage: dr\nversion: v1.0.2\ndiff: https://github.com/example/example/compare/v1.0.1...v1.0.2\n\n[v1.0.2]: https://github.com/example/example/compare/v1.0.1...v1.0.2'",
         "'--assignee' '@me'",
         "'--base' 'test-base'",
         "'--head' 'deploy/dr'",

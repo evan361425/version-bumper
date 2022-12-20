@@ -84,7 +84,7 @@ export class Changelog {
     }
 
     const first = this.getTagByKey(this.firstTagKey);
-    first && first.setDiffLink('HEAD', tag.key);
+    first && first.setDiffLink(tag.key, 'HEAD');
 
     tag.body = Changelog.fitAutoLinks(tag.body, Config.instance.autoLinks);
     tag.setDiffLink(this.latestTag?.key);
