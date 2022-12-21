@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.5.2] - 2022-12-21
+
+-   ([01a9498](https://github.com/evan361425/version-bumper/commit/01a9498740ea922d406971f69fa0e12179a80712)) fix: correct default commit message - Shueh Chou Lu
+
 ## [v0.5.1] - 2022-12-20
 
 -   ([4ecfc37](https://github.com/evan361425/version-bumper/commit/4ecfc37ef8fb556bf4315b85dd3098455336e9c4)) fix: wrong diff link - Shueh Chou Lu
@@ -79,7 +83,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.5.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.5.2...HEAD
+[v0.5.2]: https://github.com/evan361425/version-bumper/compare/v0.5.1...v0.5.2
 [v0.5.1]: https://github.com/evan361425/version-bumper/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/evan361425/version-bumper/compare/v0.4.5...v0.5.0
 [v0.4.5]: https://github.com/evan361425/version-bumper/compare/v0.4.4...v0.4.5
