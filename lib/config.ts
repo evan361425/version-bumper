@@ -25,7 +25,8 @@ const DEFAULTS = {
   },
   changelog: {
     file: 'CHANGELOG.md',
-    commitMessage: 'chore: bump to {version}\nticket: {ticket}\nstage: {stage}',
+    commitMessage:
+      'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
     template: '單號：{ticket}\n\n{content}',
     header: `# Changelog
 
