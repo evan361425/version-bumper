@@ -131,7 +131,7 @@ First Release
       template: 'ticket prefix:{ticket}\n\n{content}',
       disable: false,
       commitMessage:
-        'chore: bump to {version}\nticket: {ticket}\nstage: {stage}',
+        'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
       file: 'CHANGELOG.md',
     });
     expect(cfg.latestInfo.version).to.eql('v1.0.2');
@@ -186,7 +186,7 @@ First Release
 [v1.0.1]: https://github.com/example/example/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/example/example/commits/v1.0.0
 `,
-      "[cmd]: git 'commit' '.' '-m' 'chore: bump to v1.0.2\nticket: TICKET-200\nstage: test' '--no-verify'",
+      "[cmd]: git 'commit' '.' '-m' 'chore: bump to v1.0.2\n\nticket: TICKET-200\nstage: test' '--no-verify'",
       "[cmd]: git 'tag' 'v1.0.2' '-m' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
       '[bump] Pushing commit and tag',
       "[cmd]: git 'push' '--no-verify'",
