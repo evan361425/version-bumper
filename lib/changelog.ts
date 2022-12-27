@@ -33,7 +33,7 @@ export class Changelog {
     this.header = origin.substring(0, headerIdx).trim();
     this.tags = origin
       .substring(headerIdx, footerIdx === -1 ? undefined : footerIdx)
-      .split('## ')
+      .split('\n## ')
       .map((e) => e.trim())
       .filter((e) => Boolean(e))
       .map((e) => Tag.fromString(e));
@@ -86,8 +86,7 @@ export class Changelog {
     const first = this.getTagByKey(this.firstTagKey);
     first && first.setDiffLink(tag.key, 'HEAD');
 
-    tag.body = Changelog.fitAutoLinks(tag.body, Config.instance.autoLinks);
-    tag.setDiffLink(this.latestTag?.key);
+    tag.setDiffLink(this.latestTag?.key).setBody(tag.body).setIsNew(true);
 
     this.tags.splice(this.firstIsUnreleased ? 1 : 0, 0, tag);
 

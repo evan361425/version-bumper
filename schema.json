@@ -48,7 +48,7 @@
         "template": {
           "cliName": "changelogTemplate",
           "type": "string",
-          "default": "票號：{ticket}\n\n{content}",
+          "default": "單號: {ticket}\n\n{content}",
           "description": "Tag 更新的範本，\n支援的變數有：\n版本：`version`、票號：`ticket`、環境：`stage`\n最新內文：`content`、差異連結：`diff`"
         },
         "header": {

@@ -34,7 +34,7 @@ export default async function () {
   await bump(changelog);
 
   // 根據 latestVersion 打 tag
-  await git('tag', tag.key, '-m', tag.parsedBody);
+  await git('tag', tag.key, '-m', tag.body);
 
   // 把變動（含 tag）推上去
   if (!Config.instance.noPush) {
@@ -141,7 +141,7 @@ function createPR(tag: Tag, b: BaseBranchInfo) {
 }
 
 function createRelease(tag: Tag) {
-  const args = ['--title', tag.key, '--notes', tag.parsedBody, tag.key];
+  const args = ['--title', tag.key, '--notes', tag.bodyWithAutoLinks, tag.key];
   Config.instance.releaseInfo.preRelease && args.unshift('--prerelease');
   Config.instance.releaseInfo.draft && args.unshift('--draft');
   notice('[bump] Creating GitHub release');

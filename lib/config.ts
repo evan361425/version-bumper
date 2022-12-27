@@ -27,7 +27,7 @@ const DEFAULTS = {
     file: 'CHANGELOG.md',
     commitMessage:
       'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
-    template: '單號：{ticket}\n\n{content}',
+    template: '單號: {ticket}\n\n{content}',
     header: `# Changelog
 
 所有本專案的版本紀錄將於此說明之。

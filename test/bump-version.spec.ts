@@ -29,7 +29,7 @@ describe('Bump version', function () {
       },
       changelog: {
         header: 'test default header',
-        template: 'ticket prefix:{ticket}\n\n{content}',
+        template: 'ticket prefix: {ticket}\n\n{content}',
       },
       files: { latestVersion: 'non-exit-file' },
       autoLinks: {
@@ -128,7 +128,7 @@ First Release
     });
     expect(cfg.changelogInfo).to.eql({
       header: 'test default header',
-      template: 'ticket prefix:{ticket}\n\n{content}',
+      template: 'ticket prefix: {ticket}\n\n{content}',
       disable: false,
       commitMessage:
         'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
@@ -150,6 +150,10 @@ First Release
       "[cmd]: git 'update-index' '--refresh'",
       "[cmd]: npm 'version' '--no-commit-hooks' '--no-git-tag-version' 'v1.0.2'",
       '[bump] Start updating changelog',
+      '[auto-links] hit( TICKET-200), target(TICKET-), num(200)',
+      '[auto-links] is not in link',
+      '[auto-links] hit( TICKET-200), target(TICKET-), num(200)',
+      '[auto-links] is not in link',
       `# Changelog
 
 This is my test header
@@ -162,13 +166,13 @@ Hi there, try correct this!
 
 ## [v1.0.2] - 2022-12-01
 
-ticket prefix:TICKET-200
+ticket prefix: [TICKET-200](replace-200)
 
 This is my new release
 
 With version: v1.0.2
 stage: test
-ticket: TICKET-200
+ticket: [TICKET-200](replace-200)
 
 ## [v1.0.1] - 2022-11-30
 
@@ -187,7 +191,7 @@ First Release
 [v1.0.0]: https://github.com/example/example/commits/v1.0.0
 `,
       "[cmd]: git 'commit' '.' '-m' 'chore: bump to v1.0.2\n\nticket: TICKET-200\nstage: test' '--no-verify'",
-      "[cmd]: git 'tag' 'v1.0.2' '-m' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
+      "[cmd]: git 'tag' 'v1.0.2' '-m' 'ticket prefix: TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
       '[bump] Pushing commit and tag',
       "[cmd]: git 'push' '--no-verify'",
       "[cmd]: git 'push' '--tag' '--no-verify'",
@@ -223,7 +227,7 @@ First Release
       [
         "[cmd]: gh 'release' 'create'",
         "'--title' 'v1.0.2'",
-        "'--notes' 'ticket prefix:TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
+        "'--notes' 'ticket prefix: [TICKET-200](replace-200)\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: [TICKET-200](replace-200)'",
         "'v1.0.2'",
       ].join(' '),
     ]);

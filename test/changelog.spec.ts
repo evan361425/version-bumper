@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-hooks-for-single-case */
 import { assert, expect } from 'chai';
 import Sinon from 'sinon';
 import { Changelog } from '../lib/changelog.js';
@@ -73,7 +74,7 @@ describe('Changelog', function () {
     }
   });
 
-  it('should serialized after add tag', function () {
+  it('serialized after adding tag', function () {
     const changelog = createChangelog();
     const tag1 = new Tag('new-version-1.2.3', 'This is body\n\n', {
       createdDate: '2022-12-30',

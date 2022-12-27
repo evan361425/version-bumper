@@ -1,3 +1,4 @@
+import { Changelog } from './changelog.js';
 import { Config } from './config.js';
 
 type TagConfig = {
@@ -5,6 +6,7 @@ type TagConfig = {
   link: string;
   ticket: string;
   raw: boolean;
+  isNew: boolean;
 };
 
 export class Tag {
@@ -12,15 +14,19 @@ export class Tag {
   readonly ticket?: string;
   readonly raw: boolean;
 
+  isNew: boolean;
   body: string;
   link?: string;
   createdDate!: string;
+
+  private _bodyWithAutoLinks?: string;
 
   constructor(key: string, body: string, config: Partial<TagConfig> = {}) {
     this.key = key.trim();
     this.body = body.trim();
     this.ticket = config.ticket;
     this.raw = config.raw ?? false;
+    this.isNew = config.isNew ?? false;
 
     this.setCreatedDate(config.createdDate);
     this.setLink(config.link);
@@ -52,27 +58,38 @@ export class Tag {
 
   static readonly veryFirstTagKey = 'Unreleased';
 
-  get parsedBody() {
-    if (this.raw) return this.body;
+  get bodyWithAutoLinks(): string {
+    if (this._bodyWithAutoLinks === undefined) {
+      this._bodyWithAutoLinks = Changelog.fitAutoLinks(
+        this.body,
+        Config.instance.autoLinks,
+      );
+    }
 
-    const body = this.body
-      .replace(/{version}/g, this.key)
-      .replace(/{diff}/g, this.link ?? '')
-      .replace(/{stage}/g, Config.instance.stage ?? '')
-      .replace(/{ticket}/g, this.ticket ?? '');
+    return this._bodyWithAutoLinks;
+  }
 
-    return Config.instance.changelogInfo.template
-      .replace(/{content}/g, body)
-      .replace(/{version}/g, this.key)
-      .replace(/{diff}/g, this.link ?? '')
-      .replace(/{stage}/g, Config.instance.stage ?? '')
-      .replace(/{ticket}/g, this.ticket ?? '');
+  setIsNew(isNew: boolean): Tag {
+    this.isNew = isNew;
+
+    return this;
   }
 
   setLink(link?: string): Tag {
     if (link && link.startsWith('https://')) {
       this.link = link;
     }
+
+    return this;
+  }
+
+  setBody(body: string): Tag {
+    this.body = Config.instance.changelogInfo.template
+      .replace(/{content}/g, body)
+      .replace(/{version}/g, this.key)
+      .replace(/{diff}/g, this.link ?? '')
+      .replace(/{stage}/g, Config.instance.stage ?? '')
+      .replace(/{ticket}/g, this.ticket ?? '');
 
     return this;
   }
@@ -91,7 +108,7 @@ export class Tag {
     return this;
   }
 
-  setDiffLink(ref?: string, base?: string) {
+  setDiffLink(ref?: string, base?: string): Tag {
     base = base ? base : this.key;
     if (ref) {
       this.setLink(Config.instance.repoLink + '/compare/' + ref + '...' + base);
@@ -106,7 +123,9 @@ export class Tag {
     const header = this.link ? `[${this.key}]` : this.key;
     const date = this.createdDate ? ` - ${this.createdDate}` : '';
 
-    return header + date + '\n\n' + this.parsedBody;
+    return (
+      header + date + '\n\n' + (this.isNew ? this.bodyWithAutoLinks : this.body)
+    );
   }
 
   toLink(): string {
