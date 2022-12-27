@@ -59,6 +59,7 @@ describe('Config', function () {
       latest_diff_enable: 'latest_diff_enable',
       latest_diff_allowed: 'latest_diff_allowed',
       latest_diff_ignored: 'latest_diff_ignored',
+      release_disable: 'release_disable',
       release_pre: 'release_pre',
       release_draft: 'release_draft',
     }).forEach(([k, v]) => setEnv(k, v));
@@ -90,6 +91,11 @@ describe('Config', function () {
             base: 'shouldNotShow',
           },
         },
+      },
+      release: {
+        disable: false,
+        preRelease: false,
+        draft: false,
       },
       latestInfo: {
         version: 'shouldNotShow',
@@ -128,6 +134,7 @@ describe('Config', function () {
       releaseOnly: true,
       noPush: true,
       releaseInfo: {
+        disable: true,
         draft: true,
         preRelease: true,
       },

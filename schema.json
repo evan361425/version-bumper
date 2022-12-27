@@ -151,6 +151,12 @@
       "title": "ReleaseInfo",
       "description": "GitHub Release 設定",
       "properties": {
+        "disable": {
+          "cliName": "releaseDisable",
+          "type": "boolean",
+          "default": false,
+          "description": "不要建立 GitHub Release"
+        },
         "preRelease": {
           "cliName": "releasePre",
           "type": "boolean",

@@ -19,11 +19,13 @@ export default async function () {
   }
 
   if (Config.instance.prOnly) {
-    return await createPRs(tag);
+    await createPRs(tag);
+    return;
   }
 
   if (Config.instance.releaseOnly) {
-    return await createRelease(tag);
+    await createRelease(tag);
+    return;
   }
 
   if (tagExist) {
@@ -44,10 +46,16 @@ export default async function () {
   }
 
   // 建立 PR
-  await createPRs(tag);
+  const success = await createPRs(tag);
 
   // 建立 Release
-  await createRelease(tag);
+  if (!Config.instance.releaseInfo.disable) {
+    if (!success) {
+      notice('[bump] Create PR(s) failed! Stop creating GitHub release');
+    } else {
+      await createRelease(tag);
+    }
+  }
 }
 
 async function bump(changelog: Changelog) {
@@ -91,15 +99,18 @@ async function bump(changelog: Changelog) {
 async function createPRs(tag: Tag) {
   const stage = Config.instance.stage;
   const branch = Config.instance.branch;
-  if (!stage || !branch) return;
+  if (!stage || !branch) return true;
 
-  await createPR(tag, branch);
+  let success = await createPR(tag, branch);
   for await (const sibling of Object.values(branch.siblings)) {
-    await createPR(tag, sibling);
+    const s2 = await createPR(tag, sibling);
+    success = s2 ? success : false;
   }
+
+  return success;
 }
 
-function createPR(tag: Tag, b: BaseBranchInfo) {
+async function createPR(tag: Tag, b: BaseBranchInfo) {
   const repo = Config.instance.prInfo.repo;
   const temp = Config.instance.prInfo.template;
   const title = Config.instance.prInfo.title
@@ -120,24 +131,30 @@ function createPR(tag: Tag, b: BaseBranchInfo) {
   notice(`[pr] Creating branch ${b.name} in ${repo} (${b.head} -> ${b.base})`);
 
   // https://cli.github.com/manual/gh_pr_create
-  return gh(
-    'pr',
-    'create',
-    '--title',
-    title,
-    '--body',
-    body,
-    '--assignee',
-    '@me',
-    '--base',
-    b.base,
-    '--head',
-    b.head,
-    '--repo',
-    Config.instance.prInfo.repo,
-    ...b.reviewers.map((reviewer) => ['--reviewer', reviewer]).flat(),
-    ...(b.labels.map((label) => ['--label', label]).flat() ?? []),
-  ).catch((e) => error(e));
+  try {
+    await gh(
+      'pr',
+      'create',
+      '--title',
+      title,
+      '--body',
+      body,
+      '--assignee',
+      '@me',
+      '--base',
+      b.base,
+      '--head',
+      b.head,
+      '--repo',
+      Config.instance.prInfo.repo,
+      ...b.reviewers.map((reviewer) => ['--reviewer', reviewer]).flat(),
+      ...(b.labels.map((label) => ['--label', label]).flat() ?? []),
+    );
+    return true;
+  } catch (e) {
+    error(`${e}`);
+    return false;
+  }
 }
 
 function createRelease(tag: Tag) {

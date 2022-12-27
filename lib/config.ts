@@ -269,6 +269,7 @@ export class Config {
 
     function getReleaseInfo(): ReleaseInfo {
       const info: Partial<ReleaseInfo> = config['release'] ?? {};
+      info.disable = getBoolConfig('release_disable', info.disable);
       info.preRelease = getBoolConfig('release_pre', info.preRelease);
       info.draft = getBoolConfig('release_draft', info.draft);
 
@@ -551,4 +552,4 @@ type DepsInfo = {
   preCommands: Commands;
   postCommands: Commands;
 };
-type ReleaseInfo = { preRelease: boolean; draft: boolean };
+type ReleaseInfo = { disable: boolean; preRelease: boolean; draft: boolean };
