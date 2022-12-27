@@ -5,7 +5,7 @@
  */
 
 import api from '../lib/api.js';
-import { getPackageJsonFile, readFile } from '../lib/helper.js';
+import { getPackageJsonFile, npm, readFile } from '../lib/helper.js';
 import { notice } from '../lib/logger.js';
 
 //------------------------------------------------------------------------------
@@ -70,7 +70,12 @@ ${message}`);
     process.argv.includes('--v');
 
   if (needVersion) {
-    return console.log(`version-bumper: ${getVersion()}`);
+    console.log(`bumper ${getVersion()}
+Update command: npm i -g @evan361425/version-bumper`);
+    const info = await npm('search', '@evan361425/version-bumper');
+    const latestVer = info.split('\n')[1]?.split('|')[4]?.trim() ?? 'unknown';
+    console.log(`Latest version: ${latestVer}`);
+    return;
   }
 
   if (needHelp) {
