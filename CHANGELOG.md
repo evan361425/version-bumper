@@ -8,6 +8,11 @@
 
 Please check git diff.
 
+## [v0.6.0] - 2022-12-27
+
+-   ([9952134](https://github.com/evan361425/version-bumper/commit/995213488a9c47288753cbad59346505f6269160)) feat: allow disable github release - Shueh Chou Lu
+-   ([09174db](https://github.com/evan361425/version-bumper/commit/09174dbf51fa0b89677833afa45b261c228be17a)) feat: show latest version - Shueh Chou Lu
+
 ## [v0.5.3] - 2022-12-27
 
 -   ([2dbbb3f](https://github.com/evan361425/version-bumper/commit/2dbbb3f78a0c4ea287ecf2f95d6f704e2a54ba6e)) fix: add autolink in template ticket - Shueh Chou Lu
@@ -87,7 +92,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.5.3...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.6.0...HEAD
+[v0.6.0]: https://github.com/evan361425/version-bumper/compare/v0.5.3...v0.6.0
 [v0.5.3]: https://github.com/evan361425/version-bumper/compare/v0.5.2...v0.5.3
 [v0.5.2]: https://github.com/evan361425/version-bumper/compare/v0.5.1...v0.5.2
 [v0.5.1]: https://github.com/evan361425/version-bumper/compare/v0.5.0...v0.5.1
