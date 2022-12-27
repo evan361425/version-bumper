@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.5.3] - 2022-12-27
+
+-   ([2dbbb3f](https://github.com/evan361425/version-bumper/commit/2dbbb3f78a0c4ea287ecf2f95d6f704e2a54ba6e)) fix: add autolink in template ticket - Shueh Chou Lu
+
 ## [v0.5.2] - 2022-12-21
 
 -   ([01a9498](https://github.com/evan361425/version-bumper/commit/01a9498740ea922d406971f69fa0e12179a80712)) fix: correct default commit message - Shueh Chou Lu
@@ -83,7 +87,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.5.2...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.5.3...HEAD
+[v0.5.3]: https://github.com/evan361425/version-bumper/compare/v0.5.2...v0.5.3
 [v0.5.2]: https://github.com/evan361425/version-bumper/compare/v0.5.1...v0.5.2
 [v0.5.1]: https://github.com/evan361425/version-bumper/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/evan361425/version-bumper/compare/v0.4.5...v0.5.0
