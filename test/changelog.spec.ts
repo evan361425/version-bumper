@@ -50,6 +50,7 @@ describe('Changelog', function () {
         '## [v1.2.3-rc1] - 2022-02-03\n\n' +
         'Hi there\n\n' +
         '## [V1.2.2] - 2022-02-01\n\n' +
+        '### QQ\n\n' +
         'QQ\n\n' +
         '[unreleased]: https://hi/unreleased\n' +
         '[v1.2.3-rc1]: https://hi/v1.2.3-rc1\n' +
@@ -62,7 +63,7 @@ describe('Changelog', function () {
     const testData: [string, string, string][] = [
       ['Unreleased', 'Some unreleased', ''],
       ['v1.2.3-rc1', 'Hi there', '2022-02-03'],
-      ['V1.2.2', 'QQ', '2022-02-01'],
+      ['V1.2.2', '### QQ\n\nQQ', '2022-02-01'],
     ];
 
     for (const [key, body, date] of testData) {
@@ -99,6 +100,7 @@ describe('Changelog', function () {
       '## [v1.2.3-rc1] - 2022-02-03\n\n' +
       'Hi there\n\n' +
       '## [V1.2.2] - 2022-02-01\n\n' +
+      '### QQ\n\n' +
       'QQ\n\n' +
       '[unreleased]: https://github.com/example/example/compare/new-version-1.2.4...HEAD\n' +
       '[new-version-1.2.4]: https://github.com/example/example/compare/new-version-1.2.3...new-version-1.2.4\n' +
