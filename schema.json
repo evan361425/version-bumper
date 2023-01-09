@@ -167,6 +167,11 @@
               "default": false,
               "description": "當這個 Tag 被觸發時，是否修改 Changelog，\n如果 `prOnly` 為是，則不會去改 Changelog"
             },
+            "packageJson": {
+              "type": "boolean",
+              "default": false,
+              "description": "當這個 Tag 被觸發時，是否修改 package.json 的 version，\n預設會跟著 `changelog` 的設定"
+            },
             "release": {
               "type": "object",
               "additionalProperties": false,
@@ -206,9 +211,17 @@
           "title": "Tag 的版本模式",
           "description": "以逗號（,）做為區隔，\n例如 `^v\\d+.\\d+.\\d+-rc\\d*$,^v\\d+.\\d+.\\d+$`\n必須每個都有值"
         },
-        "tagChangelogs": {
+        "tagPackageJson": {
+          "title": "Tag 是否要去修改 package.json 的 version",
+          "type": "boolean",
+          "default": false,
+          "description": "設定任一值則代表所有 tag 都會修改 package.json\n預設會跟著 tag_changelog 走"
+        },
+        "tagChangelog": {
           "title": "Tag 是否要去修改 Changelog",
-          "description": "以逗號（,）做為區隔，有任一值則為 true"
+          "type": "boolean",
+          "default": false,
+          "description": "設定任一值則代表所有 tag 都會修改 Changelog"
         },
         "releaseEnable": {
           "title": "是否建立 GitHub release",

@@ -128,7 +128,7 @@ export class Config {
 
       const names = stf(getConfig('tag_names'));
       const patterns = stf(getConfig('tag_patterns'));
-      const changelogs = stf(getConfig('tag_changelogs'));
+      const changelog = getBoolConfig('tag_changelog');
 
       if (names && patterns) {
         tags = {};
@@ -137,13 +137,13 @@ export class Config {
           // @ts-expect-error Type 'undefined' cannot be used as an index type.
           tags[names[i]] = {
             pattern: patterns[i],
-            changelog: changelogs ? Boolean(changelogs[i]) : false,
           };
         }
       }
 
       Object.entries(tags).forEach(([, tag]) => {
-        tag.changelog ??= false;
+        tag.changelog ??= changelog;
+        tag.packageJson ??= getBoolConfig('tag_package_json', tag.changelog);
         tag.release = getReleaseInfo(tag);
       });
 
@@ -497,6 +497,7 @@ function underLine2Camel(key: string) {
 type TagInfo = {
   pattern: string;
   changelog: boolean;
+  packageJson: boolean;
   release: ReleaseInfo;
 };
 export type BaseBranchInfo = {

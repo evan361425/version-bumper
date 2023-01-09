@@ -42,7 +42,8 @@ describe('Config', function () {
       auto_link_values: 'auto_link_values',
       tag_names: 'tag_names',
       tag_patterns: 'tag_patterns',
-      tag_changelogs: 'tag_changelog',
+      tag_changelog: 'tag_changelog',
+      tag_package_json: 'tag_package_json',
       pr_repo: 'pr_repo',
       pr_title: 'pr_title',
       pr_template: 'pr_template',
@@ -80,6 +81,7 @@ describe('Config', function () {
         shouldNotShow: {
           pattern: 'shouldNotShow',
           changelog: false,
+          packageJson: false,
           release: {
             enable: false,
             title: 'shouldNotShow',
@@ -146,6 +148,7 @@ describe('Config', function () {
         tag_names: {
           pattern: 'tag_patterns',
           changelog: true,
+          packageJson: true,
           release: {
             enable: true,
             title: 'release_title',

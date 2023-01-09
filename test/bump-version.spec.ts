@@ -103,6 +103,7 @@ First Release
       test: {
         pattern: '^v1.0.\\d+$',
         changelog: true,
+        packageJson: true,
         release: {
           enable: true,
           draft: false,

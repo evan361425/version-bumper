@@ -78,7 +78,14 @@ async function bump(changelog: Changelog) {
   if (polluted) await gitCommit(msg);
 
   if (tagInfo.changelog) {
-    await npm('version', '--no-commit-hooks', '--no-git-tag-version', tag.key);
+    if (tagInfo.packageJson) {
+      await npm(
+        'version',
+        '--no-commit-hooks',
+        '--no-git-tag-version',
+        tag.key,
+      );
+    }
 
     if (!Config.instance.changelogInfo.disable) {
       notice('[bump] Start updating changelog');
