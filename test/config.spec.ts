@@ -59,7 +59,8 @@ describe('Config', function () {
       latest_diff_enable: 'latest_diff_enable',
       latest_diff_allowed: 'latest_diff_allowed',
       latest_diff_ignored: 'latest_diff_ignored',
-      release_disable: 'release_disable',
+      release_enable: 'release_enable',
+      release_title: 'release_title',
       release_pre: 'release_pre',
       release_draft: 'release_draft',
     }).forEach(([k, v]) => setEnv(k, v));
@@ -79,6 +80,12 @@ describe('Config', function () {
         shouldNotShow: {
           pattern: 'shouldNotShow',
           changelog: false,
+          release: {
+            enable: false,
+            title: 'shouldNotShow',
+            preRelease: false,
+            draft: false,
+          },
         },
       },
       pr: {
@@ -91,11 +98,6 @@ describe('Config', function () {
             base: 'shouldNotShow',
           },
         },
-      },
-      release: {
-        disable: false,
-        preRelease: false,
-        draft: false,
       },
       latestInfo: {
         version: 'shouldNotShow',
@@ -133,11 +135,6 @@ describe('Config', function () {
       prOnly: true,
       releaseOnly: true,
       noPush: true,
-      releaseInfo: {
-        disable: true,
-        draft: true,
-        preRelease: true,
-      },
       changelogInfo: {
         disable: true,
         template: 'changelog_template',
@@ -149,6 +146,12 @@ describe('Config', function () {
         tag_names: {
           pattern: 'tag_patterns',
           changelog: true,
+          release: {
+            enable: true,
+            title: 'release_title',
+            draft: true,
+            preRelease: true,
+          },
         },
       },
       prInfo: {

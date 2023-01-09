@@ -54,7 +54,6 @@ export class Config {
   readonly latestInfo: LatestInfo;
   readonly tagsInfo: TagsInfo;
   readonly prInfo: PRInfo;
-  readonly releaseInfo: ReleaseInfo;
 
   readonly autoLinks: Record<string, string>;
 
@@ -88,7 +87,6 @@ export class Config {
     this.tagsInfo = getTagsInfo();
     this.prInfo = getPRInfo();
     this.latestInfo = getLatestInfo();
-    this.releaseInfo = getReleaseInfo();
     this.autoLinks = getAutoLinks();
 
     this.stage = getStage(this.latestInfo.version, this.tagsInfo);
@@ -146,6 +144,7 @@ export class Config {
 
       Object.entries(tags).forEach(([, tag]) => {
         tag.changelog ??= false;
+        tag.release = getReleaseInfo(tag);
       });
 
       return tags;
@@ -267,9 +266,10 @@ export class Config {
       return result;
     }
 
-    function getReleaseInfo(): ReleaseInfo {
-      const info: Partial<ReleaseInfo> = config['release'] ?? {};
-      info.disable = getBoolConfig('release_disable', info.disable);
+    function getReleaseInfo(data: { release?: unknown }): ReleaseInfo {
+      const info: Partial<ReleaseInfo> = data['release'] ?? {};
+      info.enable = getBoolConfig('release_enable', info.enable);
+      info.title = getConfig('release_title', info.title);
       info.preRelease = getBoolConfig('release_pre', info.preRelease);
       info.draft = getBoolConfig('release_draft', info.draft);
 
@@ -497,6 +497,7 @@ function underLine2Camel(key: string) {
 type TagInfo = {
   pattern: string;
   changelog: boolean;
+  release: ReleaseInfo;
 };
 export type BaseBranchInfo = {
   name: string;
@@ -552,4 +553,9 @@ type DepsInfo = {
   preCommands: Commands;
   postCommands: Commands;
 };
-type ReleaseInfo = { disable: boolean; preRelease: boolean; draft: boolean };
+export type ReleaseInfo = {
+  enable: boolean;
+  title?: string;
+  preRelease: boolean;
+  draft: boolean;
+};

@@ -40,6 +40,9 @@ describe('Bump version', function () {
         test: {
           pattern: '^v1.0.\\d+$',
           changelog: true,
+          release: {
+            enable: true,
+          },
         },
       },
       pr: {
@@ -100,6 +103,11 @@ First Release
       test: {
         pattern: '^v1.0.\\d+$',
         changelog: true,
+        release: {
+          enable: true,
+          draft: false,
+          preRelease: false,
+        },
       },
     });
     expect(cfg.prInfo).to.eql({
@@ -223,12 +231,13 @@ First Release
         "'--reviewer' 'r1' '--reviewer' 'r2'",
         "'--label' 'label-1' '--label' 'label-2'",
       ].join(' '),
-      '[bump] Creating GitHub release',
+      '[bump] Creating GitHub release v1.0.2',
       [
-        "[cmd]: gh 'release' 'create'",
+        "[cmd]: gh 'release' 'create' 'v1.0.2'",
         "'--title' 'v1.0.2'",
+        "'--prerelease=false'",
+        "'--draft=false'",
         "'--notes' 'ticket prefix: [TICKET-200](replace-200)\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: [TICKET-200](replace-200)'",
-        "'v1.0.2'",
       ].join(' '),
     ]);
   });

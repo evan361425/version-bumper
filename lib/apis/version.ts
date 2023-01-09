@@ -1,5 +1,5 @@
 import { Changelog } from '../changelog.js';
-import { BaseBranchInfo, Config } from '../config.js';
+import { BaseBranchInfo, Config, ReleaseInfo } from '../config.js';
 import { gh, git, npm, writeFile } from '../helper.js';
 import { error, notice } from '../logger.js';
 import { Tag } from '../tag.js';
@@ -24,7 +24,10 @@ export default async function () {
   }
 
   if (Config.instance.releaseOnly) {
-    await createRelease(tag);
+    if (Config.instance.tag) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      await doRelease(tag, Config.instance.tag!.release);
+    }
     return;
   }
 
@@ -49,11 +52,12 @@ export default async function () {
   const success = await createPRs(tag);
 
   // 建立 Release
-  if (!Config.instance.releaseInfo.disable) {
+  const tagInfo = Config.instance.tag;
+  if (tagInfo && tagInfo.release.enable) {
     if (!success) {
       notice('[bump] Create PR(s) failed! Stop creating GitHub release');
     } else {
-      await createRelease(tag);
+      await doRelease(tag, tagInfo.release);
     }
   }
 }
@@ -157,12 +161,20 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
   }
 }
 
-function createRelease(tag: Tag) {
-  const args = ['--title', tag.key, '--notes', tag.bodyWithAutoLinks, tag.key];
-  Config.instance.releaseInfo.preRelease && args.unshift('--prerelease');
-  Config.instance.releaseInfo.draft && args.unshift('--draft');
-  notice('[bump] Creating GitHub release');
+function doRelease(tag: Tag, config: ReleaseInfo) {
+  const args = [
+    'create',
+    tag.key,
+    '--title',
+    config.title ?? tag.key,
+    `--prerelease=${config.preRelease}`,
+    `--draft=${config.draft}`,
+    '--notes',
+    tag.bodyWithAutoLinks,
+  ];
+
+  notice(`[bump] Creating GitHub release ${config.title ?? tag.key}`);
 
   // https://cli.github.com/manual/gh_release_create
-  return gh('release', 'create', ...args);
+  return gh('release', ...args);
 }

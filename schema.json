@@ -145,32 +145,6 @@
         }
       }
     },
-    "release": {
-      "type": "object",
-      "additionalProperties": false,
-      "title": "ReleaseInfo",
-      "description": "GitHub Release 設定",
-      "properties": {
-        "disable": {
-          "cliName": "releaseDisable",
-          "type": "boolean",
-          "default": false,
-          "description": "不要建立 GitHub Release"
-        },
-        "preRelease": {
-          "cliName": "releasePre",
-          "type": "boolean",
-          "default": false,
-          "description": "在 `gh` 指令中增加 `--pre-release`"
-        },
-        "draft": {
-          "cliName": "releaseDraft",
-          "type": "boolean",
-          "default": false,
-          "description": "在 `gh` 指令中增加 `--draft`"
-        }
-      }
-    },
     "tags": {
       "type": "object",
       "additionalProperties": false,
@@ -192,6 +166,33 @@
               "type": "boolean",
               "default": false,
               "description": "當這個 Tag 被觸發時，是否修改 Changelog，\n如果 `prOnly` 為是，則不會去改 Changelog"
+            },
+            "release": {
+              "type": "object",
+              "additionalProperties": false,
+              "title": "ReleaseInfo",
+              "description": "GitHub Release 設定",
+              "properties": {
+                "enable": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "要建立 GitHub Release"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "release 的標題，預設使用 tag key"
+                },
+                "preRelease": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "在 `gh` 指令中使用 `--pre-release=true|false`"
+                },
+                "draft": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "在 `gh` 指令中增加 `--draft=true|false`"
+                }
+              }
             }
           }
         }
@@ -208,6 +209,26 @@
         "tagChangelogs": {
           "title": "Tag 是否要去修改 Changelog",
           "description": "以逗號（,）做為區隔，有任一值則為 true"
+        },
+        "releaseEnable": {
+          "title": "是否建立 GitHub release",
+          "description": "設定任一值則代表所有 tag 都會建立 GitHub Release"
+        },
+        "releaseTitle": {
+          "title": "GitHub release 的標題",
+          "description": "若不設定，則使用 tag 名稱"
+        },
+        "releasePre": {
+          "title": "GitHub release 是否為 pre-release",
+          "type": "boolean",
+          "default": false,
+          "description": "在 `gh` 指令中增加 `--pre-release=true|false`"
+        },
+        "releaseDraft": {
+          "title": "GitHub release 是否為草稿",
+          "type": "boolean",
+          "default": false,
+          "description": "在 `gh` 指令中增加 `--draft=true|false`"
         }
       }
     },
