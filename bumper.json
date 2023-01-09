@@ -1,9 +1,6 @@
 {
   "$schema": "schema.json",
   "repoLink": "https://github.com/evan361425/version-bumper",
-  "release": {
-    "draft": true
-  },
   "changelog": {
     "commitMessage": "chore: bump to {version}",
     "template": "{content}"
@@ -15,6 +12,12 @@
     }
   },
   "tags": {
-    "release": { "pattern": "v[0-9]+.[0-9]+.[0-9]+", "changelog": true }
+    "release": {
+      "pattern": "v[0-9]+.[0-9]+.[0-9]+",
+      "changelog": true,
+      "release": {
+        "enable": true
+      }
+    }
   }
 }

@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.7.0] - 2023-01-09
+
+-   ([2bc2888](https://github.com/evan361425/version-bumper/commit/2bc2888ca7f64d2c20e0ae0c739aac3bebd15ac0)) fix: release config in tag - Shueh Chou Lu
+
 ## [v0.6.0] - 2022-12-27
 
 -   ([9952134](https://github.com/evan361425/version-bumper/commit/995213488a9c47288753cbad59346505f6269160)) feat: allow disable github release - Shueh Chou Lu
@@ -92,7 +96,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.6.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.7.0...HEAD
+[v0.7.0]: https://github.com/evan361425/version-bumper/compare/v0.6.0...v0.7.0
 [v0.6.0]: https://github.com/evan361425/version-bumper/compare/v0.5.3...v0.6.0
 [v0.5.3]: https://github.com/evan361425/version-bumper/compare/v0.5.2...v0.5.3
 [v0.5.2]: https://github.com/evan361425/version-bumper/compare/v0.5.1...v0.5.2
