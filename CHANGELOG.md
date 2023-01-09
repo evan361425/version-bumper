@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.7.1] - 2023-01-09
+
+-   ([59a6446](https://github.com/evan361425/version-bumper/commit/59a6446d880c115da5eed0f9048c233dc0786f40)) feat: allow disable package.json bumping - Shueh Chou Lu
+
 ## [v0.7.0] - 2023-01-09
 
 -   ([2bc2888](https://github.com/evan361425/version-bumper/commit/2bc2888ca7f64d2c20e0ae0c739aac3bebd15ac0)) fix: release config in tag - Shueh Chou Lu
@@ -96,7 +100,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.7.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.7.1...HEAD
+[v0.7.1]: https://github.com/evan361425/version-bumper/compare/v0.7.0...v0.7.1
 [v0.7.0]: https://github.com/evan361425/version-bumper/compare/v0.6.0...v0.7.0
 [v0.6.0]: https://github.com/evan361425/version-bumper/compare/v0.5.3...v0.6.0
 [v0.5.3]: https://github.com/evan361425/version-bumper/compare/v0.5.2...v0.5.3
