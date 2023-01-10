@@ -5,11 +5,12 @@ Yet, another version bumper for npm.
 Features:
 
 -   Changelog
+-   Update package.json
 -   Autolink for tickets (e.g. Jira)
 -   GitHub PR
 -   GitHub release
--   Configuration
--   Small without any dependencies
+-   Highly flexible by configuration
+-   Tiny without any dependencies
 
 ## Usage
 
@@ -22,7 +23,7 @@ npm i -g @evan361425/version-bumper
 npm i -D @evan361425/version-bumper
 ```
 
-You can see how to play with bumper by:
+You can see command's details by:
 
 ```bash
 $ bumper help
@@ -38,7 +39,7 @@ Args:
         -v, --version version info
 ```
 
-Usually you will use `init` for a new project:
+Usually, you will need to `init` for a new project:
 
 ```bash
 $ bumper init
@@ -69,14 +70,16 @@ You should add `./bumper.json` on the project root folder, else set it by the ar
 
 You can start by `bumper init` or write it yourself, for example:
 
-```json
+```jsonc
 {
+  // Please go to https://json-schema.app/view/%23/%23%2Fproperties%2Fdeps?url=https%3A%2F%2Fraw.githubusercontent.com%2Fevan361425%2Fversion-bumper%2Fmaster%2Fschema.json
+  // for better description!
   "$schema": "node_modules/@evan361425/version-bumper/schema.json",
-  "repoLink": "https://github.com/example/example",
+  "repoLink": "https://github.com/example/example", // default using currenct repo
   "changelog": {
-    "header": "# Changelog\nThis is my awesome changelog.",
+    "header": "# Changelog\n\nThis is my awesome changelog.",
     "template": "ticket: {ticket}\n\n{content}",
-    "commitMessage": "chore: bump to {version}\nticket: {ticket}\nstage: {stage}"
+    "commitMessage": "chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}"
   },
   "tags": {
     "develop": {
@@ -87,25 +90,29 @@ You can start by `bumper init` or write it yourself, for example:
     },
     "production": {
       "pattern": "v[0-9]+.[0-9]+.[0-9]+",
-      "changelog": true
+      "changelog": true, // Edit changelog and commit/push it
+      "release": {
+        "enable": true // GitHub Release
+      }
     }
   },
   "pr": {
     "repo": "example/other-repo",
-    "template": "This PR is auto-generated from bumper\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}",
+    "template": "This PR is auto-generated from bumper\n\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}",
     "branches": {
       "develop": {
-        "base": "main",
-        "head": "deploy/develop"
+        "base": "deploy/develop",
+        "head": "master"
       },
       "staging": {
-        "base": "deploy/develop",
-        "head": "deploy/staging",
-        "labels": ["staging"]
+        "base": "deploy/staging",
+        "head": "deploy/develop",
+        "labels": ["staging"],
+        "reviewers": ["some-guy"]
       },
       "production": {
-        "base": "deploy/staging",
-        "head": "deploy/production",
+        "base": "deploy/production",
+        "head": "deploy/staging",
         "labels": ["production"],
         "siblings": {
           "dr": {
@@ -140,10 +147,10 @@ You can start by `bumper init` or write it yourself, for example:
 
 ### Priority
 
-Arguments can be sent in environment/command/file (detail in `bumper <command> -h`),
-and the highest priority will be the environment variables.
+Arguments can be sent in environment/command/file (see details in `bumper <command> -h`).
 
-The lowest priority will be argument in config file.
+The highest priority will be the environment variables,
+and the lowest priority will be the settings in configuration file.
 
 ```txt
 Env > Command > Configuration file
