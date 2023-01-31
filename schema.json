@@ -30,7 +30,7 @@
     "beforeScripts": {
       "type": "array",
       "cliName": "",
-      "description": "在執行非直接的指令前，\n會執行這些指令，各值代表一個 sub-process 的指令",
+      "description": "在執行非直接的指令前，\n會執行這些指令，各值代表一個 sub-process 的指令\n支援的變數有：\nTag 名稱：`tag`、Tag 內文：`content`",
       "items": {
         "type": ["string", "array"],
         "title": "若為陣列，則每個值代表該指令的參數",

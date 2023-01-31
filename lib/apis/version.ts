@@ -35,15 +35,8 @@ export default async function () {
     throw tagExist;
   }
 
-  for (const script of Config.instance.beforeScripts) {
-    const [cmd, rawArgs] = Array.isArray(script)
-      ? [script[0], script.slice(1)]
-      : breaker(script, 1, ' ');
-    const args = Array.isArray(rawArgs) ? rawArgs : rawArgs.split(' ');
-
-    if (cmd) {
-      notice(await createCommand(cmd, args));
-    }
+  for await (const script of Config.instance.beforeScripts) {
+    await execScript(script, tag);
   }
 
   // 如有必要，更新 Changelog
@@ -70,6 +63,20 @@ export default async function () {
     } else {
       await doRelease(tag, tagInfo.release);
     }
+  }
+}
+
+async function execScript(script: string | string[], tag: Tag) {
+  const [cmd, rawArgs] = Array.isArray(script)
+    ? [script[0], script.slice(1)]
+    : breaker(script, 1, ' ');
+  const args = (Array.isArray(rawArgs) ? rawArgs : rawArgs.split(' ')).map(
+    (e) => e.replace(/{tag}/g, tag.key).replace(/{content}/g, tag.body),
+  );
+
+  if (cmd) {
+    const result = await createCommand(cmd, args);
+    notice(`[bump] Execute command '${cmd}' done, output:\n${result}`);
   }
 }
 

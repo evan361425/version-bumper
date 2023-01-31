@@ -21,6 +21,7 @@ describe('Bump version', function () {
     useFakeTimers(now.getTime());
     const config = new Config({
       repoLink: 'https://github.com/example/example',
+      beforeScripts: [['a', '"{content}qq"'], 'c de{tag}f'],
       latestInfo: {
         version: 'v1.0.2',
         ticket: 'TICKET-200',
@@ -155,6 +156,10 @@ First Release
     expect(cfg.stage).to.eql('test');
     expect(calls).to.eql([
       '[changelog] Start parsing',
+      '[cmd]: a \'"ticket prefix: TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200qq"\'',
+      "[bump] Execute command 'a' done, output:\n",
+      "[cmd]: c 'dev1.0.2f'",
+      "[bump] Execute command 'c' done, output:\n",
       '[bump] Requirements checked',
       "[cmd]: git 'update-index' '--refresh'",
       "[cmd]: npm 'version' '--no-commit-hooks' '--no-git-tag-version' 'v1.0.2'",
