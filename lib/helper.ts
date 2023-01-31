@@ -58,6 +58,13 @@ export function createCommand(name: string, args: string[]): Promise<string> {
       command.on('close', () => {
         error !== '' ? rej(new Error(error)) : res(response);
       });
+      command.on('exit', (code, signal) => {
+        if (code !== 0) {
+          rej(
+            new Error(`Return non-zero code(${signal}) with message: ${error}`),
+          );
+        }
+      });
     })
   );
 }
