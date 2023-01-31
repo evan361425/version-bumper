@@ -8,6 +8,12 @@
 
 Please check git diff.
 
+## [v0.9.0] - 2023-01-31
+
+-   ([73ede1f](https://github.com/evan361425/version-bumper/commit/73ede1f92a164229152a9cb0f80310add6904b66)) fix: reject command when return non-zero code - Shueh Chou Lu
+-   ([ee0f0ee](https://github.com/evan361425/version-bumper/commit/ee0f0ee8e9f289547c7130d237e8a3ce94f92b83)) fix: default using false on packageJson - Shueh Chou Lu
+-   ([0b002e4](https://github.com/evan361425/version-bumper/commit/0b002e456e81753e3ffe4ce234077396e58c916a)) fix: log tag info when bumping - Shueh Chou Lu
+
 ## [v0.8.1] - 2023-01-31
 
 -   ([feb50b1](https://github.com/evan361425/version-bumper/commit/feb50b1866c15758decd15ad5deea700b99ad31f)) feat: add tag and content var for script - Shueh Chou Lu
@@ -109,7 +115,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.8.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.9.0...HEAD
+[v0.9.0]: https://github.com/evan361425/version-bumper/compare/v0.8.1...v0.9.0
 [v0.8.1]: https://github.com/evan361425/version-bumper/compare/v0.8.0...v0.8.1
 [v0.8.0]: https://github.com/evan361425/version-bumper/compare/v0.7.1...v0.8.0
 [v0.7.1]: https://github.com/evan361425/version-bumper/compare/v0.7.0...v0.7.1

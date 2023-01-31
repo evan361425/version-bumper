@@ -15,7 +15,7 @@
     "release": {
       "pattern": "v[0-9]+.[0-9]+.[0-9]+",
       "changelog": true,
-      "packageJson": false,
+      "packageJson": true,
       "release": {
         "enable": true
       }
