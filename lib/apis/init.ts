@@ -19,7 +19,10 @@ export default async function () {
   const changelog = new Changelog(Config.instance.changelog);
 
   if (allowed(files.config, 'configuration')) {
-    const schema = path.relative(path.resolve(), getSchemaFile());
+    let schema = path.relative(path.resolve(), getSchemaFile());
+    if (schema.startsWith('..')) {
+      schema = getSchemaFile();
+    }
 
     writeFile(
       files.config,
@@ -30,7 +33,7 @@ export default async function () {
           changelog: {
             template: '單號：{ticket}\n\n{content}',
             commitMessage:
-              'chore: bump to {version}\nticket: {ticket}\nstage: {stage}',
+              'chore: bump to {version}\n\nticket: {ticket}\n\nstage: {stage}',
           },
           latestInfo: {
             file: 'docs/LATEST_VERSION.md',
@@ -41,7 +44,7 @@ export default async function () {
           pr: {
             repo: config.prInfo.repo,
             template:
-              'This PR is auto-generated from bumper\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}',
+              'This PR is auto-generated from bumper\n\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}',
           },
         },
         undefined,

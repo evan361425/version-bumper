@@ -74,8 +74,8 @@ export class Config {
   }
 
   constructor(config: Record<string, never>) {
-    getBoolConfig('verbose') && startVerbose();
-    getBoolConfig('debug') && startDebug();
+    getBoolConfig('verbose', false, undefined, ['v']) && startVerbose();
+    getBoolConfig('debug', false, undefined, ['d']) && startDebug();
 
     // ================ bump versions ================
     this.repoLink = getConfig('repo_link') ?? '';
@@ -333,11 +333,17 @@ export class Config {
       key: string,
       other = false,
       cfg?: Record<string, never>,
+      aliases?: string[],
     ): boolean {
       if (process.env['BUMPER_' + key.toUpperCase()]) return true;
 
       const k = underLine2Camel(key);
       if (process.argv.indexOf('--' + k) !== -1) return true;
+      if (aliases !== undefined) {
+        for (const alias of aliases) {
+          if (process.argv.indexOf('-' + alias) !== -1) return true;
+        }
+      }
 
       cfg ??= config;
       return cfg[k] === undefined ? other : Boolean(cfg[k]);
