@@ -1,6 +1,6 @@
 import { Changelog } from '../changelog.js';
 import { BaseBranchInfo, Config, ReleaseInfo } from '../config.js';
-import { gh, git, npm, writeFile } from '../helper.js';
+import { breaker, createCommand, gh, git, npm, writeFile } from '../helper.js';
 import { error, notice } from '../logger.js';
 import { Tag } from '../tag.js';
 
@@ -33,6 +33,17 @@ export default async function () {
 
   if (tagExist) {
     throw tagExist;
+  }
+
+  for (const script of Config.instance.beforeScripts) {
+    const [cmd, rawArgs] = Array.isArray(script)
+      ? [script[0], script.slice(1)]
+      : breaker(script, 1, ' ');
+    const args = Array.isArray(rawArgs) ? rawArgs : rawArgs.split(' ');
+
+    if (cmd) {
+      notice(await createCommand(cmd, args));
+    }
   }
 
   // 如有必要，更新 Changelog

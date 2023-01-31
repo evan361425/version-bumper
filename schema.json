@@ -27,6 +27,18 @@
       "default": false,
       "description": "是否把 Tag 和 Commit 推至 remote repo"
     },
+    "beforeScripts": {
+      "type": "array",
+      "cliName": "",
+      "description": "在執行非直接的指令前，\n會執行這些指令，各值代表一個 sub-process 的指令",
+      "items": {
+        "type": ["string", "array"],
+        "title": "若為陣列，則每個值代表該指令的參數",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
     "changelog": {
       "type": "object",
       "additionalProperties": false,

@@ -57,6 +57,8 @@ export class Config {
 
   readonly autoLinks: Record<string, string>;
 
+  readonly beforeScripts: string[] | string[][];
+
   // ====== For bump deps =======
 
   readonly deps: DepsInfo;
@@ -88,6 +90,7 @@ export class Config {
     this.prInfo = getPRInfo();
     this.latestInfo = getLatestInfo();
     this.autoLinks = getAutoLinks();
+    this.beforeScripts = getBeforeScripts();
 
     this.stage = getStage(this.latestInfo.version, this.tagsInfo);
 
@@ -264,6 +267,10 @@ export class Config {
       });
 
       return result;
+    }
+
+    function getBeforeScripts(): string[] {
+      return config['beforeScripts'] ?? [];
     }
 
     function getReleaseInfo(data: { release?: unknown }): ReleaseInfo {

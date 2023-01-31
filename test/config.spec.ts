@@ -71,6 +71,7 @@ describe('Config', function () {
       prOnly: false,
       releaseOnly: false,
       noPush: false,
+      beforeScripts: ['no-env-to-override'],
       changelog: {
         disable: false,
         template: 'shouldNotShow',
@@ -137,6 +138,7 @@ describe('Config', function () {
       prOnly: true,
       releaseOnly: true,
       noPush: true,
+      beforeScripts: ['no-env-to-override'],
       changelogInfo: {
         disable: true,
         template: 'changelog_template',
