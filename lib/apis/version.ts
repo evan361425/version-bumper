@@ -108,6 +108,7 @@ async function bump(changelog: Changelog) {
     if (!Config.instance.changelogInfo.disable) {
       notice('[bump] Start updating changelog');
       writeFile(Config.instance.changelogInfo.file, changelog.toString());
+      notice(`[bump] Add tag ${tag.key}:\n${tag.bodyWithAutoLinks}`);
     }
 
     // commit both npm version and changelog
