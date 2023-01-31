@@ -7,13 +7,14 @@ on:
       - master
     paths:
       - "**.ts"
+  pull_request:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Setup .npmrc file to publish to npm
       - name: Set up environment
@@ -21,5 +22,8 @@ jobs:
         with:
           node-version: 14
 
+      - name: Lint and format
+        run: npm i && npm run lint && npm run format:check && npm run build
+
       - name: Test
-        run: npm i && npm run lint && npm run format:check && npm test && npm run build
+        run: npm test
