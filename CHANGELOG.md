@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.9.1] - 2023-01-31
+
+-   ([20fc285](https://github.com/evan361425/version-bumper/commit/20fc285740b561fedac542ead43726d602936c9c)) fix: show error msg when execute scripts - Shueh Chou Lu
+
 ## [v0.9.0] - 2023-01-31
 
 -   ([73ede1f](https://github.com/evan361425/version-bumper/commit/73ede1f92a164229152a9cb0f80310add6904b66)) fix: reject command when return non-zero code - Shueh Chou Lu
@@ -115,7 +119,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.9.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.9.1...HEAD
+[v0.9.1]: https://github.com/evan361425/version-bumper/compare/v0.9.0...v0.9.1
 [v0.9.0]: https://github.com/evan361425/version-bumper/compare/v0.8.1...v0.9.0
 [v0.8.1]: https://github.com/evan361425/version-bumper/compare/v0.8.0...v0.8.1
 [v0.8.0]: https://github.com/evan361425/version-bumper/compare/v0.7.1...v0.8.0
