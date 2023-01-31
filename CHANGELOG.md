@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.8.1] - 2023-01-31
+
+-   ([feb50b1](https://github.com/evan361425/version-bumper/commit/feb50b1866c15758decd15ad5deea700b99ad31f)) feat: add tag and content var for script - Shueh Chou Lu
+
 ## [v0.8.0] - 2023-01-31
 
 -   ([6843b1c](https://github.com/evan361425/version-bumper/commit/6843b1c0b96c5823cd5d2d3b35a2273156897442)) feat: add before scripts for bumping - Shueh Chou Lu
@@ -105,7 +109,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.8.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.8.1...HEAD
+[v0.8.1]: https://github.com/evan361425/version-bumper/compare/v0.8.0...v0.8.1
 [v0.8.0]: https://github.com/evan361425/version-bumper/compare/v0.7.1...v0.8.0
 [v0.7.1]: https://github.com/evan361425/version-bumper/compare/v0.7.0...v0.7.1
 [v0.7.0]: https://github.com/evan361425/version-bumper/compare/v0.6.0...v0.7.0
