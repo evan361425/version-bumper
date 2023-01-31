@@ -75,8 +75,12 @@ async function execScript(script: string | string[], tag: Tag) {
   );
 
   if (cmd) {
-    const result = await createCommand(cmd, args);
-    notice(`[bump] Execute command '${cmd}' done, output:\n${result}`);
+    try {
+      const result = await createCommand(cmd, args);
+      notice(`[bump] Execute command '${cmd}' done, output:\n${result}`);
+    } catch (error) {
+      notice(`[bump] Execute command '${cmd}' error, output:\n${error}`);
+    }
   }
 }
 
