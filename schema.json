@@ -182,7 +182,7 @@
             "packageJson": {
               "type": "boolean",
               "default": false,
-              "description": "當這個 Tag 被觸發時，是否修改 package.json 的 version，\n預設會跟著 `changelog` 的設定"
+              "description": "當這個 Tag 被觸發時，是否修改 package.json 的 version。"
             },
             "release": {
               "type": "object",

@@ -146,7 +146,7 @@ export class Config {
 
       Object.entries(tags).forEach(([, tag]) => {
         tag.changelog ??= changelog;
-        tag.packageJson ??= getBoolConfig('tag_package_json', tag.changelog);
+        tag.packageJson ??= getBoolConfig('tag_package_json');
         tag.release = getReleaseInfo(tag);
       });
 

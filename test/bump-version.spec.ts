@@ -41,6 +41,7 @@ describe('Bump version', function () {
         test: {
           pattern: '^v1.0.\\d+$',
           changelog: true,
+          packageJson: true,
           release: {
             enable: true,
           },
