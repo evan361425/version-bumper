@@ -80,6 +80,7 @@ async function execScript(script: string | string[], tag: Tag) {
       notice(`[bump] Execute command '${cmd}' done, output:\n${result}`);
     } catch (error) {
       notice(`[bump] Execute command '${cmd}' error, output:\n${error}`);
+      throw error;
     }
   }
 }
