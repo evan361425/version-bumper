@@ -8,6 +8,11 @@
 
 Please check git diff.
 
+## [v0.9.2] - 2023-02-10
+
+-   ([0112292](https://github.com/evan361425/version-bumper/commit/0112292dd9ac9239a09f0e407a5fe5b8f150acbb)) fix: throw error if execute script failed - Shueh Chou Lu
+-   ([04e515d](https://github.com/evan361425/version-bumper/commit/04e515dc6d81e893bff61fea7e2b0d3c8ee22bfd)) ci: test on PR - Shueh Chou Lu
+
 ## [v0.9.1] - 2023-01-31
 
 -   ([20fc285](https://github.com/evan361425/version-bumper/commit/20fc285740b561fedac542ead43726d602936c9c)) fix: show error msg when execute scripts - Shueh Chou Lu
@@ -119,7 +124,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.9.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.9.2...HEAD
+[v0.9.2]: https://github.com/evan361425/version-bumper/compare/v0.9.1...v0.9.2
 [v0.9.1]: https://github.com/evan361425/version-bumper/compare/v0.9.0...v0.9.1
 [v0.9.0]: https://github.com/evan361425/version-bumper/compare/v0.8.1...v0.9.0
 [v0.8.1]: https://github.com/evan361425/version-bumper/compare/v0.8.0...v0.8.1
