@@ -79,8 +79,12 @@ async function execScript(script: string | string[], tag: Tag) {
       const result = await createCommand(cmd, args);
       notice(`[bump] Execute command '${cmd}' done, output:\n${result}`);
     } catch (error) {
-      notice(`[bump] Execute command '${cmd}' error, output:\n${error}`);
-      throw error;
+      notice(
+        `[bump] Execute command '${cmd} ${args.join(
+          ' ',
+        )}' error, output:\n${error}`,
+      );
+      process.exit(1);
     }
   }
 }
