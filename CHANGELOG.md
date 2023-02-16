@@ -8,6 +8,11 @@
 
 Please check git diff.
 
+## [v0.10.0] - 2023-02-16
+
+-   ([2e29c41](https://github.com/evan361425/version-bumper/commit/2e29c419c02669ee858f06efd7227bd0846e90d8)) feat: add content on commit message - Shueh Chou Lu
+-   ([650d59f](https://github.com/evan361425/version-bumper/commit/650d59fb95bbcf617ded08c81ce5d1e8910cbbce)) fix: avoid ignore value start with dash - Shueh Chou Lu
+
 ## [v0.9.3] - 2023-02-13
 
 -   ([b44b8d8](https://github.com/evan361425/version-bumper/commit/b44b8d80fe529542f9b3fc638e904523ec4386a4)) fix: output script error and exit, not throw error - Shueh Chou Lu
@@ -128,7 +133,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.9.3...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.10.0...HEAD
+[v0.10.0]: https://github.com/evan361425/version-bumper/compare/v0.9.3...v0.10.0
 [v0.9.3]: https://github.com/evan361425/version-bumper/compare/v0.9.2...v0.9.3
 [v0.9.2]: https://github.com/evan361425/version-bumper/compare/v0.9.1...v0.9.2
 [v0.9.1]: https://github.com/evan361425/version-bumper/compare/v0.9.0...v0.9.1
