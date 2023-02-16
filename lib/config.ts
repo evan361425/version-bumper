@@ -469,7 +469,7 @@ function getOptionFromArgs(key: string): string | undefined {
   if (arg && arg.includes('=')) return breaker(arg, 1, '=')[1];
 
   const value = process.argv[index + 1];
-  if (!value || value.startsWith('-')) return;
+  if (!value) return;
 
   return value;
 }
