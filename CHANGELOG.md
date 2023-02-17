@@ -8,6 +8,11 @@
 
 Please check git diff.
 
+## [v0.11.0] - 2023-02-17
+
+-   ([ec1ee14](https://github.com/evan361425/version-bumper/commit/ec1ee14c16877887d67c07cad90f528f10a7b1cf)) fix: print known error instead throw it - Shueh Chou Lu
+-   ([fde469e](https://github.com/evan361425/version-bumper/commit/fde469eb0e86fccd7a229b743016543effcb3773)) feat: use regex to choose diff commit - Shueh Chou Lu
+
 ## [v0.10.0] - 2023-02-16
 
 -   ([2e29c41](https://github.com/evan361425/version-bumper/commit/2e29c419c02669ee858f06efd7227bd0846e90d8)) feat: add content on commit message - Shueh Chou Lu
@@ -133,7 +138,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.10.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.11.0...HEAD
+[v0.11.0]: https://github.com/evan361425/version-bumper/compare/v0.10.0...v0.11.0
 [v0.10.0]: https://github.com/evan361425/version-bumper/compare/v0.9.3...v0.10.0
 [v0.9.3]: https://github.com/evan361425/version-bumper/compare/v0.9.2...v0.9.3
 [v0.9.2]: https://github.com/evan361425/version-bumper/compare/v0.9.1...v0.9.2
