@@ -8,4 +8,5 @@ export function info(message: string) {
 }
 export function error(message: string) {
   console.error(message);
+  process.exit(1);
 }

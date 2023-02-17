@@ -424,23 +424,23 @@ export class Config {
   verify(command: AllowedCommand) {
     if (command === 'version') {
       if (!this.latestInfo.version) {
-        throw new Error(`Missing required 'latestVersion' in config`);
+        error(`Missing required 'latestVersion' in config`);
       }
 
       for (const tag of Object.values(this.tagsInfo)) {
         if (!tag.pattern) {
-          throw new Error('Required `pattern` in tags config');
+          error('Required `pattern` in tags config');
         }
       }
 
       for (const [key, meta] of Object.entries(this.prInfo.branches)) {
         if (!this.tagsInfo[key]) {
-          throw new Error(
+          error(
             `Missing ${key} in tags config, PR.branches should mappable to tags' keys`,
           );
         }
         if (!meta.base) {
-          throw new Error('Required `base` in PR.branches config');
+          error('Required `base` in PR.branches config');
         }
       }
     }

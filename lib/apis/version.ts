@@ -32,7 +32,7 @@ export default async function () {
   }
 
   if (tagExist) {
-    throw tagExist;
+    error((tagExist as { message: string }).message);
   }
 
   for await (const script of Config.instance.beforeScripts) {
@@ -192,7 +192,7 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     );
     return true;
   } catch (e) {
-    error(`${e}`);
+    notice(`${e}`);
     return false;
   }
 }
