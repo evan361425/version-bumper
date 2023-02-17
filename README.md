@@ -29,10 +29,11 @@ You can see command's details by:
 $ bumper help
 Usage: (npx) bumper <command> [args]
 Commands
-        version Update the version of NPM project
-        deps    Update dependencies with hooking
-        help    Show this message
-        init    Setup configuration files
+        (default) Update the version of NPM project
+        version   Show the installed and latest version
+        deps      Update dependencies with hooking
+        help      Show this message
+        init      Setup configuration files
 
 Args:
         -h, --help Show command's arguments
