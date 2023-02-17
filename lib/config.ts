@@ -393,11 +393,13 @@ export class Config {
 
             const title = e[2] ?? '';
             const igs = this.latestInfo.diff.ignored;
-            if (igs.some((ig) => title.startsWith(ig))) {
+            if (igs.some((ig) => new RegExp(ig).test(title))) {
               return;
             }
             const als = this.latestInfo.diff.allowed;
-            return als.length ? als.some((al) => title.startsWith(al)) : true;
+            return als.length
+              ? als.some((al) => new RegExp(al).test(title))
+              : true;
           })
           .map((e) => {
             const [hash, name, title] = e as [string, string, string];
