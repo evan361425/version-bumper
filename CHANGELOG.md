@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.11.1] - 2023-02-17
+
+-   ([4156a79](https://github.com/evan361425/version-bumper/commit/4156a7983555612af7fa4aa495b2fea8bc72401b)) fix: ignore hash links if this commit from PR - Shueh Chou Lu
+
 ## [v0.11.0] - 2023-02-17
 
 -   ([ec1ee14](https://github.com/evan361425/version-bumper/commit/ec1ee14c16877887d67c07cad90f528f10a7b1cf)) fix: print known error instead throw it - Shueh Chou Lu
@@ -138,7 +142,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.11.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.11.1...HEAD
+[v0.11.1]: https://github.com/evan361425/version-bumper/compare/v0.11.0...v0.11.1
 [v0.11.0]: https://github.com/evan361425/version-bumper/compare/v0.10.0...v0.11.0
 [v0.10.0]: https://github.com/evan361425/version-bumper/compare/v0.9.3...v0.10.0
 [v0.9.3]: https://github.com/evan361425/version-bumper/compare/v0.9.2...v0.9.3
