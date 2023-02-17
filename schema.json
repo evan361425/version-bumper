@@ -119,13 +119,13 @@
             "allowed": {
               "type": "array",
               "cliName": "latestDiffAllowed",
-              "description": "允許的前綴，若無則所有 Commit 都會被使用，\n`latestDiffIgnored` 會優先使用",
+              "description": "允許的 RegEx 字元，\n若無，則所有 Commit 都會被使用，\n`latestDiffIgnored` 會優先使用",
               "items": { "type": "string" }
             },
             "ignored": {
               "type": "array",
               "cliName": "latestDiffIgnored",
-              "description": "忽略的前綴，\n凡是 commit 的標題前綴於特定字眼，就忽略他",
+              "description": "忽略的 RegEx 字元，\n凡是 commit 的標題命中這個 pattern，就忽略他",
               "items": { "type": "string" }
             }
           }
