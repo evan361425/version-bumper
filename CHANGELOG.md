@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.11.3] - 2023-02-22
+
+-   ([0bc3871](https://github.com/evan361425/version-bumper/commit/0bc3871df01483ed4a8b4aa76affc773a2a087c1)) fix: extract links in tag message - Shueh Chou Lu
+
 ## [v0.11.2] - 2023-02-22
 
 -   ([dda3026](https://github.com/evan361425/version-bumper/commit/dda3026dd6c9cbffcd019eb0621dc539ac65af24)) fix: add bullet before pr commit - Shueh Chou Lu
@@ -146,7 +150,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.11.2...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.11.3...HEAD
+[v0.11.3]: https://github.com/evan361425/version-bumper/compare/v0.11.2...v0.11.3
 [v0.11.2]: https://github.com/evan361425/version-bumper/compare/v0.11.1...v0.11.2
 [v0.11.1]: https://github.com/evan361425/version-bumper/compare/v0.11.0...v0.11.1
 [v0.11.0]: https://github.com/evan361425/version-bumper/compare/v0.10.0...v0.11.0
