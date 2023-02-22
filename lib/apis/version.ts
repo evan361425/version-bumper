@@ -1,6 +1,14 @@
 import { Changelog } from '../changelog.js';
 import { BaseBranchInfo, Config, ReleaseInfo } from '../config.js';
-import { breaker, createCommand, gh, git, npm, writeFile } from '../helper.js';
+import {
+  breaker,
+  createCommand,
+  extractLinks,
+  gh,
+  git,
+  npm,
+  writeFile,
+} from '../helper.js';
 import { error, notice } from '../logger.js';
 import { Tag } from '../tag.js';
 
@@ -43,7 +51,7 @@ export default async function () {
   await bump(changelog);
 
   // 根據 latestVersion 打 tag
-  await git('tag', tag.key, '-m', tag.body);
+  await git('tag', tag.key, '-m', extractLinks(tag.body));
 
   // 把變動（含 tag）推上去
   if (!Config.instance.noPush) {

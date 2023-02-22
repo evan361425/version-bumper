@@ -180,3 +180,27 @@ export function mockFile(target: string) {
   if (mockedFiles) mockedFiles.push(target);
   else mockedFiles = [target];
 }
+
+export function extractLinks(body: string): string {
+  const linker = new RegExp(`\\[([^\\]]+)\\]\\([^\\)\\s]+\\)`, 'mi');
+  let result = '';
+
+  do {
+    const index = body.search(linker);
+    if (index === -1) {
+      result += body;
+      break;
+    }
+
+    const [hit, text] = linker.exec(body.substring(index)) as unknown as [
+      string,
+      string,
+    ];
+    const rest = index + hit.length;
+
+    result += body.substring(0, index) + text;
+    body = body.substring(rest);
+  } while (body !== '');
+
+  return result;
+}
