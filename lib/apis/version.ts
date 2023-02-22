@@ -107,7 +107,7 @@ async function bump(changelog: Changelog) {
   const msg = Config.instance.changelogInfo.commitMessage
     .replace(/{version}/g, tag.key ?? '')
     .replace(/{stage}/g, stage)
-    .replace(/{content}/g, tag.body)
+    .replace(/{content}/g, extractLinks(tag.body))
     .replace(/{ticket}/g, tag.ticket ?? '');
 
   const polluted = await git('update-index', '--refresh');
