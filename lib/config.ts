@@ -404,7 +404,7 @@ export class Config {
           .map((e) => {
             const [hash, name, title] = e as [string, string, string];
             // if this commit come from PR, don't add hash message
-            if (title.includes('#')) return `${title} - ${name}`;
+            if (/#\d+(\s|$)/.test(title)) return `-   ${title} - ${name}`;
 
             const h = hash.substring(0, 7);
             const l = `${this.repoLink}/commit/${hash}`;
