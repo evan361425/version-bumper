@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.11.5] - 2023-02-23
+
+-   ([e34c100](https://github.com/evan361425/version-bumper/commit/e34c100c2366d3779580c2d9c1587069c51c4a6e)) fix: prepend pr id if exist (#1) - Shueh Chou Lu
+
 ## [v0.11.4] - 2023-02-22
 
 -   ([4002b72](https://github.com/evan361425/version-bumper/commit/4002b72717c277e7464db1d057eca53253225aca)) fix: extract links in commit message - Shueh Chou Lu
@@ -154,7 +158,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.11.4...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.11.5...HEAD
+[v0.11.5]: https://github.com/evan361425/version-bumper/compare/v0.11.4...v0.11.5
 [v0.11.4]: https://github.com/evan361425/version-bumper/compare/v0.11.3...v0.11.4
 [v0.11.3]: https://github.com/evan361425/version-bumper/compare/v0.11.2...v0.11.3
 [v0.11.2]: https://github.com/evan361425/version-bumper/compare/v0.11.1...v0.11.2
