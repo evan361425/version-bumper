@@ -377,16 +377,18 @@ export class Config {
         // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
         const t = (await git(true, 'describe', '--abbrev=0')).trim();
         // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-        const d = await git(true, 'log', '--pretty=%H "%an" %s', `HEAD...${t}`);
+        const d = await git(true, 'log', '--pretty=%H %al %s', `HEAD...${t}`);
 
         const commits = d
           .split('\n')
           .map((e) => {
-            const [hash, rest] = breaker(e.trim(), 1, ' "');
+            const [hash, rest] = breaker(e.trim(), 1, ' ');
             if (!hash || !rest) return;
-            const [name, title] = breaker(rest, 1, '" ');
+            const [name, title] = breaker(rest.trim(), 1, ' ');
 
-            return name && title ? [hash, name, title] : undefined;
+            return name && title
+              ? [hash, name.trim(), title.trim()]
+              : undefined;
           })
           .filter((e) => {
             if (!e) return;
@@ -404,7 +406,16 @@ export class Config {
           .map((e) => {
             const [hash, name, title] = e as [string, string, string];
             // if this commit come from PR, don't add hash message
-            if (/#\d+(\s|$)/.test(title)) return `-   ${title} - ${name}`;
+            if (/#\d+/.test(title)) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              const result = /\(?#(\d+)\)?/.exec(title)!;
+              const prefix = title.substring(0, result.index);
+              const postfix = title.substring(result.index + result[0].length);
+              const t = (prefix + postfix).trim();
+              const id = result[1];
+              const l = `${this.repoLink}/pull/${id}`;
+              return `-   ([#${id}](${l})) ${t} - ${name}`;
+            }
 
             const h = hash.substring(0, 7);
             const l = `${this.repoLink}/commit/${hash}`;
