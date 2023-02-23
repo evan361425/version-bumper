@@ -229,12 +229,12 @@ describe('Config', function () {
     mockCommand(
       Promise.resolve(
         [
-          'hash1__! "Author 1" this is msg',
-          'hash2 "Author 1" ',
+          'hash1__! author-1 this is msg',
+          'hash2 author-1 ',
           'hash3 ',
           'hash4 author',
-          'hash5__! "Author 2" this is other msg',
-          'hash6 "Author 2" ignored msg',
+          'hash5__! author-2 this is other msg(#31)',
+          'hash6 author-2 ignored msg',
         ].join('\n'),
       ),
     );
@@ -248,8 +248,8 @@ describe('Config', function () {
 
     expect(config.latestInfo.content).to.eql(
       [
-        '-   ([hash1__](some-link/commit/hash1__!)) this is msg - Author 1',
-        '-   ([hash5__](some-link/commit/hash5__!)) this is other msg - Author 2',
+        '-   ([hash1__](some-link/commit/hash1__!)) this is msg - author-1',
+        '-   ([#31](some-link/pull/31)) this is other msg - author-2',
       ].join('\n'),
     );
   });
@@ -263,10 +263,10 @@ describe('Config', function () {
     mockCommand(
       Promise.resolve(
         [
-          'hash1 "Author 1" this is msg',
-          'hash2__! "Author 1" abc this is msg',
-          'hash3 "Author 2" this is other msg',
-          'hash4__! "Author 2" def msg',
+          'hash1 author-1 this is msg',
+          'hash2__! author-1 abc this is msg',
+          'hash3 author-2 this is other msg',
+          'hash4__! author-2 def msg',
         ].join('\n'),
       ),
     );
@@ -279,8 +279,8 @@ describe('Config', function () {
 
     expect(config.latestInfo.content).to.eql(
       [
-        '-   ([hash2__](some-link/commit/hash2__!)) abc this is msg - Author 1',
-        '-   ([hash4__](some-link/commit/hash4__!)) def msg - Author 2',
+        '-   ([hash2__](some-link/commit/hash2__!)) abc this is msg - author-1',
+        '-   ([hash4__](some-link/commit/hash4__!)) def msg - author-2',
       ].join('\n'),
     );
   });
