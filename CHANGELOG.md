@@ -8,6 +8,11 @@
 
 Please check git diff.
 
+## [v0.12.0] - 2023-03-05
+
+-   ([e5de06a](https://github.com/evan361425/version-bumper/commit/e5de06a30e345ad7476b37d2d90f59032f712d7b)) feat: add beforeCommit and afterScripts - wu0dj2k7ao3
+-   ([e6c3397](https://github.com/evan361425/version-bumper/commit/e6c3397976b1ace068be3d1a2fb754222098ac24)) test: correct test - wu0dj2k7ao3
+
 ## [v0.11.5] - 2023-02-23
 
 -   ([e34c100](https://github.com/evan361425/version-bumper/commit/e34c100c2366d3779580c2d9c1587069c51c4a6e)) fix: prepend pr id if exist (#1) - Shueh Chou Lu
@@ -158,7 +163,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.11.5...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.12.0...HEAD
+[v0.12.0]: https://github.com/evan361425/version-bumper/compare/v0.11.5...v0.12.0
 [v0.11.5]: https://github.com/evan361425/version-bumper/compare/v0.11.4...v0.11.5
 [v0.11.4]: https://github.com/evan361425/version-bumper/compare/v0.11.3...v0.11.4
 [v0.11.3]: https://github.com/evan361425/version-bumper/compare/v0.11.2...v0.11.3
