@@ -43,7 +43,6 @@ describe('Config', function () {
       tag_names: 'tag_names',
       tag_patterns: 'tag_patterns',
       tag_changelog: 'tag_changelog',
-      tag_package_json: 'tag_package_json',
       pr_repo: 'pr_repo',
       pr_title: 'pr_title',
       pr_template: 'pr_template',
@@ -72,6 +71,8 @@ describe('Config', function () {
       releaseOnly: false,
       noPush: false,
       beforeScripts: ['no-env-to-override'],
+      afterScripts: ['no-env-to-override'],
+      beforeCommit: ['no-env-to-override'],
       changelog: {
         disable: false,
         template: 'shouldNotShow',
@@ -82,7 +83,6 @@ describe('Config', function () {
         shouldNotShow: {
           pattern: 'shouldNotShow',
           changelog: false,
-          packageJson: false,
           release: {
             enable: false,
             title: 'shouldNotShow',
@@ -139,6 +139,8 @@ describe('Config', function () {
       releaseOnly: true,
       noPush: true,
       beforeScripts: ['no-env-to-override'],
+      afterScripts: ['no-env-to-override'],
+      beforeCommit: ['no-env-to-override'],
       changelogInfo: {
         disable: true,
         template: 'changelog_template',
@@ -150,7 +152,6 @@ describe('Config', function () {
         tag_names: {
           pattern: 'tag_patterns',
           changelog: true,
-          packageJson: true,
           release: {
             enable: true,
             title: 'release_title',

@@ -6,7 +6,6 @@ import {
   extractLinks,
   gh,
   git,
-  npm,
   writeFile,
 } from '../helper.js';
 import { error, notice } from '../logger.js';
@@ -72,6 +71,10 @@ export default async function () {
       await doRelease(tag, tagInfo.release);
     }
   }
+
+  for await (const script of Config.instance.afterScripts) {
+    await execScript(script, tag);
+  }
 }
 
 async function execScript(script: string | string[], tag: Tag) {
@@ -114,13 +117,8 @@ async function bump(changelog: Changelog) {
   if (polluted) await gitCommit(msg);
 
   if (tagInfo.changelog) {
-    if (tagInfo.packageJson) {
-      await npm(
-        'version',
-        '--no-commit-hooks',
-        '--no-git-tag-version',
-        tag.key,
-      );
+    for await (const script of Config.instance.beforeCommit) {
+      await execScript(script, tag);
     }
 
     if (!Config.instance.changelogInfo.disable) {

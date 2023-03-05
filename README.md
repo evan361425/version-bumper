@@ -1,11 +1,11 @@
 # Version Bumper
 
-Yet, another version bumper for npm.
+Yet, another helper for bumping version.
 
 Features:
 
 -   Changelog
--   Update package.json
+-   Hooking: before commit, before, after scripts
 -   Autolink for tickets (e.g. Jira)
 -   GitHub PR
 -   GitHub release
@@ -76,7 +76,10 @@ You can start by `bumper init` or write it yourself, for example:
   // Please go to https://json-schema.app/view/%23/%23%2Fproperties%2Fdeps?url=https%3A%2F%2Fraw.githubusercontent.com%2Fevan361425%2Fversion-bumper%2Fmaster%2Fschema.json
   // for better description!
   "$schema": "node_modules/@evan361425/version-bumper/schema.json",
-  "repoLink": "https://github.com/example/example", // default using currenct repo
+  "repoLink": "https://github.com/example/example", // default using current repo
+  "beforeCommit": [
+    "npm version --no-git-tag-version --no-commit-hooks {tag}"
+  ],
   "changelog": {
     "header": "# Changelog\n\nThis is my awesome changelog.",
     "template": "ticket: {ticket}\n\n{content}",

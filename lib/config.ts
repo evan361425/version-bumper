@@ -58,6 +58,8 @@ export class Config {
   readonly autoLinks: Record<string, string>;
 
   readonly beforeScripts: string[] | string[][];
+  readonly afterScripts: string[] | string[][];
+  readonly beforeCommit: string[] | string[][];
 
   // ====== For bump deps =======
 
@@ -90,7 +92,9 @@ export class Config {
     this.prInfo = getPRInfo();
     this.latestInfo = getLatestInfo();
     this.autoLinks = getAutoLinks();
-    this.beforeScripts = getBeforeScripts();
+    this.beforeScripts = config['beforeScripts'] ?? [];
+    this.afterScripts = config['afterScripts'] ?? [];
+    this.beforeCommit = config['beforeCommit'] ?? [];
 
     this.stage = getStage(this.latestInfo.version, this.tagsInfo);
 
@@ -146,7 +150,6 @@ export class Config {
 
       Object.entries(tags).forEach(([, tag]) => {
         tag.changelog ??= changelog;
-        tag.packageJson ??= getBoolConfig('tag_package_json');
         tag.release = getReleaseInfo(tag);
       });
 
@@ -267,10 +270,6 @@ export class Config {
       });
 
       return result;
-    }
-
-    function getBeforeScripts(): string[] {
-      return config['beforeScripts'] ?? [];
     }
 
     function getReleaseInfo(data: { release?: unknown }): ReleaseInfo {
@@ -526,7 +525,6 @@ function underLine2Camel(key: string) {
 type TagInfo = {
   pattern: string;
   changelog: boolean;
-  packageJson: boolean;
   release: ReleaseInfo;
 };
 export type BaseBranchInfo = {

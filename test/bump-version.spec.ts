@@ -28,6 +28,9 @@ describe('Bump version', function () {
         content:
           'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
       },
+      beforeCommit: [
+        'npm version --no-commit-hooks --no-git-tag-version {tag}',
+      ],
       changelog: {
         header: 'test default header',
         template: 'ticket prefix: {ticket}\n\n{content}',
@@ -164,6 +167,7 @@ First Release
       '[bump] Requirements checked',
       "[cmd]: git 'update-index' '--refresh'",
       "[cmd]: npm 'version' '--no-commit-hooks' '--no-git-tag-version' 'v1.0.2'",
+      "[bump] Execute command 'npm' done, output:\n",
       '[bump] Start updating changelog',
       '[auto-links] hit( TICKET-200), target(TICKET-), num(200)',
       '[auto-links] is not in link',
