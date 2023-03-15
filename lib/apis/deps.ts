@@ -188,7 +188,6 @@ async function execCommand(cmd: string | string[], dep?: OutdatedPackage) {
 
 async function setUpRepo(deps: OutdatedPackage[]) {
   info('[dep] start getting repo links');
-  const names = deps.map((d) => d.name);
 
   /**
    * example:
@@ -198,17 +197,21 @@ async function setUpRepo(deps: OutdatedPackage[]) {
    * redis repo available at the following URL:
    *   https://github.com/redis/node-redis
    */
-  const result = await npm('repo', ...[...names, '--no-browser']);
-  const lines = result
-    .split('\n')
-    .map((e) => e.trim())
-    .filter(Boolean);
+  for await (const d of deps) {
+    try {
+      const result = await npm('repo', d.name, '--no-browser');
+      const lines = result
+        .split('\n')
+        .map((e) => e.trim())
+        .filter(Boolean);
 
-  for (const d of deps) {
-    const idx = lines.indexOf(`${d.name} repo available at the following URL:`);
-    const url = lines[idx + 1];
-    if (url?.startsWith('https:/')) {
-      d.setLink(url);
+      const url = lines[lines.length - 1];
+      if (url?.startsWith('https:/')) {
+        d.setLink(url);
+      }
+    } catch (error) {
+      console.log((error as Error).message);
+      continue;
     }
   }
 }

@@ -56,13 +56,18 @@ export function createCommand(name: string, args: string[]): Promise<string> {
         rej(err);
       });
       command.on('close', () => {
-        error !== '' ? rej(new Error(error)) : res(response);
+        error !== ''
+          ? rej(new Error(`Command: ${name} ${args.join(' ')} \n${error}`))
+          : res(response);
       });
       command.on('exit', (code, signal) => {
         if (code !== 0 && error) {
           rej(
             new Error(
-              `Return non-zero code(${code}) with signal(${signal}) and response:\n${response}\nerror:\n${error}`,
+              `Command: ${name} ${args.join(' ')} \n` +
+                `return non-zero code: ${code}\n` +
+                `with signal: ${signal}\n` +
+                `and response:\n${response}\nerror:\n${error}`,
             ),
           );
         }
