@@ -59,10 +59,10 @@ export function createCommand(name: string, args: string[]): Promise<string> {
         error !== '' ? rej(new Error(error)) : res(response);
       });
       command.on('exit', (code, signal) => {
-        if (code !== 0) {
+        if (code !== 0 && error) {
           rej(
             new Error(
-              `Return non-zero code(${signal}) with message:\n${response}\nerror:\n${error}`,
+              `Return non-zero code(${code}) with signal(${signal}) and response:\n${response}\nerror:\n${error}`,
             ),
           );
         }

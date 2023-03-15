@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.12.1] - 2023-03-15
+
+
+
 ## [v0.12.0] - 2023-03-05
 
 -   ([e5de06a](https://github.com/evan361425/version-bumper/commit/e5de06a30e345ad7476b37d2d90f59032f712d7b)) feat: add beforeCommit and afterScripts - wu0dj2k7ao3
@@ -163,7 +167,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.12.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.12.1...HEAD
+[v0.12.1]: https://github.com/evan361425/version-bumper/compare/v0.12.0...v0.12.1
 [v0.12.0]: https://github.com/evan361425/version-bumper/compare/v0.11.5...v0.12.0
 [v0.11.5]: https://github.com/evan361425/version-bumper/compare/v0.11.4...v0.11.5
 [v0.11.4]: https://github.com/evan361425/version-bumper/compare/v0.11.3...v0.11.4
