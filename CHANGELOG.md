@@ -10,11 +10,11 @@ Please check git diff.
 
 ## [v0.12.2] - 2023-03-15
 
-
+-   ([c69c58d](https://github.com/evan361425/version-bumper/commit/c69c58df7874be17e657ec2aad9422941891cedf)) fix(deps): get repo link separately
 
 ## [v0.12.1] - 2023-03-15
 
-
+-   ([50c5d83](https://github.com/evan361425/version-bumper/commit/50c5d83eae449ce0ccac7eae2308c5eec2cf8b3b)) fix: show command when error
 
 ## [v0.12.0] - 2023-03-05
 

@@ -9,7 +9,7 @@
   "latestInfo": {
     "diff": {
       "enable": true,
-      "allowed": ["doc:", "chore"]
+      "ignored": ["^doc", "^chore"]
     }
   },
   "tags": {
