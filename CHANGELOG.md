@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.12.2] - 2023-03-15
+
+
+
 ## [v0.12.1] - 2023-03-15
 
 
@@ -167,7 +171,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.12.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.12.2...HEAD
+[v0.12.2]: https://github.com/evan361425/version-bumper/compare/v0.12.1...v0.12.2
 [v0.12.1]: https://github.com/evan361425/version-bumper/compare/v0.12.0...v0.12.1
 [v0.12.0]: https://github.com/evan361425/version-bumper/compare/v0.11.5...v0.12.0
 [v0.11.5]: https://github.com/evan361425/version-bumper/compare/v0.11.4...v0.11.5
