@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v0.13.0] - 2023-03-20
+
+-   ([822a221](https://github.com/evan361425/version-bumper/commit/822a221ffeaaf08188488dcd7a7b78f00ebb788b)) feat: allow ignore body in changelog - wu0dj2k7ao3
+
 ## [v0.12.2] - 2023-03-15
 
 -   ([c69c58d](https://github.com/evan361425/version-bumper/commit/c69c58df7874be17e657ec2aad9422941891cedf)) fix(deps): get repo link separately
@@ -171,7 +175,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.12.2...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.13.0...HEAD
+[v0.13.0]: https://github.com/evan361425/version-bumper/compare/v0.12.2...v0.13.0
 [v0.12.2]: https://github.com/evan361425/version-bumper/compare/v0.12.1...v0.12.2
 [v0.12.1]: https://github.com/evan361425/version-bumper/compare/v0.12.0...v0.12.1
 [v0.12.0]: https://github.com/evan361425/version-bumper/compare/v0.11.5...v0.12.0
