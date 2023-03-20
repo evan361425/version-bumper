@@ -9,6 +9,8 @@ export class Changelog {
 
   readonly firstTagKey: string;
 
+  readonly redundant: string = '';
+
   constructor(origin: string) {
     this.tags = [Tag.veryFirst()];
     this.header = Config.instance.changelogInfo.header;
@@ -56,6 +58,12 @@ export class Changelog {
           this.getTagByKey(key.substring(1))?.setLink(link);
         }
       });
+
+    const footLastIdx = origin.substring(footerIdx).search(/\n\n/);
+    this.redundant =
+      footLastIdx === -1
+        ? ''
+        : origin.substring(footerIdx + footLastIdx).trim();
   }
 
   get firstIsUnreleased(): boolean {
@@ -94,14 +102,34 @@ export class Changelog {
   }
 
   toString(): string {
-    const content = [this.header, ...this.tags.map((tag) => tag.toString())];
+    const content = [
+      this.header,
+      ...this.tags.map((tag) => {
+        let body = tag.toString();
+        if (tag.isNew) {
+          const ignoreStart = '<!-- bumper-changelog-ignore-start -->';
+          const ignoreEnd = '<!-- bumper-changelog-ignore-end -->';
+          while (true) {
+            const start = body.search(ignoreStart);
+            if (start === -1) break;
+
+            const end = body.search(ignoreEnd);
+            const r =
+              end === -1 ? '' : body.substring(end + ignoreEnd.length) + '\n';
+            body = body.substring(0, start).trim() + r.trim();
+          }
+        }
+        return body;
+      }),
+    ];
 
     const footer = this.tags
       .map((tag) => tag.toLink())
       .filter((link) => Boolean(link))
       .join('\n');
 
-    return content.join('\n\n## ').trim() + '\n\n' + footer + '\n';
+    const result = content.join('\n\n## ').trim() + '\n\n' + footer + '\n';
+    return this.redundant ? `${result}\n${this.redundant}\n` : result;
   }
 
   static fitAutoLinks(body: string, links: Record<string, string>): string {

@@ -61,7 +61,7 @@ export function createCommand(name: string, args: string[]): Promise<string> {
           : res(response);
       });
       command.on('exit', (code, signal) => {
-        if (code !== 0 && error) {
+        if (code !== 0) {
           rej(
             new Error(
               `Command: ${name} ${args.join(' ')} \n` +

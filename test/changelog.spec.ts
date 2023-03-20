@@ -77,9 +77,13 @@ describe('Changelog', function () {
 
   it('serialized after adding tag', function () {
     const changelog = createChangelog();
-    const tag1 = new Tag('new-version-1.2.3', 'This is body\n\n', {
-      createdDate: '2022-12-30',
-    });
+    const tag1 = new Tag(
+      'new-version-1.2.3',
+      'This is body\n\n<!-- bumper-changelog-ignore-start -->\nThis will ignored\n<!-- bumper-changelog-ignore-end -->\n',
+      {
+        createdDate: '2022-12-30',
+      },
+    );
     const tag2 = new Tag('new-version-1.2.4', '\n\nNewer one\n\nhi there', {
       createdDate: '2022-12-31',
     });
