@@ -5,7 +5,6 @@
     "commitMessage": "chore: bump to {version}",
     "template": "{content}"
   },
-  "beforeCommit": ["npm version --no-commit-hooks --no-git-tag-version {tag}"],
   "latestInfo": {
     "diff": {
       "enable": true,

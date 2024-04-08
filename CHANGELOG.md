@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v1.0.0] - 2024-04-08
+
+-   ([9c7362e](https://github.com/evan361425/version-bumper/commit/9c7362ece2933c149a4d050aa0f6370de2a1b3c8)) ci: use node 20 structure - wu0dj2k7ao3
+
 ## [v0.13.0] - 2023-03-20
 
 -   ([822a221](https://github.com/evan361425/version-bumper/commit/822a221ffeaaf08188488dcd7a7b78f00ebb788b)) feat: allow ignore body in changelog - wu0dj2k7ao3
@@ -175,7 +179,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v0.13.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v1.0.0...HEAD
+[v1.0.0]: https://github.com/evan361425/version-bumper/compare/v0.13.0...v1.0.0
 [v0.13.0]: https://github.com/evan361425/version-bumper/compare/v0.12.2...v0.13.0
 [v0.12.2]: https://github.com/evan361425/version-bumper/compare/v0.12.1...v0.12.2
 [v0.12.1]: https://github.com/evan361425/version-bumper/compare/v0.12.0...v0.12.1
