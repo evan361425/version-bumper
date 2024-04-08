@@ -70,8 +70,7 @@ function printArgsFromSchema(command: string) {
       title: '執行程式時輸出雜七雜八的東西',
       default: false,
       type: 'boolean',
-      description:
-        '他和 debug 只差在 debug 不會真的執行且會輸出 IO 的操作\ndebug 會覆寫此設定',
+      description: '他和 debug 只差在 debug 不會真的執行且會輸出 IO 的操作\ndebug 會覆寫此設定',
       underlineKey: 'verbose',
       alias: ['-v'],
     },
@@ -117,9 +116,7 @@ function printArgsFromSchema(command: string) {
   });
 }
 
-function* parseObject(
-  obj: Record<string, unknown>,
-): Generator<[string, ItemSchema], void, unknown> {
+function* parseObject(obj: Record<string, unknown>): Generator<[string, ItemSchema], void, unknown> {
   if (obj['cli']) {
     for (const entry of Object.entries(obj['cli'])) {
       yield [entry[0], { type: 'string', ...entry[1] }];
@@ -139,9 +136,7 @@ function* parseObject(
         if (child['type'] === 'array') {
           const d = child['description'];
           child['type'] = 'string' as never;
-          child['description'] = (
-            d ? arrayPrefix + '\n' + d : arrayPrefix
-          ) as never;
+          child['description'] = (d ? arrayPrefix + '\n' + d : arrayPrefix) as never;
         }
 
         const k = child['cliName'] ?? key;
@@ -161,11 +156,7 @@ function camelToUnderline(value: string) {
   let parsed = value;
   while (re.test(parsed)) {
     const index = re.exec(parsed)?.index ?? -1;
-    parsed =
-      parsed.substring(0, index) +
-      '_' +
-      parsed.charAt(index).toLowerCase() +
-      parsed.substring(index + 1);
+    parsed = parsed.substring(0, index) + '_' + parsed.charAt(index).toLowerCase() + parsed.substring(index + 1);
   }
 
   return parsed;

@@ -1,11 +1,5 @@
 import { Config } from '../config.js';
-import {
-  appendFile,
-  breaker,
-  createCommand,
-  npm,
-  writeFile,
-} from '../helper.js';
+import { appendFile, breaker, createCommand, npm, writeFile } from '../helper.js';
 import { info, notice } from '../logger.js';
 import { PackageJson } from '../package-json.js';
 
@@ -100,16 +94,12 @@ class OutdatedPackage {
     this.name = entry[0] ?? '';
     this.current = entry[1] ?? '';
 
-    const useLatest =
-      Config.instance.deps.allLatest ||
-      match(this.name, Config.instance.deps.latestDeps);
+    const useLatest = Config.instance.deps.allLatest || match(this.name, Config.instance.deps.latestDeps);
     this.target = (useLatest ? entry[3] : entry[2]) ?? '';
   }
 
   get isValid() {
-    return (
-      this.name && this.current && this.target && this.current !== this.target
-    );
+    return this.name && this.current && this.target && this.current !== this.target;
   }
 
   get properties(): string[] {
@@ -135,9 +125,9 @@ class OutdatedPackage {
   }
 }
 
-async function update(info: PrePost, dep?: OutdatedPackage) {
+async function update(prePost: PrePost, dep?: OutdatedPackage) {
   dep && notice(dep.toString());
-  for (const cmd of info.preCommands) {
+  for (const cmd of prePost.preCommands) {
     await execCommand(cmd, dep);
   }
 
@@ -149,8 +139,8 @@ async function update(info: PrePost, dep?: OutdatedPackage) {
   const response = await npm(...cmd);
   response && notice(response);
 
-  for (const cmd of info.postCommands) {
-    await execCommand(cmd, dep);
+  for (const cmd2 of prePost.postCommands) {
+    await execCommand(cmd2, dep);
   }
 }
 
@@ -168,17 +158,17 @@ function match(target: string, list: string[]): boolean {
 }
 
 async function execCommand(cmd: string | string[], dep?: OutdatedPackage) {
-  const [exec, rawArgs] = Array.isArray(cmd)
-    ? [cmd[0], cmd.slice(1)]
-    : breaker(cmd, 1, ' ');
+  const [exec, rawArgs] = Array.isArray(cmd) ? [cmd[0], cmd.slice(1)] : breaker(cmd, 1, ' ');
   const args = Array.isArray(rawArgs) ? rawArgs : rawArgs.split(' ');
   const parsed = args.map((e) => {
-    return dep
-      ? e
-          .replace(/{name}/g, dep.name)
-          .replace(/{current}/g, dep.current)
-          .replace(/{target}/g, dep.target)
-      : e;
+    if (!dep) {
+      return e;
+    }
+
+    return e
+      .replace(/{name}/g, dep.name)
+      .replace(/{current}/g, dep.current)
+      .replace(/{target}/g, dep.target);
   });
 
   if (exec) {

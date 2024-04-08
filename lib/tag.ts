@@ -11,7 +11,7 @@ type TagConfig = {
 
 export class Tag {
   readonly key: string;
-  readonly ticket?: string;
+  readonly ticket: string | undefined;
   readonly raw: boolean;
 
   isNew: boolean;
@@ -38,14 +38,13 @@ export class Tag {
 
     const header = raw.substring(0, splitter === -1 ? undefined : splitter);
     // for example: [v3.7.3-rc1] - 2022-08-30, should get `v3.7.3-rc1` & `2022-08-30`
-    const vd = /\[?([^\[\]]+)\]?[ \-]*([0-9]{4}-[0-9]{2}-[0-9]{2})?/;
+    const vd = /\[?([^[\]]+)\]?[ -]*([0-9]{4}-[0-9]{2}-[0-9]{2})?/;
     const [, version, date] = vd.exec(header) ?? ['', header];
 
-    return new Tag(
-      version ?? '',
-      splitter === -1 ? '' : raw.substring(splitter + 1).trim(),
-      { createdDate: date ?? '', raw: true },
-    );
+    return new Tag(version ?? '', splitter === -1 ? '' : raw.substring(splitter + 1).trim(), {
+      createdDate: date ?? '',
+      raw: true,
+    });
   }
 
   static veryFirst() {
@@ -60,10 +59,7 @@ export class Tag {
 
   get bodyWithAutoLinks(): string {
     if (this._bodyWithAutoLinks === undefined) {
-      this._bodyWithAutoLinks = Changelog.fitAutoLinks(
-        this.body,
-        Config.instance.autoLinks,
-      );
+      this._bodyWithAutoLinks = Changelog.fitAutoLinks(this.body, Config.instance.autoLinks);
     }
 
     return this._bodyWithAutoLinks;
@@ -123,9 +119,7 @@ export class Tag {
     const header = this.link ? `[${this.key}]` : this.key;
     const date = this.createdDate ? ` - ${this.createdDate}` : '';
 
-    return (
-      header + date + '\n\n' + (this.isNew ? this.bodyWithAutoLinks : this.body)
-    );
+    return header + date + '\n\n' + (this.isNew ? this.bodyWithAutoLinks : this.body);
   }
 
   toLink(): string {

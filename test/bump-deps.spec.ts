@@ -1,22 +1,21 @@
-/* eslint-disable mocha/no-hooks-for-single-case */
-import { expect } from 'chai';
-import Sinon from 'sinon';
+import assert from 'node:assert';
+import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import api from '../lib/api.js';
 import { Config } from '../lib/config.js';
 import { mockCommand, mockFile, startDebug, stopDebug } from '../lib/helper.js';
 import { resetEnv, setupEnv } from './warm-up.js';
 
-describe('Bump deps', function () {
+void describe('Bump deps', function () {
   beforeEach(function () {
     resetEnv();
   });
 
   afterEach(function () {
-    Sinon.restore();
     setupEnv();
+    mock.restoreAll();
   });
 
-  it('example', async function () {
+  void it('example', async function () {
     const config = new Config({
       deps: {
         ignored: ['ignored*', 'exactIgnored'],
@@ -30,7 +29,7 @@ describe('Bump deps', function () {
       },
     } as unknown as never);
 
-    Sinon.stub(Config, 'instance').get(() => config);
+    Config.instance = config;
     mockCommand(
       Promise.resolve(`Package Current Wanted Latest
     ignored1   1.0.0    1.1.0    2.0.0
@@ -56,14 +55,14 @@ describe('Bump deps', function () {
     mockFile(pkg);
     mockFile(pkg);
 
-    const stdout = Sinon.stub(console, 'log');
+    const log = mock.method(console, 'log');
     startDebug();
     await api.deps();
     stopDebug();
 
-    const calls = stdout.getCalls().map((call) => call.args[0]);
+    const calls = log.mock.calls.map((call) => call.arguments[0]);
     const call1 = JSON.parse(calls.shift()).deps;
-    expect(call1).to.eql({
+    assert.deepStrictEqual(call1, {
       allLatest: false,
       appendOnly: false,
       devInfo: {
@@ -78,16 +77,10 @@ describe('Bump deps', function () {
       saveExact: false,
     });
 
-    const pre = [
-      "[cmd]: do 'some' 'pre' 'thing'",
-      "[cmd]: do 'some' 'pre thing'",
-    ];
-    const post = [
-      "[cmd]: do 'some' 'post' 'thing'",
-      "[cmd]: do 'some' 'post thing'",
-    ];
+    const pre = ["[cmd]: do 'some' 'pre' 'thing'", "[cmd]: do 'some' 'pre thing'"];
+    const post = ["[cmd]: do 'some' 'post' 'thing'", "[cmd]: do 'some' 'post thing'"];
 
-    expect(calls.filter(Boolean)).to.eql([
+    assert.deepStrictEqual(calls.filter(Boolean), [
       "[cmd]: npm 'outdated'",
       '========== Start Dependencies ==========\n',
       '[dep] start getting repo links',

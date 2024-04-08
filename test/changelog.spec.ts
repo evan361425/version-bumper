@@ -1,12 +1,11 @@
-/* eslint-disable mocha/no-hooks-for-single-case */
-import { assert, expect } from 'chai';
-import Sinon from 'sinon';
+import assert from 'node:assert';
+import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import { Changelog } from '../lib/changelog.js';
 import { Tag } from '../lib/tag.js';
 
-describe('Changelog', function () {
-  describe('Auto Links', function () {
-    it('body should add auto links', function () {
+void describe('Changelog', function () {
+  void describe('Auto Links', function () {
+    void it('body should add auto links', function () {
       const body = Changelog.fitAutoLinks(
         'This is my body with EVAN-123\n' +
           'And sometimes EVAN has already in link, like [EVAN-123](evan-123)\n' +
@@ -20,7 +19,8 @@ describe('Changelog', function () {
         },
       );
 
-      expect(body).to.eq(
+      assert.deepStrictEqual(
+        body,
         'This is my body with [EVAN-123](test://go-to/evan-123)\n' +
           'And sometimes EVAN has already in link, like [EVAN-123](evan-123)\n' +
           '[EVAN-123](test://go-to/evan-123)\n' +
@@ -30,12 +30,12 @@ describe('Changelog', function () {
       );
     });
 
-    it('pass when empty body', function () {
-      expect(Changelog.fitAutoLinks('', { 'evan-': 'test' })).to.be.eq('');
+    void it('pass when empty body', function () {
+      assert.deepStrictEqual(Changelog.fitAutoLinks('', { 'evan-': 'test' }), '');
     });
 
-    it('pass when no auto-links', function () {
-      expect(Changelog.fitAutoLinks('my-body', {})).to.be.eq('my-body');
+    void it('pass when no auto-links', function () {
+      assert.deepStrictEqual(Changelog.fitAutoLinks('my-body', {}), 'my-body');
     });
   });
 
@@ -58,7 +58,7 @@ describe('Changelog', function () {
     );
   }
 
-  it('should parse tag from source', function () {
+  void it('should parse tag from source', function () {
     const changelog = createChangelog();
     const testData: [string, string, string][] = [
       ['Unreleased', 'Some unreleased', ''],
@@ -69,13 +69,13 @@ describe('Changelog', function () {
     for (const [key, body, date] of testData) {
       const tag = changelog.getTagByKey(key);
       if (!tag) assert.fail(`should not be undefined on ${key}`);
-      expect(tag.key).eq(key);
-      expect(tag.body).eq(body);
-      expect(tag.createdDate).eq(date);
+      assert.deepStrictEqual(tag.key, key);
+      assert.deepStrictEqual(tag.body, body);
+      assert.deepStrictEqual(tag.createdDate, date);
     }
   });
 
-  it('serialized after adding tag', function () {
+  void it('serialized after adding tag', function () {
     const changelog = createChangelog();
     const tag1 = new Tag(
       'new-version-1.2.3',
@@ -106,22 +106,22 @@ describe('Changelog', function () {
       '## [V1.2.2] - 2022-02-01\n\n' +
       '### QQ\n\n' +
       'QQ\n\n' +
-      '[unreleased]: https://github.com/example/example/compare/new-version-1.2.4...HEAD\n' +
-      '[new-version-1.2.4]: https://github.com/example/example/compare/new-version-1.2.3...new-version-1.2.4\n' +
-      '[new-version-1.2.3]: https://github.com/example/example/compare/v1.2.3-rc1...new-version-1.2.3\n' +
+      '[unreleased]: https://github.com/evan361425/version-bumper/compare/new-version-1.2.4...HEAD\n' +
+      '[new-version-1.2.4]: https://github.com/evan361425/version-bumper/compare/new-version-1.2.3...new-version-1.2.4\n' +
+      '[new-version-1.2.3]: https://github.com/evan361425/version-bumper/compare/v1.2.3-rc1...new-version-1.2.3\n' +
       '[v1.2.3-rc1]: https://hi/v1.2.3-rc1\n' +
       '[v1.2.2]: https://hi/v1.2.2\n';
 
     // testing twice times avoid mutate after output
-    expect(changelog.toString()).eq(expected);
-    expect(changelog.toString()).eq(expected);
+    assert.deepStrictEqual(changelog.toString(), expected);
+    assert.deepStrictEqual(changelog.toString(), expected);
   });
 
   beforeEach(function () {
-    Sinon.stub(console, 'log');
+    mock.method(console, 'log');
   });
 
   afterEach(function () {
-    Sinon.restore();
+    mock.restoreAll();
   });
 });

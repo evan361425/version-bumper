@@ -14,16 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Setup .npmrc file to publish to npm
       - name: Set up environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: 20
 
       - name: Lint and format
-        run: npm i && npm run lint && npm run format:check && npm run build
+        run: |
+          make install
+          make lint
 
       - name: Test
-        run: npm test
+        run: make test-ci

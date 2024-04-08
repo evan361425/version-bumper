@@ -1,20 +1,20 @@
-import { expect } from 'chai';
-import Sinon from 'sinon';
+import assert from 'node:assert';
+import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import { Config } from '../lib/config.js';
 import { mockCommand, mockFile } from '../lib/helper.js';
 import { resetEnv, setEnv, setupEnv } from './warm-up.js';
 
-describe('Config', function () {
+void describe('Config', function () {
   beforeEach(function () {
     resetEnv();
   });
 
   afterEach(function () {
     setupEnv();
-    Sinon.restore();
+    mock.restoreAll();
   });
 
-  it('env must overwrite config', function () {
+  void it('env must overwrite config', function () {
     Object.entries({
       config: 'config',
       debug: 'debug',
@@ -133,7 +133,7 @@ describe('Config', function () {
       },
     } as unknown as Record<string, never>);
 
-    expect(JSON.parse(JSON.stringify(config))).to.eql({
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(config)), {
       repoLink: 'repo_link',
       prOnly: true,
       releaseOnly: true,
@@ -207,7 +207,7 @@ describe('Config', function () {
     });
   });
 
-  it('should response file in PR template', function () {
+  void it('should response file in PR template', function () {
     setEnv('pr_template', 'some pr message');
 
     mockFile('pr template from file');
@@ -218,11 +218,11 @@ describe('Config', function () {
       },
     } as unknown as Record<string, never>);
 
-    expect(config.prInfo.template).to.be.eq('some pr message');
+    assert.deepStrictEqual(config.prInfo.template, 'some pr message');
   });
 
-  it('setup latest content by diff commits', async function () {
-    Sinon.stub(console, 'log');
+  void it('setup latest content by diff commits', async function () {
+    mock.method(console, 'log');
     setEnv('latest_version', 'latest');
     setEnv('latest_diff_enable', 'true');
     setEnv('latest_content', 'shouldNotShow');
@@ -247,7 +247,8 @@ describe('Config', function () {
 
     await config.init('version');
 
-    expect(config.latestInfo.content).to.eql(
+    assert.deepStrictEqual(
+      config.latestInfo.content,
       [
         '-   ([hash1__](some-link/commit/hash1__!)) this is msg - author-1',
         '-   ([#31](some-link/pull/31)) this is other msg - author-2',
@@ -255,8 +256,8 @@ describe('Config', function () {
     );
   });
 
-  it('use allowed diff commits', async function () {
-    Sinon.stub(console, 'log');
+  void it('use allowed diff commits', async function () {
+    mock.method(console, 'log');
     setEnv('latest_version', 'latest');
     setEnv('latest_diff_enable', 'true');
     setEnv('latest_diff_allowed', 'abc, def');
@@ -278,7 +279,8 @@ describe('Config', function () {
 
     await config.init('version');
 
-    expect(config.latestInfo.content).to.eql(
+    assert.deepStrictEqual(
+      config.latestInfo.content,
       [
         '-   ([hash2__](some-link/commit/hash2__!)) abc this is msg - author-1',
         '-   ([hash4__](some-link/commit/hash4__!)) def msg - author-2',

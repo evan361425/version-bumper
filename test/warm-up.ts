@@ -1,6 +1,6 @@
-import mocha from 'mocha';
+import { before } from 'node:test';
 
-mocha.before(function () {
+before(function () {
   setupEnv();
 });
 

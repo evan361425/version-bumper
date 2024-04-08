@@ -60,10 +60,7 @@ export class Changelog {
       });
 
     const footLastIdx = origin.substring(footerIdx).search(/\n\n/);
-    this.redundant =
-      footLastIdx === -1
-        ? ''
-        : origin.substring(footerIdx + footLastIdx).trim();
+    this.redundant = footLastIdx === -1 ? '' : origin.substring(footerIdx + footLastIdx).trim();
   }
 
   get firstIsUnreleased(): boolean {
@@ -109,13 +106,12 @@ export class Changelog {
         if (tag.isNew) {
           const ignoreStart = '<!-- bumper-changelog-ignore-start -->';
           const ignoreEnd = '<!-- bumper-changelog-ignore-end -->';
-          while (true) {
+          while (tag) {
             const start = body.search(ignoreStart);
             if (start === -1) break;
 
             const end = body.search(ignoreEnd);
-            const r =
-              end === -1 ? '' : body.substring(end + ignoreEnd.length) + '\n';
+            const r = end === -1 ? '' : body.substring(end + ignoreEnd.length) + '\n';
             body = body.substring(0, start).trim() + r.trim();
           }
         }
@@ -152,9 +148,12 @@ export class Changelog {
         break;
       }
 
-      const [hit, prefix, target, num] = linker.exec(
-        body.substring(index),
-      ) as unknown as [string, string, string, string];
+      const [hit, prefix, target, num] = linker.exec(body.substring(index)) as unknown as [
+        string,
+        string,
+        string,
+        string,
+      ];
       info(`[auto-links] hit(${hit}), target(${target}), num(${num})`);
       const rest = index + hit.length;
       const isInLink = inLink.test(body.substring(rest));

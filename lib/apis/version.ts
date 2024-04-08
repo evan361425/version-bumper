@@ -1,13 +1,6 @@
 import { Changelog } from '../changelog.js';
 import { BaseBranchInfo, Config, ReleaseInfo } from '../config.js';
-import {
-  breaker,
-  createCommand,
-  extractLinks,
-  gh,
-  git,
-  writeFile,
-} from '../helper.js';
+import { breaker, createCommand, extractLinks, gh, git, writeFile } from '../helper.js';
 import { error, notice } from '../logger.js';
 import { Tag } from '../tag.js';
 
@@ -16,13 +9,13 @@ export default async function () {
 
   const changelog = new Changelog(Config.instance.changelog);
   const info = Config.instance.latestInfo;
-  const tag = new Tag(info.version, info.content, { ticket: info.ticket });
+  const tag = new Tag(info.version, info.content, { ticket: info.ticket } as never);
 
   let tagExist;
   try {
     changelog.addTag(tag);
-  } catch (error) {
-    tagExist = error;
+  } catch (err) {
+    tagExist = err;
   }
 
   if (Config.instance.prOnly) {
@@ -78,23 +71,17 @@ export default async function () {
 }
 
 async function execScript(script: string | string[], tag: Tag) {
-  const [cmd, rawArgs] = Array.isArray(script)
-    ? [script[0], script.slice(1)]
-    : breaker(script, 1, ' ');
-  const args = (Array.isArray(rawArgs) ? rawArgs : rawArgs.split(' ')).map(
-    (e) => e.replace(/{tag}/g, tag.key).replace(/{content}/g, tag.body),
+  const [cmd, rawArgs] = Array.isArray(script) ? [script[0], script.slice(1)] : breaker(script, 1, ' ');
+  const args = (Array.isArray(rawArgs) ? rawArgs : rawArgs.split(' ')).map((e) =>
+    e.replace(/{tag}/g, tag.key).replace(/{content}/g, tag.body),
   );
 
   if (cmd) {
     try {
       const result = await createCommand(cmd, args);
       notice(`[bump] Execute command '${cmd}' done, output:\n${result}`);
-    } catch (error) {
-      notice(
-        `[bump] Execute command '${cmd} ${args.join(
-          ' ',
-        )}' error, output:\n${error}`,
-      );
+    } catch (err) {
+      notice(`[bump] Execute command '${cmd} ${args.join(' ')}' error, output:\n${err}`);
       process.exit(1);
     }
   }

@@ -1,8 +1,8 @@
-import path from 'node:path';
 import fs from 'node:fs';
+import path from 'node:path';
+import { Changelog } from '../changelog.js';
 import { Config } from '../config.js';
 import { getSchemaFile, isDebug, writeFile } from '../helper.js';
-import { Changelog } from '../changelog.js';
 import { info } from '../logger.js';
 
 export default async function () {
@@ -32,8 +32,7 @@ export default async function () {
           repoLink: config.repoLink,
           changelog: {
             template: '單號：{ticket}\n\n{content}',
-            commitMessage:
-              'chore: bump to {version}\n\nticket: {ticket}\n\nstage: {stage}',
+            commitMessage: 'chore: bump to {version}\n\nticket: {ticket}\n\nstage: {stage}',
           },
           latestInfo: {
             file: 'docs/LATEST_VERSION.md',

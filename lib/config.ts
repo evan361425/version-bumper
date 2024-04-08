@@ -1,12 +1,5 @@
 import path from 'node:path';
-import {
-  breaker,
-  git,
-  parseMarkdown,
-  readFile,
-  startDebug,
-  startVerbose,
-} from './helper.js';
+import { breaker, git, parseMarkdown, readFile, startDebug, startVerbose } from './helper.js';
 import { error, info } from './logger.js';
 
 const DEFAULTS = {
@@ -25,8 +18,7 @@ const DEFAULTS = {
   },
   changelog: {
     file: 'CHANGELOG.md',
-    commitMessage:
-      'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
+    commitMessage: 'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
     template: '單號: {ticket}\n\n{content}',
     header: `# Changelog
 
@@ -96,14 +88,14 @@ export class Config {
     this.afterScripts = config['afterScripts'] ?? [];
     this.beforeCommit = config['beforeCommit'] ?? [];
 
-    this.stage = getStage(this.latestInfo.version, this.tagsInfo);
+    this.stage = getStage(this.latestInfo.version, this.tagsInfo) as string;
 
     // ================ bump deps ===================
 
     const depsCfg: Record<string, never> = config['deps'] ?? {};
     const deps: Partial<DepsInfo> = {};
     deps.ignored = getListConfig('ignored', depsCfg, []);
-    deps.outputFile = getConfig('output_file', undefined, depsCfg);
+    deps.outputFile = getConfig('output_file', undefined, depsCfg) as string;
     deps.appendOnly = getBoolConfig('append_only', undefined, depsCfg);
     deps.saveExact = getBoolConfig('use_exact', undefined, depsCfg);
     deps.latestDeps = getListConfig('latest_deps', depsCfg, []);
@@ -118,10 +110,7 @@ export class Config {
     function getChangelogInfo() {
       const ch: Partial<ChangelogInfo> = config['changelog'] ?? {};
       const d = DEFAULTS.changelog;
-      ch.commitMessage = getConfig(
-        'changelog_commit_message',
-        ch.commitMessage ?? d.commitMessage,
-      );
+      ch.commitMessage = getConfig('changelog_commit_message', ch.commitMessage ?? d.commitMessage);
       ch.disable = getBoolConfig('changelog_disable', ch.disable);
       ch.file = getConfig('changelog_file', ch.file ?? d.file);
       ch.header = getConfig('changelog_header', ch.header ?? d.header);
@@ -184,8 +173,8 @@ export class Config {
         const ml = Math.min(names.length, bases.length);
         for (let i = 0; i < ml; i++) {
           const b: Partial<BaseBranchInfo> = {
-            head: heads[i],
-            base: bases[i],
+            head: heads[i] as string,
+            base: bases[i] as string,
             reviewers: stf(reviewers[i], '/'),
             labels: stf(labels[i], ' '),
           };
@@ -203,8 +192,8 @@ export class Config {
           meta.labels ??= [];
           meta.siblings ??= {};
 
-          Object.entries(meta.siblings).forEach(([k, s]) => {
-            s.name = k;
+          Object.entries(meta.siblings).forEach(([kk, s]) => {
+            s.name = kk;
             s.base ??= meta.base;
             s.head ??= meta.head;
             s.labels ??= meta.labels;
@@ -222,26 +211,16 @@ export class Config {
       const li: Partial<LatestInfo> = config['latestInfo'] ?? {};
 
       li.diff ??= { enable: false, allowed: [], ignored: [] };
-      li.diff.enable =
-        getBoolConfig('latest_diff_enable') ||
-        (!getConfig('latest_content') && li.diff.enable);
-      li.diff.allowed = getListConfig(
-        'latest_diff_allowed',
-        {},
-        li.diff.allowed ?? [],
-      );
-      li.diff.ignored = getListConfig(
-        'latest_diff_ignored',
-        {},
-        li.diff.ignored ?? [],
-      );
+      li.diff.enable = getBoolConfig('latest_diff_enable') || (!getConfig('latest_content') && li.diff.enable);
+      li.diff.allowed = getListConfig('latest_diff_allowed', {}, li.diff.allowed ?? []);
+      li.diff.ignored = getListConfig('latest_diff_ignored', {}, li.diff.ignored ?? []);
 
       li.file = getConfig('latest_file', DEFAULTS.latestInfo.file);
       const [fMeta, fBody] = li.file ? parseMarkdown(li.file) : [];
 
-      li.version = getConfig('latest_version') ?? li.version ?? fMeta?.version;
+      li.version = getConfig('latest_version') ?? li.version ?? (fMeta?.version as string);
       li.ticket = getConfig('latest_ticket') ?? li.ticket ?? fMeta?.ticket;
-      li.content = getConfig('latest_content') ?? li.content ?? fBody;
+      li.content = getConfig('latest_content') ?? li.content ?? (fBody as string);
 
       return li as LatestInfo;
     }
@@ -259,11 +238,9 @@ export class Config {
       }
 
       Object.entries(autoLinks).forEach((e) => {
-        const allowed = /[a-zA-Z\-]+/.test(e[0]);
+        const allowed = /[a-zA-Z-]+/.test(e[0]);
         if (!allowed) {
-          error(
-            `The key of auto link (${e[0]}) should not contains other character beside alphabet, dash(-)`,
-          );
+          error(`The key of auto link (${e[0]}) should not contains other character beside alphabet, dash(-)`);
           return;
         }
         result[e[0]] = e[1];
@@ -273,13 +250,13 @@ export class Config {
     }
 
     function getReleaseInfo(data: { release?: unknown }): ReleaseInfo {
-      const info: Partial<ReleaseInfo> = data['release'] ?? {};
-      info.enable = getBoolConfig('release_enable', info.enable);
-      info.title = getConfig('release_title', info.title);
-      info.preRelease = getBoolConfig('release_pre', info.preRelease);
-      info.draft = getBoolConfig('release_draft', info.draft);
+      const pi: Partial<ReleaseInfo> = data['release'] ?? {};
+      pi.enable = getBoolConfig('release_enable', pi.enable);
+      pi.title = getConfig('release_title', pi.title);
+      pi.preRelease = getBoolConfig('release_pre', pi.preRelease);
+      pi.draft = getBoolConfig('release_draft', pi.draft);
 
-      return info as ReleaseInfo;
+      return pi as ReleaseInfo;
     }
 
     function getStage(v: string, tags: TagsInfo): string | undefined {
@@ -295,12 +272,8 @@ export class Config {
       return hit ? hit[0] : hit;
     }
 
-    function getDevInfo(
-      deps: Record<string, never>,
-      pre: Commands,
-      post: Commands,
-    ) {
-      const dev: Partial<DevInfo> = deps['dev'] ?? {};
+    function getDevInfo(rDeps: Record<string, never>, pre: Commands, post: Commands) {
+      const dev: Partial<DevInfo> = rDeps['dev'] ?? {};
       const d = dev as Record<string, never>;
 
       dev.oneByOne = getBoolConfig('one_by_one', undefined, d);
@@ -327,20 +300,11 @@ export class Config {
       return result as never;
     }
 
-    function getListConfig(
-      key: string,
-      cfg: Record<string, never>,
-      other?: string[],
-    ): string[] {
+    function getListConfig(key: string, cfg: Record<string, never>, other?: string[]): string[] {
       return stf(getConfig(key)) ?? cfg[underLine2Camel(key)] ?? other;
     }
 
-    function getBoolConfig(
-      key: string,
-      other = false,
-      cfg?: Record<string, never>,
-      aliases?: string[],
-    ): boolean {
+    function getBoolConfig(key: string, other = false, cfg?: Record<string, never>, aliases?: string[]): boolean {
       if (process.env['BUMPER_' + key.toUpperCase()]) return true;
 
       const k = underLine2Camel(key);
@@ -368,13 +332,12 @@ export class Config {
       }
 
       if (!this.prInfo.repo) {
-        this.prInfo.repo =
-          breaker(this.repoLink, 3, '/')[3] ?? 'example/example';
+        this.prInfo.repo = breaker(this.repoLink, 3, '/')[3] ?? 'example/example';
       }
 
       if (this.latestInfo.diff.enable) {
         // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-        const t = (await git(true, 'describe', '--abbrev=0')).trim();
+        const t = (await git(true, 'describe', '--tags', '--abbrev=0')).trim();
         // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
         const d = await git(true, 'log', '--pretty=%H %al %s', `HEAD...${t}`);
 
@@ -385,9 +348,7 @@ export class Config {
             if (!hash || !rest) return;
             const [name, title] = breaker(rest.trim(), 1, ' ');
 
-            return name && title
-              ? [hash, name.trim(), title.trim()]
-              : undefined;
+            return name && title ? [hash, name.trim(), title.trim()] : undefined;
           })
           .filter((e) => {
             if (!e) return;
@@ -398,9 +359,7 @@ export class Config {
               return;
             }
             const als = this.latestInfo.diff.allowed;
-            return als.length
-              ? als.some((al) => new RegExp(al).test(title))
-              : true;
+            return als.length ? als.some((al) => new RegExp(al).test(title)) : true;
           })
           .map((e) => {
             const [hash, name, title] = e as [string, string, string];
@@ -410,10 +369,10 @@ export class Config {
               const result = /\(?#(\d+)\)?/.exec(title)!;
               const prefix = title.substring(0, result.index);
               const postfix = title.substring(result.index + result[0].length);
-              const t = (prefix + postfix).trim();
+              const tt = (prefix + postfix).trim();
               const id = result[1];
               const l = `${this.repoLink}/pull/${id}`;
-              return `-   ([#${id}](${l})) ${t} - ${name}`;
+              return `-   ([#${id}](${l})) ${tt} - ${name}`;
             }
 
             const h = hash.substring(0, 7);
@@ -448,9 +407,7 @@ export class Config {
 
       for (const [key, meta] of Object.entries(this.prInfo.branches)) {
         if (!this.tagsInfo[key]) {
-          error(
-            `Missing ${key} in tags config, PR.branches should mappable to tags' keys`,
-          );
+          error(`Missing ${key} in tags config, PR.branches should mappable to tags' keys`);
         }
         if (!meta.base) {
           error('Required `base` in PR.branches config');
@@ -490,10 +447,7 @@ function getOptionFromArgs(key: string): string | undefined {
 }
 
 function loadConfig() {
-  const name =
-    process.env['BUMPER_CONFIG'] ??
-    getOptionFromArgs('config') ??
-    DEFAULTS.configFile;
+  const name = process.env['BUMPER_CONFIG'] ?? getOptionFromArgs('config') ?? DEFAULTS.configFile;
 
   info(`Start loading config from ${path.resolve(name)}`);
   const content = readFile(path.resolve(name));
@@ -501,18 +455,13 @@ function loadConfig() {
 
   try {
     return JSON.parse(content);
-  } catch (error) {
+  } catch (err) {
     return {};
   }
 }
 
-function stf<T>(
-  a?: T,
-  delimiter = ',',
-): T extends string ? string[] : undefined {
-  return (
-    typeof a === 'string' ? a.split(delimiter).map((e) => e.trim()) : undefined
-  ) as never;
+function stf<T>(a?: T, delimiter = ','): T extends string ? string[] : undefined {
+  return (typeof a === 'string' ? a.split(delimiter).map((e) => e.trim()) : undefined) as never;
 }
 
 function underLine2Camel(key: string) {
@@ -555,7 +504,7 @@ type TagsInfo = Record<string, TagInfo>;
 type LatestInfo = {
   version: string;
   content: string;
-  ticket?: string;
+  ticket: string | undefined;
   file: string;
   diff: {
     enable: boolean;

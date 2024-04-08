@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
-    "lib": ["ES2019"],
-    "module": "ES2022",
-    "target": "ES2019",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2022"],
+    "module": "es2022",
+    "target": "es2022",
     "moduleResolution": "node",
+    "outDir": "./dist/",
+    "typeRoots": ["node_modules/@types"],
+
+    "strict": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -17,9 +18,13 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "importsNotUsedAsValues": "error",
-    "declaration": true,
-    "outDir": "./dist/"
+
+    "checkJs": true,
+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true
   },
   "ts-node": {
     "esm": true

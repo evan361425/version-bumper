@@ -1,10 +1,5 @@
 import { spawn } from 'node:child_process';
-import {
-  appendFileSync,
-  existsSync,
-  readFileSync,
-  writeFileSync,
-} from 'node:fs';
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { info } from './logger.js';
 
@@ -36,12 +31,7 @@ export function createCommand(name: string, args: string[]): Promise<string> {
   const force = typeof args[0] === 'boolean' ? args.shift() : false;
   info(`[cmd]: ${name} '${args.join("' '")}'`);
 
-  const prepared =
-    !force && isDebug()
-      ? Promise.resolve('')
-      : mockedCommands
-      ? mockedCommands.shift()
-      : undefined;
+  const prepared = !force && isDebug() ? Promise.resolve('') : mockedCommands ? mockedCommands.shift() : undefined;
 
   return (
     prepared ??
@@ -56,9 +46,7 @@ export function createCommand(name: string, args: string[]): Promise<string> {
         rej(err);
       });
       command.on('close', () => {
-        error !== ''
-          ? rej(new Error(`Command: ${name} ${args.join(' ')} \n${error}`))
-          : res(response);
+        error !== '' ? rej(new Error(`Command: ${name} ${args.join(' ')} \n${error}`)) : res(response);
       });
       command.on('exit', (code, signal) => {
         if (code !== 0) {
@@ -150,7 +138,7 @@ export function parseMarkdown(fileName: string): [MarkdownMeta, string] {
     .filter((e: string) => e.includes(':'))
     .map((e: string) => breaker(e, 1, ':').map((v) => v.trim()))
     .forEach((e: string[]) => {
-      if (e[0]) meta[e[0].toLowerCase() as keyof MarkdownMeta] = e[1];
+      if (e[0]) meta[e[0].toLowerCase() as keyof MarkdownMeta] = e[1] as string;
     });
 
   return [meta, body?.trim() ?? ''];
@@ -177,8 +165,12 @@ export function getPackageJsonFile() {
 }
 
 export function mockCommand(target: Promise<string>) {
-  if (mockedCommands) mockedCommands.push(target);
-  else mockedCommands = [target];
+  if (mockedCommands) {
+    mockedCommands.push(target);
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    mockedCommands = [target];
+  }
 }
 
 export function mockFile(target: string) {
@@ -197,10 +189,7 @@ export function extractLinks(body: string): string {
       break;
     }
 
-    const [hit, text] = linker.exec(body.substring(index)) as unknown as [
-      string,
-      string,
-    ];
+    const [hit, text] = linker.exec(body.substring(index)) as unknown as [string, string];
     const rest = index + hit.length;
 
     result += body.substring(0, index) + text;

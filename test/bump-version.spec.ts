@@ -1,36 +1,33 @@
-/* eslint-disable mocha/no-hooks-for-single-case */
-import { expect } from 'chai';
-import { restore, stub, useFakeTimers } from 'sinon';
+import assert from 'node:assert';
+import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import bumpVersion from '../lib/apis/version.js';
 import { Config } from '../lib/config.js';
 import { startDebug, stopDebug } from '../lib/helper.js';
 import { resetEnv, setupEnv } from './warm-up.js';
 
-describe('Bump version', function () {
+void describe('Bump version', function () {
   beforeEach(function () {
     resetEnv();
   });
 
   afterEach(function () {
-    restore();
     setupEnv();
+    mock.restoreAll();
   });
 
-  it('example', async function () {
+  void it('example', async function () {
     const now = new Date('2022-12-1');
-    useFakeTimers(now.getTime());
+    mock.timers.enable();
+    mock.timers.setTime(now.getTime());
     const config = new Config({
       repoLink: 'https://github.com/example/example',
       beforeScripts: [['a', '"{content}qq"'], 'c de{tag}f'],
       latestInfo: {
         version: 'v1.0.2',
         ticket: 'TICKET-200',
-        content:
-          'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
+        content: 'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
       },
-      beforeCommit: [
-        'npm version --no-commit-hooks --no-git-tag-version {tag}',
-      ],
+      beforeCommit: ['npm version --no-commit-hooks --no-git-tag-version {tag}'],
       changelog: {
         header: 'test default header',
         template: 'ticket prefix: {ticket}\n\n{content}',
@@ -51,8 +48,7 @@ describe('Bump version', function () {
         },
       },
       pr: {
-        template:
-          'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
+        template: 'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
         branches: {
           test: {
             head: 'test-head',
@@ -67,8 +63,8 @@ describe('Bump version', function () {
       },
     } as unknown as never);
 
-    stub(Config, 'instance').get(() => config);
-    stub(Config.instance, 'changelog').get(
+    Config.instance = config;
+    mock.getter(Config.instance, 'changelog').mock.mockImplementation(
       () => `# Changelog
 
 This is my test header
@@ -95,16 +91,16 @@ First Release
 [v1.0.0]: https://github.com/example/example/commits/v1.0.0`,
     );
 
-    const stdout = stub(console, 'log');
+    const stdout = mock.method(console, 'log');
     startDebug();
     await bumpVersion();
     stopDebug();
 
-    const calls = stdout.getCalls().map((call) => call.args[0]);
+    const calls = stdout.mock.calls.map((call) => call.arguments[0]);
     const call1 = calls.shift();
     const cfg = JSON.parse(call1);
-    expect(cfg.repoLink).to.eql('https://github.com/example/example');
-    expect(cfg.tagsInfo).to.eql({
+    assert.deepStrictEqual(cfg.repoLink, 'https://github.com/example/example');
+    assert.deepStrictEqual(cfg.tagsInfo, {
       test: {
         pattern: '^v1.0.\\d+$',
         changelog: true,
@@ -116,11 +112,10 @@ First Release
         },
       },
     });
-    expect(cfg.prInfo).to.eql({
+    assert.deepStrictEqual(cfg.prInfo, {
       repo: 'example/example',
       title: '{ticket} - {version}({stage})',
-      template:
-        'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
+      template: 'Test PR body\n\nWith ticket: {ticket}\nstage: {stage}\nversion: {version}\ndiff: {diff}',
       branches: {
         test: {
           name: 'test',
@@ -140,25 +135,25 @@ First Release
         },
       },
     });
-    expect(cfg.changelogInfo).to.eql({
+    assert.deepStrictEqual(cfg.changelogInfo, {
       header: 'test default header',
       template: 'ticket prefix: {ticket}\n\n{content}',
       disable: false,
-      commitMessage:
-        'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
+      commitMessage: 'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
       file: 'CHANGELOG.md',
     });
-    expect(cfg.latestInfo.version).to.eql('v1.0.2');
-    expect(cfg.latestInfo.ticket).to.eql('TICKET-200');
-    expect(cfg.latestInfo.content).to.eql(
+    assert.deepStrictEqual(cfg.latestInfo.version, 'v1.0.2');
+    assert.deepStrictEqual(cfg.latestInfo.ticket, 'TICKET-200');
+    assert.deepStrictEqual(
+      cfg.latestInfo.content,
       'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
     );
-    expect(cfg.autoLinks).to.eql({
+    assert.deepStrictEqual(cfg.autoLinks, {
       'ticket-': 'replace-{num}',
       'sub-ticket-': 'replace-sub-{num}',
     });
-    expect(cfg.stage).to.eql('test');
-    expect(calls).to.eql([
+    assert.deepStrictEqual(cfg.stage, 'test');
+    assert.deepStrictEqual(calls, [
       '[changelog] Start parsing',
       '[cmd]: a \'"ticket prefix: TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200qq"\'',
       "[bump] Execute command 'a' done, output:\n",
