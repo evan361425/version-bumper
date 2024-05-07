@@ -10,7 +10,7 @@ Usage:
 Build
   build-ts                 Build js files to dist
   build-assets             Build assets
-  build-version            Bump the version
+  bump                     Bump the version
 
 Dev
   install                  Install all dependencies

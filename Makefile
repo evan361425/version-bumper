@@ -19,13 +19,13 @@ build-ts: clean ## Build js files to dist
 	npx tsc --project tsconfig.production.json
 
 .PHONY: build-assets
-build-assets: build-ts ## Build assets
-	printf '# Makefile possible commands\n\n```shell\n$$ make help\n' > docs/commands.md
-	make help | sed -r "s/\x1B\[(36|0|1)m//g" >> docs/commands.md
-	printf '```\n' >> docs/commands.md
+build-assets: ## Build assets
+	@printf '# Makefile possible commands\n\n```shell\n$$ make help\n' > docs/commands.md
+	@make help | sed -r "s/\x1B\[(36|0|1)m//g" >> docs/commands.md
+	@printf '```\n' >> docs/commands.md
 
-.PHONY: build-version
-build-version: ## Bump the version
+.PHONY: bump
+bump: ## Bump the version
 	@current=$$(echo '$(version)' | cut -c 2-); \
 	read -p "Enter new version(origin version $$current): " target; \
 	if [[ ! $$target =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
