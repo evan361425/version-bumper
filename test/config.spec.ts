@@ -250,8 +250,8 @@ void describe('Config', function () {
     assert.deepStrictEqual(
       config.latestInfo.content,
       [
-        '-   ([hash1__](some-link/commit/hash1__!)) this is msg - author-1',
-        '-   ([#31](some-link/pull/31)) this is other msg - author-2',
+        '- ([hash1__](some-link/commit/hash1__!)) this is msg - author-1',
+        '- ([#31](some-link/pull/31)) this is other msg - author-2',
       ].join('\n'),
     );
   });
@@ -282,8 +282,8 @@ void describe('Config', function () {
     assert.deepStrictEqual(
       config.latestInfo.content,
       [
-        '-   ([hash2__](some-link/commit/hash2__!)) abc this is msg - author-1',
-        '-   ([hash4__](some-link/commit/hash4__!)) def msg - author-2',
+        '- ([hash2__](some-link/commit/hash2__!)) abc this is msg - author-1',
+        '- ([hash4__](some-link/commit/hash4__!)) def msg - author-2',
       ].join('\n'),
     );
   });

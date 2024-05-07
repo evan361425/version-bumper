@@ -4,13 +4,13 @@ Yet, another helper for bumping version.
 
 Features:
 
--   Changelog
--   Hooking: before commit, before, after scripts
--   Autolink for tickets (e.g. Jira)
--   GitHub PR
--   GitHub release
--   Highly flexible by configuration
--   Tiny without any dependencies
+- Changelog
+- Hooking: before commit, before, after scripts
+- Autolink for tickets (e.g. Jira)
+- GitHub PR
+- GitHub release
+- Highly flexible by configuration
+- Tiny without any dependencies
 
 ## Usage
 

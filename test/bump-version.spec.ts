@@ -73,14 +73,14 @@ Hi there, try correct this!
 
 ## [Unreleased]
 
--   請看 git diff。
+- 請看 git diff。
 
 ## [v1.0.1] - 2022-11-30
 
 單號：[TICKET-100](http://example.com/browse/TICKET-100)
 
--   SUB-TICKET-1001 Add some feature
--   SUB-TICKET-1002 Fix some bug
+- SUB-TICKET-1001 Add some feature
+- SUB-TICKET-1002 Fix some bug
 
 ## [v1.0.0] - 2022-01-30
 
@@ -176,7 +176,7 @@ Hi there, try correct this!
 
 ## [Unreleased]
 
--   請看 git diff。
+- 請看 git diff。
 
 ## [v1.0.2] - 2022-12-01
 
@@ -192,8 +192,8 @@ ticket: [TICKET-200](replace-200)
 
 單號：[TICKET-100](http://example.com/browse/TICKET-100)
 
--   SUB-TICKET-1001 Add some feature
--   SUB-TICKET-1002 Fix some bug
+- SUB-TICKET-1001 Add some feature
+- SUB-TICKET-1002 Fix some bug
 
 ## [v1.0.0] - 2022-01-30
 

@@ -372,12 +372,12 @@ export class Config {
               const tt = (prefix + postfix).trim();
               const id = result[1];
               const l = `${this.repoLink}/pull/${id}`;
-              return `-   ([#${id}](${l})) ${tt} - ${name}`;
+              return `- ([#${id}](${l})) ${tt} - ${name}`;
             }
 
             const h = hash.substring(0, 7);
             const l = `${this.repoLink}/commit/${hash}`;
-            return `-   ([${h}](${l})) ${title} - ${name}`;
+            return `- ([${h}](${l})) ${title} - ${name}`;
           }) as string[];
 
         if (commits.length) {
