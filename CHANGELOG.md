@@ -10,7 +10,7 @@ Please check git diff.
 
 ## [v1.0.1] - 2024-05-07
 
--   ([141ebf0](https://github.com/evan361425/version-bumper/commit/141ebf0539c15914d097dd966a2431621ff446af)) fix: use one indent on list - wu0dj2k7ao3
+- ([141ebf0](https://github.com/evan361425/version-bumper/commit/141ebf0539c15914d097dd966a2431621ff446af)) fix: use one indent on list - wu0dj2k7ao3
 
 ## [v1.0.0] - 2024-04-08
 
