@@ -122,8 +122,8 @@ export class Config {
     function getTagsInfo(): TagsInfo {
       let tags: TagsInfo = config['tags'] ?? {};
 
-      const names = stf(getConfig('tag_names', 'production'));
-      const patterns = stf(getConfig('tag_patterns', 'v[0-9]+.[0-9]+.[0-9]+'));
+      const names = stf(getConfig('tag_names'));
+      const patterns = stf(getConfig('tag_patterns'));
       const changelog = getBoolConfig('tag_changelog', true);
 
       if (names && patterns) {
@@ -210,7 +210,7 @@ export class Config {
     function getLatestInfo(): LatestInfo {
       const li: Partial<LatestInfo> = config['latestInfo'] ?? {};
 
-      li.diff ??= { enable: true, allowed: ['^fix:', '^feat:'], ignored: [] };
+      li.diff ??= { enable: true, allowed: ['^fix', '^feat'], ignored: [] };
       li.diff.enable = getBoolConfig('latest_diff_enable') || (!getConfig('latest_content') && li.diff.enable);
       li.diff.allowed = getListConfig('latest_diff_allowed', {}, li.diff.allowed ?? []);
       li.diff.ignored = getListConfig('latest_diff_ignored', {}, li.diff.ignored ?? []);

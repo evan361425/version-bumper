@@ -75,7 +75,7 @@ lint-image: ## Lint image by trivy
 			$(PACKAGE):$(version)
 
 .PHONY: test
-test: ## Run tests by Node.js test runner
+test: lint ## Run tests by Node.js test runner
 	node --import tsx --test --test-timeout 60000 test/*.spec.ts
 
 .PHONY: test-only

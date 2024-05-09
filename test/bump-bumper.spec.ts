@@ -5,7 +5,7 @@ import { Config } from '../lib/config.js';
 import { startDebug, stopDebug } from '../lib/helper.js';
 import { resetEnv, setupEnv } from './warm-up.js';
 
-void describe('Bump version', function () {
+void describe('Bump bumper', function () {
   beforeEach(function () {
     resetEnv();
   });
@@ -26,6 +26,9 @@ void describe('Bump version', function () {
         version: 'v1.0.2',
         ticket: 'TICKET-200',
         content: 'This is my new release\n\nWith version: {version}\nstage: {stage}\nticket: {ticket}',
+        diff: {
+          enable: false,
+        },
       },
       beforeCommit: ['npm version --no-commit-hooks --no-git-tag-version {tag}'],
       changelog: {
