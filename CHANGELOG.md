@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v1.1.0] - 2024-05-09
+
+-   ([7bdde42](https://github.com/evan361425/version-bumper/commit/7bdde42539b78d616e1615b1f296e9d174c2ab90)) feat: allow using latest pattern tag - wu0dj2k7ao3
+
 ## [v1.0.1] - 2024-05-07
 
 - ([141ebf0](https://github.com/evan361425/version-bumper/commit/141ebf0539c15914d097dd966a2431621ff446af)) fix: use one indent on list - wu0dj2k7ao3
@@ -183,7 +187,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v1.0.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v1.1.0...HEAD
+[v1.1.0]: https://github.com/evan361425/version-bumper/compare/v1.0.1...v1.1.0
 [v1.0.1]: https://github.com/evan361425/version-bumper/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/evan361425/version-bumper/compare/v0.13.0...v1.0.0
 [v0.13.0]: https://github.com/evan361425/version-bumper/compare/v0.12.2...v0.13.0
