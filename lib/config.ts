@@ -88,7 +88,7 @@ export class Config {
     this.afterScripts = config['afterScripts'] ?? [];
     this.beforeCommit = config['beforeCommit'] ?? [];
 
-    this.stage = getStage(this.latestInfo.version, this.tagsInfo) as string;
+    this.stage = getStage(this.latestInfo.version, this.tagsInfo, getConfig('stage')) as string;
 
     // ================ bump deps ===================
 
@@ -122,9 +122,9 @@ export class Config {
     function getTagsInfo(): TagsInfo {
       let tags: TagsInfo = config['tags'] ?? {};
 
-      const names = stf(getConfig('tag_names'));
-      const patterns = stf(getConfig('tag_patterns'));
-      const changelog = getBoolConfig('tag_changelog');
+      const names = stf(getConfig('tag_names', 'production'));
+      const patterns = stf(getConfig('tag_patterns', 'v[0-9]+.[0-9]+.[0-9]+'));
+      const changelog = getBoolConfig('tag_changelog', true);
 
       if (names && patterns) {
         tags = {};
@@ -210,7 +210,7 @@ export class Config {
     function getLatestInfo(): LatestInfo {
       const li: Partial<LatestInfo> = config['latestInfo'] ?? {};
 
-      li.diff ??= { enable: false, allowed: [], ignored: [] };
+      li.diff ??= { enable: true, allowed: ['^fix:', '^feat:'], ignored: [] };
       li.diff.enable = getBoolConfig('latest_diff_enable') || (!getConfig('latest_content') && li.diff.enable);
       li.diff.allowed = getListConfig('latest_diff_allowed', {}, li.diff.allowed ?? []);
       li.diff.ignored = getListConfig('latest_diff_ignored', {}, li.diff.ignored ?? []);
@@ -218,7 +218,7 @@ export class Config {
       li.file = getConfig('latest_file', DEFAULTS.latestInfo.file);
       const [fMeta, fBody] = li.file ? parseMarkdown(li.file) : [];
 
-      li.version = getConfig('latest_version') ?? li.version ?? (fMeta?.version as string);
+      li.version = getConfig('latest_version') ?? getConfig('v') ?? li.version ?? (fMeta?.version as string);
       li.ticket = getConfig('latest_ticket') ?? li.ticket ?? fMeta?.ticket;
       li.content = getConfig('latest_content') ?? li.content ?? (fBody as string);
 
@@ -250,26 +250,13 @@ export class Config {
     }
 
     function getReleaseInfo(data: { release?: unknown }): ReleaseInfo {
-      const pi: Partial<ReleaseInfo> = data['release'] ?? {};
+      const pi: Partial<ReleaseInfo> = data['release'] ?? { enable: true };
       pi.enable = getBoolConfig('release_enable', pi.enable);
       pi.title = getConfig('release_title', pi.title);
       pi.preRelease = getBoolConfig('release_pre', pi.preRelease);
       pi.draft = getBoolConfig('release_draft', pi.draft);
 
       return pi as ReleaseInfo;
-    }
-
-    function getStage(v: string, tags: TagsInfo): string | undefined {
-      const stage = getConfig('stage');
-      if (stage && tags[stage]) return stage;
-
-      const hit = Object.entries(tags).find((e) => {
-        if (!e[1].pattern) return;
-
-        return new RegExp(e[1].pattern).test(v);
-      });
-
-      return hit ? hit[0] : hit;
     }
 
     function getDevInfo(rDeps: Record<string, never>, pre: Commands, post: Commands) {
@@ -336,8 +323,19 @@ export class Config {
       }
 
       if (this.latestInfo.diff.enable) {
+        let t: string | undefined;
+        const tagInfo = this.tagsInfo[this.stage ?? ''];
+        if (tagInfo) {
+          // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
+          t = (await git(true, 'tag'))
+            .split('\n')
+            .map((e) => e.trim())
+            .reverse()
+            .find((e) => e && getStage(e, this.tagsInfo));
+        }
+
         // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-        const t = (await git(true, 'describe', '--tags', '--abbrev=0')).trim();
+        t ??= (await git(true, 'describe', '--tags', '--abbrev=0')).trim();
         // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
         const d = await git(true, 'log', '--pretty=%H %al %s', `HEAD...${t}`);
 
@@ -469,6 +467,18 @@ function underLine2Camel(key: string) {
     .split('_')
     .map((v, i) => (i === 0 ? v : v.charAt(0).toUpperCase() + v.slice(1)))
     .join('');
+}
+
+function getStage(v: string, tags: TagsInfo, stage?: string): string | undefined {
+  if (stage && tags[stage]) return stage;
+
+  const hit = Object.entries(tags).find((e) => {
+    if (!e[1].pattern) return;
+
+    return new RegExp(e[1].pattern).test(v);
+  });
+
+  return hit ? hit[0] : undefined;
 }
 
 type TagInfo = {

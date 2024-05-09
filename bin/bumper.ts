@@ -58,17 +58,10 @@ ${message}`);
   process.on('uncaughtException', onFatalError);
   process.on('unhandledRejection', onFatalError);
 
-  const command =
-    !process.argv[2] || process.argv[2].startsWith('-') ? '' : process.argv[2];
+  const command = !process.argv[2] || process.argv[2].startsWith('-') ? '' : process.argv[2];
 
-  const needHelp =
-    process.argv.includes('-h') ||
-    process.argv.includes('--help') ||
-    process.argv.includes('--h');
-  const needVersion =
-    command === 'version' ||
-    command === 'v' ||
-    process.argv.includes('--version');
+  const needHelp = process.argv.includes('-h') || process.argv.includes('--help') || process.argv.includes('--h');
+  const needVersion = command === 'version' || command === 'v' || process.argv.includes('--version');
 
   if (needVersion) {
     console.log(`bumper ${getVersion()}
@@ -82,7 +75,7 @@ Update command: npm i -g @evan361425/version-bumper`);
   if (needHelp) {
     return api.help(command);
   } else if (command === '') {
-    await api.version();
+    await api.bumper();
   } else if (command === 'deps') {
     await api.deps();
   } else if (command === 'init') {
