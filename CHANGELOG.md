@@ -10,7 +10,7 @@ Please check git diff.
 
 ## [v1.1.2] - 2024-07-17
 
-
+- fix: sort git tag when using latestInfo.diff
 
 ## [v1.1.1] - 2024-05-09
 
