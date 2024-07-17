@@ -8,6 +8,11 @@
 
 Please check git diff.
 
+## [v1.1.4] - 2024-07-17
+
+- ([a367db9](https://github.com/evan361425/version-bumper/commit/a367db9b3cde2e2c91544f90484679f9110f2bdf)) fix: correctly find latest version - wu0dj2k7ao3
+- ([443959f](https://github.com/evan361425/version-bumper/commit/443959fc7a4e5dc9f2b3963ab0d26422d2e9a983)) test: fix - wu0dj2k7ao3
+
 ## [v1.1.3] - 2024-07-17
 
 - ([786f625](https://github.com/evan361425/version-bumper/commit/786f625307556ba6d76bb88634156b377e418f4a)) fix: also push tags when bumping - wu0dj2k7ao3
@@ -199,7 +204,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v1.1.3...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v1.1.4...HEAD
+[v1.1.4]: https://github.com/evan361425/version-bumper/compare/v1.1.3...v1.1.4
 [v1.1.3]: https://github.com/evan361425/version-bumper/compare/v1.1.2...v1.1.3
 [v1.1.2]: https://github.com/evan361425/version-bumper/compare/v1.1.1...v1.1.2
 [v1.1.1]: https://github.com/evan361425/version-bumper/compare/v1.1.0...v1.1.1
