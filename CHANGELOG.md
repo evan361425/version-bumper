@@ -8,6 +8,10 @@
 
 Please check git diff.
 
+## [v1.1.3] - 2024-07-17
+
+- ([786f625](https://github.com/evan361425/version-bumper/commit/786f625307556ba6d76bb88634156b377e418f4a)) fix: also push tags when bumping - wu0dj2k7ao3
+
 ## [v1.1.2] - 2024-07-17
 
 - fix: sort git tag when using latestInfo.diff
@@ -195,7 +199,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v1.1.2...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v1.1.3...HEAD
+[v1.1.3]: https://github.com/evan361425/version-bumper/compare/v1.1.2...v1.1.3
 [v1.1.2]: https://github.com/evan361425/version-bumper/compare/v1.1.1...v1.1.2
 [v1.1.1]: https://github.com/evan361425/version-bumper/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/evan361425/version-bumper/compare/v1.0.1...v1.1.0
