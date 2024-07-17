@@ -212,7 +212,7 @@ First Release
       "[cmd]: git 'tag' 'v1.0.2' '-m' 'ticket prefix: TICKET-200\n\nThis is my new release\n\nWith version: v1.0.2\nstage: test\nticket: TICKET-200'",
       '[bump] Pushing commit and tag',
       "[cmd]: git 'push' '--no-verify'",
-      "[cmd]: git 'push' '--tag' '--no-verify'",
+      "[cmd]: git 'push' '--tags' '--no-verify'",
       '[auto-links] hit( TICKET-200), target(TICKET-), num(200)',
       '[auto-links] is not in link',
       '[pr] Creating branch test in example/example (test-head -> test-base)',
