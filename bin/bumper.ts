@@ -66,8 +66,12 @@ ${message}`);
   if (needVersion) {
     console.log(`bumper ${getVersion()}
 Update command: npm i -g @evan361425/version-bumper`);
-    const info = await npm('search', '@evan361425/version-bumper');
-    const latestVer = info.split('\n')[1]?.split('|')[4]?.trim() ?? 'unknown';
+    const info = await npm('search', '@evan361425/version-bumper', '--parseable', '--prefer-online');
+    const result = info
+      .split('\t')
+      .map((e) => e.trim())
+      .filter((e) => Boolean(e));
+    const latestVer = result[result.length - 1]?.trim();
     console.log(`Latest version: ${latestVer}`);
     return;
   }
