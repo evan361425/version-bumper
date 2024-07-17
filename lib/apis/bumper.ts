@@ -49,7 +49,7 @@ export default async function () {
   if (!Config.instance.noPush) {
     notice('[bump] Pushing commit and tag');
     await git('push', '--no-verify');
-    await git('push', '--tag', '--no-verify');
+    await git('push', '--tags', '--no-verify');
   }
 
   // 建立 PR
