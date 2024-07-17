@@ -327,7 +327,7 @@ export class Config {
         const tagInfo = this.tagsInfo[this.stage ?? ''];
         if (tagInfo) {
           // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-          t = (await git(true, 'tag'))
+          t = (await git(true, 'tag', '--sort=v:refname'))
             .split('\n')
             .map((e) => e.trim())
             .reverse()
