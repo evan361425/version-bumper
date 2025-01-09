@@ -56,7 +56,7 @@ format: ## Format by prettier
 
 .PHONY: lint
 lint: ## Lint by eslint
-	npx eslint 'lib/**/*.ts' 'test/*.ts'
+	npx eslint
 	npx prettier --check 'lib/**/*.ts' 'test/*.ts'
 
 .PHONY: lint-image

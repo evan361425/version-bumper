@@ -15,18 +15,18 @@
     "呂學洲 <evan.lu@104.com.tw>"
   ],
   "devDependencies": {
-    "@types/node": "^20.12.2",
-    "@typescript-eslint/eslint-plugin": "^7",
-    "@typescript-eslint/parser": "^7",
-    "eslint": "^8",
-    "eslint-plugin-security": "^2",
+    "@types/node": "^20",
+    "eslint": "^9",
+    "eslint-config-prettier": "^9",
+    "eslint-plugin-security": "^3",
     "prettier": "^3",
     "ts-node": "^10",
     "tsx": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "type": "module"
 }
