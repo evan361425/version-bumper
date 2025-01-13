@@ -1,6 +1,6 @@
 import { Config } from '../config.js';
 import { appendFile, breaker, createCommand, npm, writeFile } from '../helper.js';
-import { info, notice } from '../logger.js';
+import { log, verbose } from '../logger.js';
 import { PackageJson } from '../package-json.js';
 
 const TABLE_PREFIX = '|Package|Old|New|\n|-|-|-|\n';
@@ -24,7 +24,7 @@ export default async function () {
   let output = '';
 
   if (deps.length) {
-    notice(`${SEPARATOR} Start Dependencies ${SEPARATOR}\n`);
+    log(`${SEPARATOR} Start Dependencies ${SEPARATOR}\n`);
     await setUpRepo(deps);
 
     if (!config.appendOnly) {
@@ -38,7 +38,7 @@ export default async function () {
   }
 
   if (devDeps.length) {
-    notice(`\n${SEPARATOR} Start Dev Dependencies ${SEPARATOR}\n`);
+    log(`\n${SEPARATOR} Start Dev Dependencies ${SEPARATOR}\n`);
     await setUpRepo(devDeps);
 
     config.outputFile && appendFile(config.outputFile, '\n' + TABLE_PREFIX);
@@ -49,7 +49,7 @@ export default async function () {
       if (config.devInfo.oneByOne) {
         await update(config.devInfo, dep);
       } else {
-        notice(dep.toString());
+        log(dep.toString());
         newPkg.fixDev(dep.name, dep.target);
       }
     }
@@ -115,7 +115,7 @@ class OutdatedPackage {
   }
 
   setLink(link: string) {
-    info(`[dep] found ${this.name}'s link ${link}`);
+    verbose(`[dep] found ${this.name}'s link ${link}`);
     this.link = link;
     return this;
   }
@@ -126,7 +126,7 @@ class OutdatedPackage {
 }
 
 async function update(prePost: PrePost, dep?: OutdatedPackage) {
-  dep && notice(dep.toString());
+  dep && log(dep.toString());
   for (const cmd of prePost.preCommands) {
     await execCommand(cmd, dep);
   }
@@ -137,7 +137,7 @@ async function update(prePost: PrePost, dep?: OutdatedPackage) {
   if (dep?.isDev) cmd.push('--save-dev');
 
   const response = await npm(...cmd);
-  response && notice(response);
+  response && log(response);
 
   for (const cmd2 of prePost.postCommands) {
     await execCommand(cmd2, dep);
@@ -172,12 +172,12 @@ async function execCommand(cmd: string | string[], dep?: OutdatedPackage) {
   });
 
   if (exec) {
-    notice(await createCommand(exec, parsed));
+    log(await createCommand(exec, parsed));
   }
 }
 
 async function setUpRepo(deps: OutdatedPackage[]) {
-  info('[dep] start getting repo links');
+  verbose('[dep] start getting repo links');
 
   /**
    * example:

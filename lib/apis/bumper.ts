@@ -1,7 +1,7 @@
 import { Changelog } from '../changelog.js';
 import { BaseBranchInfo, Config, ReleaseInfo } from '../config.js';
 import { breaker, createCommand, extractLinks, gh, git, writeFile } from '../helper.js';
-import { error, notice } from '../logger.js';
+import { error, log } from '../logger.js';
 import { Tag } from '../tag.js';
 
 export default async function () {
@@ -47,7 +47,7 @@ export default async function () {
 
   // 把變動（含 tag）推上去
   if (!Config.instance.noPush) {
-    notice('[bump] Pushing commit and tag');
+    log('[bump] Pushing commit and tag');
     await git('push', '--no-verify');
     await git('push', '--tags', '--no-verify');
   }
@@ -59,7 +59,7 @@ export default async function () {
   const tagInfo = Config.instance.tag;
   if (tagInfo && tagInfo.release.enable) {
     if (!success) {
-      notice('[bump] Create PR(s) failed! Stop creating GitHub release');
+      log('[bump] Create PR(s) failed! Stop creating GitHub release');
     } else {
       await doRelease(tag, tagInfo.release);
     }
@@ -79,9 +79,9 @@ async function execScript(script: string | string[], tag: Tag) {
   if (cmd) {
     try {
       const result = await createCommand(cmd, args);
-      notice(`[bump] Execute command '${cmd}' done, output:\n${result}`);
+      log(`[bump] Execute command '${cmd}' done, output:\n${result}`);
     } catch (err) {
-      notice(`[bump] Execute command '${cmd} ${args.join(' ')}' error, output:\n${err}`);
+      log(`[bump] Execute command '${cmd} ${args.join(' ')}' error, output:\n${err}`);
       process.exit(1);
     }
   }
@@ -92,7 +92,7 @@ async function bump(changelog: Changelog) {
   const stage = Config.instance.stage;
   const tagInfo = Config.instance.tag;
   if (!tag || !stage || !tagInfo) return;
-  notice('[bump] Requirements checked');
+  log('[bump] Requirements checked');
 
   const msg = Config.instance.changelogInfo.commitMessage
     .replace(/{version}/g, tag.key ?? '')
@@ -109,9 +109,9 @@ async function bump(changelog: Changelog) {
     }
 
     if (!Config.instance.changelogInfo.disable) {
-      notice('[bump] Start updating changelog');
+      log('[bump] Start updating changelog');
       writeFile(Config.instance.changelogInfo.file, changelog.toString());
-      notice(`[bump] Add tag ${tag.key}:\n${tag.bodyWithAutoLinks}`);
+      log(`[bump] Add tag ${tag.key}:\n${tag.bodyWithAutoLinks}`);
     }
 
     // commit both npm version and changelog
@@ -161,7 +161,7 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     Config.instance.autoLinks,
   );
 
-  notice(`[pr] Creating branch ${b.name} in ${repo} (${b.head} -> ${b.base})`);
+  log(`[pr] Creating branch ${b.name} in ${repo} (${b.head} -> ${b.base})`);
 
   // https://cli.github.com/manual/gh_pr_create
   try {
@@ -185,7 +185,7 @@ async function createPR(tag: Tag, b: BaseBranchInfo) {
     );
     return true;
   } catch (e) {
-    notice(`${e}`);
+    log(`${e}`);
     return false;
   }
 }
@@ -202,7 +202,7 @@ function doRelease(tag: Tag, config: ReleaseInfo) {
     tag.bodyWithAutoLinks,
   ];
 
-  notice(`[bump] Creating GitHub release ${config.title ?? tag.key}`);
+  log(`[bump] Creating GitHub release ${config.title ?? tag.key}`);
 
   // https://cli.github.com/manual/gh_release_create
   return gh('release', ...args);

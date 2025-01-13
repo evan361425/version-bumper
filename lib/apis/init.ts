@@ -3,7 +3,7 @@ import path from 'node:path';
 import { Changelog } from '../changelog.js';
 import { Config } from '../config.js';
 import { getSchemaFile, isDebug, writeFile } from '../helper.js';
-import { info } from '../logger.js';
+import { verbose } from '../logger.js';
 
 export default async function () {
   const config = new Config({ latestVersion: 'unknown' as never });
@@ -76,7 +76,7 @@ function prepareFolder(file: string) {
 function allowed(file: string, key: string): boolean {
   const name = file.substring(path.resolve().length + 1);
   if (isDebug()) {
-    info(`Debug always allowed write to ${name}`);
+    verbose(`Debug always allowed write to ${name}`);
     return true;
   }
   if (fs.existsSync(file)) {

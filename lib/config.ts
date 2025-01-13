@@ -1,9 +1,42 @@
 import path from 'node:path';
 import { breaker, git, parseMarkdown, readFile, startDebug, startVerbose } from './helper.js';
-import { error, info } from './logger.js';
+import { IAutoLink, IChangelog, IDiff, IPR, IProcess, IRepo, ITag } from './interfaces';
+import { error, verbose } from './logger.js';
 
-const DEFAULTS = {
-  configFile: 'bumper.json',
+export interface IConfig {
+  repo: IRepo;
+  process: IProcess;
+  changelog: IChangelog;
+  autoLinks: IAutoLink[];
+  pr: IPR;
+  diff: IDiff;
+  tags: ITag[];
+}
+
+const DEFAULT_CONFIG_PATH = 'bumper.json';
+const DEFAULTS: IConfig = {
+  repo: {
+    link: 'https://github.com/example/example',
+  },
+  process: {
+    noPush: false,
+    prOnly: false,
+    releaseOnly: false,
+    throwErrorIfTagExist: true,
+  },
+  changelog: {
+    disable: false,
+    destination: 'CHANGELOG.md',
+    template: {
+      file: '',
+      value: '## {version}\n\n{content}',
+      github: {
+        repo: '',
+        path: '',
+        branch: 'main',
+      },
+    },
+  },
   pr: {
     title: '{ticket} - {version}({stage})',
     template: `This PR is auto-generated from bumper
@@ -31,31 +64,8 @@ const DEFAULTS = {
   },
 };
 
-export class Config {
+export class Config implements IConfig {
   static #instance: Config;
-
-  // ====== For bump version =======
-
-  repoLink: string;
-  readonly stage?: string;
-  readonly prOnly: boolean;
-  readonly releaseOnly: boolean;
-  readonly noPush: boolean;
-
-  readonly changelogInfo: ChangelogInfo;
-  readonly latestInfo: LatestInfo;
-  readonly tagsInfo: TagsInfo;
-  readonly prInfo: PRInfo;
-
-  readonly autoLinks: Record<string, string>;
-
-  readonly beforeScripts: string[] | string[][];
-  readonly afterScripts: string[] | string[][];
-  readonly beforeCommit: string[] | string[][];
-
-  // ====== For bump deps =======
-
-  readonly deps: DepsInfo;
 
   static get instance() {
     if (!this.#instance) {
@@ -130,10 +140,9 @@ export class Config {
         tags = {};
         const ml = Math.min(names.length, patterns.length);
         for (let i = 0; i < ml; i++) {
-          // @ts-expect-error Type 'undefined' cannot be used as an index type.
-          tags[names[i]] = {
-            pattern: patterns[i],
-          };
+          tags[names[i]!] = {
+            pattern: patterns[i]!,
+          } as TagInfo;
         }
       }
 
@@ -386,7 +395,7 @@ export class Config {
 
     this.verify(command);
 
-    info(JSON.stringify(this, undefined, 2));
+    verbose(JSON.stringify(this, undefined, 2));
 
     return this;
   }
@@ -447,7 +456,7 @@ function getOptionFromArgs(key: string): string | undefined {
 function loadConfig() {
   const name = process.env['BUMPER_CONFIG'] ?? getOptionFromArgs('config') ?? DEFAULTS.configFile;
 
-  info(`Start loading config from ${path.resolve(name)}`);
+  verbose(`Start loading config from ${path.resolve(name)}`);
   const content = readFile(path.resolve(name));
   if (!content) return {};
 
@@ -480,69 +489,3 @@ function getStage(v: string, tags: TagsInfo, stage?: string): string | undefined
 
   return hit ? hit[0] : undefined;
 }
-
-type TagInfo = {
-  pattern: string;
-  changelog: boolean;
-  release: ReleaseInfo;
-};
-export type BaseBranchInfo = {
-  name: string;
-  head: string;
-  base: string;
-  labels: string[];
-  reviewers: string[];
-};
-type BranchInfo = BaseBranchInfo & {
-  siblings: Record<string, BaseBranchInfo>;
-};
-type ChangelogInfo = {
-  disable: boolean;
-  file: string;
-  template: string;
-  header: string;
-  commitMessage: string;
-};
-type PRInfo = {
-  repo: string;
-  title: string;
-  template: string;
-  templateFile: string;
-  branches: Record<string, BranchInfo>;
-};
-type TagsInfo = Record<string, TagInfo>;
-type LatestInfo = {
-  version: string;
-  content: string;
-  ticket: string | undefined;
-  file: string;
-  diff: {
-    enable: boolean;
-    allowed: string[];
-    ignored: string[];
-  };
-};
-type DevInfo = {
-  oneByOne: boolean;
-  preCommands: Commands;
-  postCommands: Commands;
-};
-type AllowedCommand = 'version' | 'deps';
-type Commands = string[] | string[][];
-type DepsInfo = {
-  ignored: string[];
-  outputFile?: string;
-  appendOnly: boolean;
-  saveExact: boolean;
-  allLatest: boolean;
-  latestDeps: string[];
-  devInfo: DevInfo;
-  preCommands: Commands;
-  postCommands: Commands;
-};
-export type ReleaseInfo = {
-  enable: boolean;
-  title?: string;
-  preRelease: boolean;
-  draft: boolean;
-};

@@ -6,7 +6,7 @@
 
 import api from '../lib/api.js';
 import { getPackageJsonFile, npm, readFile } from '../lib/helper.js';
-import { notice } from '../lib/logger.js';
+import { log } from '../lib/logger.js';
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -88,5 +88,5 @@ Update command: npm i -g @evan361425/version-bumper`);
     return api.help(command);
   }
 
-  notice(`${command} done`);
+  log(`${command} done`);
 })().catch(onFatalError);

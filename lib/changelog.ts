@@ -1,5 +1,5 @@
 import { Config } from './config.js';
-import { info } from './logger.js';
+import { verbose } from './logger.js';
 import { Tag } from './tag.js';
 
 export class Changelog {
@@ -16,18 +16,18 @@ export class Changelog {
     this.header = Config.instance.changelogInfo.header;
     this.firstTagKey = Tag.veryFirstTagKey;
     if (typeof origin !== 'string' || origin === '') {
-      info('[changelog] No need parse');
+      verbose('[changelog] No need parse');
       return;
     }
 
-    info('[changelog] Start parsing');
+    verbose('[changelog] Start parsing');
 
     const headerIdx = origin.search(/\n## \[/);
     const footerIdx = origin.search(/\n\[[^\]]+\]:/);
 
     if (headerIdx === -1) {
       this.header = origin;
-      info('[changelog] Not found any tags');
+      verbose('[changelog] Not found any tags');
       return;
     }
 
@@ -44,7 +44,7 @@ export class Changelog {
 
     // parse footer links
     if (footerIdx === -1) {
-      info('[changelog] Not found footer');
+      verbose('[changelog] Not found footer');
       return;
     }
     origin
@@ -154,7 +154,7 @@ export class Changelog {
         string,
         string,
       ];
-      info(`[auto-links] hit(${hit}), target(${target}), num(${num})`);
+      verbose(`[auto-links] hit(${hit}), target(${target}), num(${num})`);
       const rest = index + hit.length;
       const isInLink = inLink.test(body.substring(rest));
 
@@ -162,7 +162,7 @@ export class Changelog {
 
       // only add link if not in link
       if (!isInLink) {
-        info(`[auto-links] is not in link`);
+        verbose(`[auto-links] is not in link`);
         const rawLink = casedLinks[target.toLowerCase()];
         const link = rawLink?.replace(/{num}/g, num ?? '');
         const origin = num ? target.concat(num) : target;

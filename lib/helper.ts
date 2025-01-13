@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { info } from './logger.js';
+import { verbose } from './logger.js';
 
 let mode: 'debug' | 'normal' | 'verbose' = 'normal';
 let mockedCommands: undefined | Promise<string>[];
@@ -29,7 +29,7 @@ export function isVerbose(): boolean {
 
 export function createCommand(name: string, args: string[]): Promise<string> {
   const force = typeof args[0] === 'boolean' ? args.shift() : false;
-  info(`[cmd]: ${name} '${args.join("' '")}'`);
+  verbose(`[cmd]: ${name} '${args.join("' '")}'`);
 
   const prepared = !force && isDebug() ? Promise.resolve('') : mockedCommands ? mockedCommands.shift() : undefined;
 
