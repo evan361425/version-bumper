@@ -1,12 +1,9 @@
-import { getSchemaFile, readFile } from '../util.js';
-
 const PREFIX = '\t';
 const commands: Record<string, string> = {
-  '': '更新專案版本',
-  version: '顯示安裝的版本',
-  deps: '更新套件',
-  help: '顯示此訊息',
-  init: '初始化專案',
+  '': 'Specific version to bump',
+  version: 'Show latest version of this package',
+  help: 'Show this message',
+  init: 'Create a new configuration file',
 };
 const allowedTypes = ['array', 'number', 'string', 'boolean'];
 const arrayPrefix = '以逗號（,）做為區隔';
@@ -20,34 +17,37 @@ type ItemSchema = {
   alias?: string[];
 };
 
-export default function (command: string) {
-  const pureCommand = !commands[command] || command === 'help';
-
-  if (pureCommand) {
-    console.log('Usage: (npx) bumper <command> [args]\nCommands');
-    printCommands();
-    console.log('\nArgs:\n\t-h, --help 顯示相關 Command 的 Args');
-    console.log('\t-v, --version 顯示版本資訊');
-  } else {
-    console.log(`Usage: (npx) bumper ${command} [args]\nArgs:`);
-    printArgsFromSchema(command ?? '');
+export function helpCommand(firstArg: string): void {
+  if (firstArg === 'version') {
+    console.log(`Usage: (npx) bumper version [args]\nArgs:\n\tNo arguments, only show the latest version`);
   }
+
+  if (firstArg === 'help') {
+    console.log('Usage: (npx) bumper <command|version|> [args]\nCommands');
+    printCommands();
+    console.log('\nArgs:\n\t-h, --help Show available arguments');
+    console.log('\t-v, --version Show version');
+    return;
+  }
+
+  console.log(`Usage: (npx) bumper <version|> [args]\nIf no version given, it will ask for it\nArgs:`);
+  printArgsFromSchema();
 }
 
 function printCommands() {
   const keyMaxLength = Object.keys(commands)
-    .map((k) => (k || '(default)').length)
+    .map((k) => (k || '(any else)').length)
     .reduce((prev, curr) => (curr > prev ? curr : prev));
 
   Object.entries(commands).forEach(([key, desc]) => {
-    key = key || '(default)';
+    key = key || '(any else)';
     const spaces = keyMaxLength - key.length;
     const prefix = PREFIX + key + ' '.repeat(spaces);
     console.log(prefix + ' ' + desc);
   });
 }
 
-function printArgsFromSchema(command: string) {
+function printArgsFromSchema() {
   const file = getSchemaFile();
   let schema = JSON.parse(readFile(file));
 

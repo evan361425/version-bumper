@@ -1,3 +1,31 @@
+/**
+ * Configuration of the bumper.
+ */
+export interface IConfig {
+  repo: IRepo;
+  process: IProcess;
+  changelog: IChangelog;
+  autoLinks: IAutoLink[];
+  pr: IPR;
+  diff: IDiff;
+  tags: ITag[];
+}
+
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+
+export type PartialConfig = DeepPartial<IConfig>;
+export type ConfigArguments<T> = T extends ITemplate | KVPairs
+  ? string
+  : T extends object
+    ? {
+        [P in keyof T]?: ConfigArguments<T[P]>;
+      }
+    : string;
+
 export type KVPairs = Record<string, string>;
 
 /**

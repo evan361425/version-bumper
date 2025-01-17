@@ -1,6 +1,6 @@
 import { ChangelogIO } from './changelog.js';
 import { command } from './command.js';
-import { askForWantedVars, DeepPartial, IConfig } from './config-loader.js';
+import { askForWantedVars, DeepPartial } from './config-loader.js';
 import { BumperError } from './errors.js';
 import {
   AutoLink,
@@ -14,11 +14,11 @@ import {
   VersionedTemplate,
 } from './factories.js';
 import { GitDatabase } from './git.js';
-import { IDiffGroup, IProcess, ITag } from './interfaces.js';
+import { IConfig, IDiffGroup, IProcess, ITag } from './interfaces.js';
 import { verbose } from './logger.js';
 import { breaker } from './util.js';
 
-const DEFAULTS: IConfig = {
+export const DEFAULTS: IConfig = {
   repo: { link: '' },
   process: {
     bump: true,

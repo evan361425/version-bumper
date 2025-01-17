@@ -2,7 +2,7 @@ import path from 'node:path';
 import { Config } from './config.js';
 import { BumperError } from './errors.js';
 import { Tag } from './factories.js';
-import { IAutoLink, IChangelog, IDiff, IPR, IProcess, IRepo, ITag, ITemplate, KVPairs } from './interfaces.js';
+import { ConfigArguments, DeepPartial, IConfig, IProcess, ITemplate } from './interfaces.js';
 import { askQuestion, readFile } from './io.js';
 import { log, verbose } from './logger.js';
 import { breaker } from './util.js';
@@ -14,7 +14,7 @@ const DEFAULT_CONFIG_PATH = 'bumper.json';
  *
  * It helps auto-generate the documentation of the command.
  */
-export const configArgsMap: PartialConfig<IConfig> = {
+export const configArgsMap: ConfigArguments<IConfig> = {
   repo: {
     link: 'repo',
   },
@@ -124,32 +124,6 @@ export const specialArgs = [
    */
   'only-release',
 ];
-
-/**
- * Configuration of the bumper.
- */
-export interface IConfig {
-  repo: IRepo;
-  process: IProcess;
-  changelog: IChangelog;
-  autoLinks: IAutoLink[];
-  pr: IPR;
-  diff: IDiff;
-  tags: ITag[];
-}
-
-export type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
-type PartialConfig<T> = T extends ITemplate | KVPairs
-  ? string
-  : T extends object
-    ? {
-        [P in keyof T]?: PartialConfig<T[P]>;
-      }
-    : string;
 
 /**
  * @param key

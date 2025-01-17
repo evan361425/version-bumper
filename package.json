@@ -20,6 +20,7 @@
     "eslint-config-prettier": "^9",
     "eslint-plugin-security": "^3",
     "prettier": "^3",
+    "ts-json-schema-generator": "^2.3.0",
     "ts-node": "^10",
     "tsx": "^4",
     "typescript": "^5",

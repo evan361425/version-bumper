@@ -1,14 +1,14 @@
 {
   "$schema": "schema.json",
-  "repoLink": "https://github.com/evan361425/version-bumper",
-  "changelog": {
-    "commitMessage": "chore: bump to {version}",
-    "template": "{content}"
+  "repo": {
+    "link": "https://github.com/evan361425/version-bumper"
   },
-  "latestInfo": {
-    "diff": {
-      "enable": true,
-      "ignored": ["^doc", "^chore"]
+  "changelog": {
+    "enable": true,
+    "commit": {
+      "message": {
+        "value": "chore: bump to {version}"
+      }
     }
   },
   "tags": {

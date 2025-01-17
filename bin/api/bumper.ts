@@ -1,7 +1,7 @@
-import { Config } from '../config.js';
-import { BumperError } from '../errors.js';
+import { Config } from '../../lib/config.js';
+import { BumperError } from '../../lib/errors.js';
 
-export default async function (cfg: Config) {
+export async function bumperCommand(cfg: Config): Promise<void> {
   if (cfg.process.checkTag) {
     if (!(await cfg.git.hasTag(cfg.version))) {
       throw new BumperError(`Tag ${cfg.version} not found`);
