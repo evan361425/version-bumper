@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Changelog } from '../changelog.js';
 import { Config } from '../config.js';
-import { getSchemaFile, isDebug, writeFile } from '../helper.js';
 import { verbose } from '../logger.js';
+import { getSchemaFile, isDebug, writeFile } from '../util.js';
 
 export default async function () {
   const config = new Config({ latestVersion: 'unknown' as never });

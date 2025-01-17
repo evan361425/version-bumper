@@ -1,17 +1,18 @@
 import assert from 'node:assert';
-import { command } from './command';
-import { IAutoLink } from './interfaces';
-import { verbose } from './logger';
+import { command } from './command.js';
+import { IAutoLink } from './interfaces.js';
+import { verbose } from './logger.js';
+import { removeMarkdownLinks } from './util.js';
 
 export class GitCommit {
   protected _pr: string | undefined;
   protected _scope: string | undefined;
   protected _title: string | undefined;
-  protected _titleFull: string | undefined;
+  protected _titleTail: string | undefined;
 
   constructor(
     readonly hashFull: string,
-    readonly message: string,
+    readonly titleFull: string,
     readonly author: string,
   ) {}
 
@@ -19,33 +20,44 @@ export class GitCommit {
     return this.hashFull.substring(0, 7);
   }
 
-  get title(): string {
-    if (this._title) return this._title;
+  get titleTail(): string {
+    if (this._titleTail) return this._titleTail;
 
     const idx = this.titleFull.indexOf(':');
-    return (this._title = idx === -1 ? this.titleFull : this.titleFull.substring(idx + 1).trim());
-  }
-
-  get titleFull(): string {
-    return (this._titleFull ??= this.message.split('\n')[0]!);
+    return (this._titleTail = idx === -1 ? this.titleFull : this.titleFull.substring(idx + 1).trim());
   }
 
   get pr(): string {
-    return (this._pr ??= this.title.match(/\(?#(\d+)\)/)?.[1] ?? this.hash);
+    return (this._pr ??= this.titleFull.match(/\(?#(\d+)\)/)?.[1] ?? this.hash);
   }
 
   get scope(): string {
-    return (this._scope ??= this.title.match(/^\w+\((\w+)\)/)?.[1] ?? '');
+    return (this._scope ??= this.titleFull.match(/^\w+\((\w+)\)/)?.[1] ?? '');
   }
 
-  parseTicket(autoLinks: IAutoLink[]): string {
+  parseAutoLink(autoLinks: IAutoLink[]): string {
     for (const link of autoLinks) {
-      if (link.matches.some((m) => new RegExp(m).test(this.title))) {
-        return this.title.match(/\(?#(\d+)\)/)?.[1] ?? '';
-      }
+      const match = link.extract(this.titleFull);
+      if (match) return match;
     }
 
     return '';
+  }
+
+  parseTitle(autoLinks: IAutoLink[]): string {
+    if (this._title) return this._title;
+
+    let title = this.titleTail.replace(/\(?#\d+\)/, '');
+
+    for (const link of autoLinks) {
+      const match = link.extract(title);
+      if (match) {
+        title = title.replace(match, '').trim();
+      }
+    }
+
+    // avoid double space
+    return (this._title = title.replace(/ +/g, ' ').trim());
   }
 }
 
@@ -62,6 +74,15 @@ export class GitDatabase {
      */
     readonly branch: string,
   ) {}
+
+  async tag(version: string, content: string): Promise<void> {
+    await command('git', ['tag', version, '-m', removeMarkdownLinks(content)]);
+  }
+
+  async push(): Promise<void> {
+    await command('git', ['push', '--no-verify']);
+    await command('git', ['push', '--tags', '--no-verify']);
+  }
 
   /**
    * Create a new branch from the `branch`.
@@ -175,5 +196,23 @@ export class GitDatabase {
       '--jq',
       '.sha',
     ]);
+  }
+
+  async hasTag(tag: string): Promise<boolean> {
+    try {
+      const local = await command('git', ['tag', '-l', tag]);
+      if (local.includes(tag)) {
+        return true;
+      }
+
+      const remote = await command('gh', ['api', `repos/${this.repo}/git/ref/tags/${tag}`]);
+      if (remote.includes(`"refs/tags/${tag}"`)) {
+        return true;
+      }
+    } catch (error) {
+      verbose(`[git] Tag ${tag} not found: ${error}`);
+    }
+
+    return false;
   }
 }

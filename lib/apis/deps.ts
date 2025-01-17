@@ -1,7 +1,7 @@
 import { Config } from '../config.js';
-import { appendFile, breaker, createCommand, npm, writeFile } from '../helper.js';
 import { log, verbose } from '../logger.js';
 import { PackageJson } from '../package-json.js';
+import { appendFile, breaker, createCommand, npm, writeFile } from '../util.js';
 
 const TABLE_PREFIX = '|Package|Old|New|\n|-|-|-|\n';
 const SEPARATOR = '='.repeat(10);

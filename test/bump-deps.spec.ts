@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import api from '../lib/api.js';
 import { Config } from '../lib/config.js';
-import { mockCommand, mockFile, startDebug, stopDebug } from '../lib/helper.js';
+import { mockCommand, mockFile, startDebug, stopDebug } from '../lib/util.js';
 import { resetEnv, setupEnv } from './warm-up.js';
 
 void describe('Bump deps', function () {

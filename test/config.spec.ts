@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import { Config } from '../lib/config.js';
-import { mockCommand, mockFile } from '../lib/helper.js';
+import { mockCommand, mockFile } from '../lib/util.js';
 import { resetEnv, setEnv, setupEnv } from './warm-up.js';
 
 void describe('Config', function () {

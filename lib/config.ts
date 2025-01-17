@@ -1,491 +1,258 @@
-import path from 'node:path';
-import { breaker, git, parseMarkdown, readFile, startDebug, startVerbose } from './helper.js';
-import { IAutoLink, IChangelog, IDiff, IPR, IProcess, IRepo, ITag } from './interfaces';
-import { error, verbose } from './logger.js';
+import { ChangelogIO } from './changelog.js';
+import { command } from './command.js';
+import { askForWantedVars, DeepPartial, IConfig } from './config-loader.js';
+import { BumperError } from './errors.js';
+import {
+  AutoLink,
+  Changelog,
+  ChangelogTemplate,
+  ContentTemplate,
+  Diff,
+  PR,
+  Repo,
+  Tag,
+  VersionedTemplate,
+} from './factories.js';
+import { GitDatabase } from './git.js';
+import { IDiffGroup, IProcess, ITag } from './interfaces.js';
+import { verbose } from './logger.js';
+import { breaker } from './util.js';
 
-export interface IConfig {
-  repo: IRepo;
-  process: IProcess;
-  changelog: IChangelog;
-  autoLinks: IAutoLink[];
-  pr: IPR;
-  diff: IDiff;
-  tags: ITag[];
-}
-
-const DEFAULT_CONFIG_PATH = 'bumper.json';
 const DEFAULTS: IConfig = {
-  repo: {
-    link: 'https://github.com/example/example',
-  },
+  repo: { link: '' },
   process: {
-    noPush: false,
-    prOnly: false,
-    releaseOnly: false,
-    throwErrorIfTagExist: true,
+    bump: true,
+    push: true,
+    pr: true,
+    release: true,
+    checkTag: true,
+    wantedTicket: false,
+    useSemanticGroups: true,
+    useSemanticTag: true,
+    useReleaseCandidateTag: false,
   },
   changelog: {
-    disable: false,
+    enable: true,
     destination: 'CHANGELOG.md',
-    template: {
-      file: '',
-      value: '## {version}\n\n{content}',
-      github: {
-        repo: '',
-        path: '',
-        branch: 'main',
+    section: {
+      value: '## [{version}] - {date}\n\n{content}',
+    },
+    commit: {
+      message: {
+        value: 'chore: {"versionName" }bump to {version}',
       },
+      addAll: false,
     },
   },
+  autoLinks: [],
   pr: {
-    title: '{ticket} - {version}({stage})',
-    template: `This PR is auto-generated from bumper
+    title: {
+      value: '{"ticket" - } New {versionName} version {version}',
+    },
+    body: {
+      value: `This PR is auto-generated from bumper
 
-- ticket: {ticket}
-- stage: {stage}
+- ticket: {ticket}{<NL>- name: "versionName"}
 - version: {version}
-- [diff]({diff})
+- [diff link]({diff})
 
 {content}
 `,
+    },
   },
-  changelog: {
-    file: 'CHANGELOG.md',
-    commitMessage: 'chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}',
-    template: '單號: {ticket}\n\n{content}',
-    header: `# Changelog
-
-所有本專案的版本紀錄將於此說明之。
-
-文件依照 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 內所描述的格式撰寫，版本號碼依照 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。`,
+  diff: {
+    groups: [],
+    item: {
+      value: `- ({pr}{|"autoLink"}) {"scope": }{title} - {author}`,
+    },
+    scopeNames: {},
+    ignored: [],
+    othersTitle: 'Others',
+    ignoreOthers: true,
   },
-  latestInfo: {
-    file: 'docs/LATEST_VERSION.md',
+  tags: [],
+};
+const SEMANTIC_GROUPS: IDiffGroup[] = [
+  { matches: ['^fix'], title: 'Fixed', priority: 0 },
+  { matches: ['^feat', '^add'], title: 'Added', priority: 0 },
+  { matches: ['^[\w\(\)]+!', 'BREAKING CHANGE'], title: 'Changed', priority: 1 },
+];
+const SEMANTIC_TAG: ITag = {
+  name: 'semantic',
+  pattern: 'v[0-9]+\\.[0-9]+\\.[0-9]+',
+  prs: [],
+  release: {
+    enable: true,
+    draft: false,
+    preRelease: false,
+  },
+  withChangelog: true,
+  sort: {
+    separator: '.',
+    fields: ['1,1', '2,2', '3,3'],
+  },
+};
+const RELEASE_CANDIDATE_TAG: ITag = {
+  name: 'release-candidate',
+  pattern: 'v[0-9]+\\.[0-9]+\\.[0-9]+-rc\\.[0-9]+',
+  prs: [],
+  release: { enable: false },
+  withChangelog: false,
+  sort: {
+    separator: '.',
+    fields: ['1,1', '2,2', '3,3', '4.4'],
   },
 };
 
-export class Config implements IConfig {
-  static #instance: Config;
+export class Config {
+  tag!: Tag;
+  version!: string;
+  ticket!: string;
 
-  static get instance() {
-    if (!this.#instance) {
-      this.#instance = new Config(loadConfig());
+  readonly process: IProcess;
+  readonly repo: Repo;
+  readonly changelog: Changelog;
+  readonly pr: PR;
+  readonly diff: Diff;
+  readonly autoLinks: AutoLink[];
+  readonly tags: Tag[];
+  readonly git: GitDatabase;
+
+  /**
+   * @param others Fallback options, the later one will override the previous one.
+   */
+  constructor(...others: DeepPartial<IConfig>[]) {
+    const cfg = { ...DEFAULTS };
+    for (const o of others) {
+      softMerge(cfg, o);
     }
 
-    return this.#instance;
+    if (cfg.process.useSemanticGroups) {
+      cfg.diff.groups = cfg.diff.groups.concat(SEMANTIC_GROUPS);
+    }
+    if (cfg.process.useSemanticTag) {
+      cfg.tags.push(SEMANTIC_TAG);
+    }
+    if (cfg.process.useReleaseCandidateTag) {
+      cfg.tags.push(RELEASE_CANDIDATE_TAG);
+    }
+
+    this.process = cfg.process;
+    this.repo = Repo.fromCfg(cfg.repo);
+    this.changelog = Changelog.fromCfg(cfg.changelog);
+    this.autoLinks = cfg.autoLinks.map((a) => AutoLink.fromCfg(a));
+    this.pr = PR.fromCfg(cfg.pr);
+    this.diff = Diff.fromCfg(cfg.diff, this.autoLinks);
+    this.tags = cfg.tags.map((t) => Tag.fromCfg(t));
+    this.git = new GitDatabase(this.repo.name, '');
   }
 
-  static set instance(v: Config) {
-    this.#instance = v;
+  /**
+   * Get the last tag diff link.
+   *
+   * It must call after `askForWantedVars` for last tag fetching.
+   */
+  get diffLink(): string {
+    return this.repo.compareLink({ from: this.tag.mustLastTag, to: this.version });
   }
 
-  constructor(config: Record<string, never>) {
-    getBoolConfig('verbose', false, undefined, ['v']) && startVerbose();
-    getBoolConfig('debug', false, undefined, ['d']) && startDebug();
-
-    // ================ bump versions ================
-    this.repoLink = getConfig('repo_link') ?? '';
-    this.prOnly = getBoolConfig('pr_only');
-    this.releaseOnly = getBoolConfig('release_only');
-    this.noPush = getBoolConfig('no_push');
-
-    this.changelogInfo = getChangelogInfo();
-    this.tagsInfo = getTagsInfo();
-    this.prInfo = getPRInfo();
-    this.latestInfo = getLatestInfo();
-    this.autoLinks = getAutoLinks();
-    this.beforeScripts = config['beforeScripts'] ?? [];
-    this.afterScripts = config['afterScripts'] ?? [];
-    this.beforeCommit = config['beforeCommit'] ?? [];
-
-    this.stage = getStage(this.latestInfo.version, this.tagsInfo, getConfig('stage')) as string;
-
-    // ================ bump deps ===================
-
-    const depsCfg: Record<string, never> = config['deps'] ?? {};
-    const deps: Partial<DepsInfo> = {};
-    deps.ignored = getListConfig('ignored', depsCfg, []);
-    deps.outputFile = getConfig('output_file', undefined, depsCfg) as string;
-    deps.appendOnly = getBoolConfig('append_only', undefined, depsCfg);
-    deps.saveExact = getBoolConfig('use_exact', undefined, depsCfg);
-    deps.latestDeps = getListConfig('latest_deps', depsCfg, []);
-    deps.allLatest = deps.latestDeps.some((e) => e === '*');
-    deps.preCommands = getListConfig('pre_commands', depsCfg, []);
-    deps.postCommands = getListConfig('post_commands', depsCfg, []);
-    deps.devInfo = getDevInfo(depsCfg, deps.preCommands, deps.postCommands);
-    this.deps = deps as DepsInfo;
-
-    // ================ helpers =====================
-
-    function getChangelogInfo() {
-      const ch: Partial<ChangelogInfo> = config['changelog'] ?? {};
-      const d = DEFAULTS.changelog;
-      ch.commitMessage = getConfig('changelog_commit_message', ch.commitMessage ?? d.commitMessage);
-      ch.disable = getBoolConfig('changelog_disable', ch.disable);
-      ch.file = getConfig('changelog_file', ch.file ?? d.file);
-      ch.header = getConfig('changelog_header', ch.header ?? d.header);
-      ch.template = getConfig('changelog_template', ch.template ?? d.template);
-
-      return ch as ChangelogInfo;
-    }
-
-    function getTagsInfo(): TagsInfo {
-      let tags: TagsInfo = config['tags'] ?? {};
-
-      const names = stf(getConfig('tag_names'));
-      const patterns = stf(getConfig('tag_patterns'));
-      const changelog = getBoolConfig('tag_changelog', true);
-
-      if (names && patterns) {
-        tags = {};
-        const ml = Math.min(names.length, patterns.length);
-        for (let i = 0; i < ml; i++) {
-          tags[names[i]!] = {
-            pattern: patterns[i]!,
-          } as TagInfo;
-        }
-      }
-
-      Object.entries(tags).forEach(([, tag]) => {
-        tag.changelog ??= changelog;
-        tag.release = getReleaseInfo(tag);
-      });
-
-      return tags;
-    }
-
-    function getPRInfo(): PRInfo {
-      const pr: Partial<PRInfo> = config['pr'] ?? {};
-      const d = DEFAULTS.pr;
-
-      const file = getConfig('pr_template_file', pr.templateFile);
-      let dTemplate = d.template;
-      if (file) {
-        const content = readFile(file);
-        dTemplate = content ? content : dTemplate;
-      }
-
-      pr.repo = getConfig('pr_repo', pr.repo);
-      pr.template = getConfig('pr_template', pr.template ?? dTemplate);
-      pr.title = getConfig('pr_title', pr.title ?? d.title);
-
-      const names = stf(getConfig('branch_names'));
-      const heads = stf(getConfig('branch_heads'));
-      const bases = stf(getConfig('branch_bases'));
-      const reviewers = stf(getConfig('branch_reviewers')) ?? [];
-      const labels = stf(getConfig('branch_labels')) ?? [];
-
-      if (names && bases) {
-        // overwrite it! since env take higher procedure
-        pr.branches = {};
-
-        const ml = Math.min(names.length, bases.length);
-        for (let i = 0; i < ml; i++) {
-          const b: Partial<BaseBranchInfo> = {
-            head: heads[i] as string,
-            base: bases[i] as string,
-            reviewers: stf(reviewers[i], '/'),
-            labels: stf(labels[i], ' '),
-          };
-
-          // @ts-expect-error Type 'undefined' cannot be used as an index type.
-          pr.branches[names[i]] = b;
-        }
-      }
-
-      if (pr.branches) {
-        Object.entries(pr.branches).forEach(([k, meta]) => {
-          meta.name = k;
-          meta.head ??= `deploy/${k}`;
-          meta.reviewers ??= [];
-          meta.labels ??= [];
-          meta.siblings ??= {};
-
-          Object.entries(meta.siblings).forEach(([kk, s]) => {
-            s.name = kk;
-            s.base ??= meta.base;
-            s.head ??= meta.head;
-            s.labels ??= meta.labels;
-            s.reviewers ??= meta.reviewers;
-          });
-        });
-      } else {
-        pr.branches = {};
-      }
-
-      return pr as PRInfo;
-    }
-
-    function getLatestInfo(): LatestInfo {
-      const li: Partial<LatestInfo> = config['latestInfo'] ?? {};
-
-      li.diff ??= { enable: true, allowed: ['^fix', '^feat'], ignored: [] };
-      li.diff.enable = getBoolConfig('latest_diff_enable') || (!getConfig('latest_content') && li.diff.enable);
-      li.diff.allowed = getListConfig('latest_diff_allowed', {}, li.diff.allowed ?? []);
-      li.diff.ignored = getListConfig('latest_diff_ignored', {}, li.diff.ignored ?? []);
-
-      li.file = getConfig('latest_file', DEFAULTS.latestInfo.file);
-      const [fMeta, fBody] = li.file ? parseMarkdown(li.file) : [];
-
-      li.version = getConfig('latest_version') ?? getConfig('v') ?? li.version ?? (fMeta?.version as string);
-      li.ticket = getConfig('latest_ticket') ?? li.ticket ?? fMeta?.ticket;
-      li.content = getConfig('latest_content') ?? li.content ?? (fBody as string);
-
-      return li as LatestInfo;
-    }
-
-    function getAutoLinks(): Record<string, string> {
-      const result: Record<string, string> = {};
-      let autoLinks: Record<string, string> = config['autoLinks'] ?? {};
-      if (getConfig('auto_link_keys') && getConfig('auto_link_values')) {
-        autoLinks = {};
-        const keys = stf(getConfig('auto_link_keys')) as string[];
-        const values = stf(getConfig('auto_link_values')) as string[];
-        for (let i = 0, l = Math.min(keys.length, values.length); i < l; i++) {
-          autoLinks[`${keys[i]}`] = `${values[i]}`;
-        }
-      }
-
-      Object.entries(autoLinks).forEach((e) => {
-        const allowed = /[a-zA-Z-]+/.test(e[0]);
-        if (!allowed) {
-          error(`The key of auto link (${e[0]}) should not contains other character beside alphabet, dash(-)`);
-          return;
-        }
-        result[e[0]] = e[1];
-      });
-
-      return result;
-    }
-
-    function getReleaseInfo(data: { release?: unknown }): ReleaseInfo {
-      const pi: Partial<ReleaseInfo> = data['release'] ?? { enable: true };
-      pi.enable = getBoolConfig('release_enable', pi.enable);
-      pi.title = getConfig('release_title', pi.title);
-      pi.preRelease = getBoolConfig('release_pre', pi.preRelease);
-      pi.draft = getBoolConfig('release_draft', pi.draft);
-
-      return pi as ReleaseInfo;
-    }
-
-    function getDevInfo(rDeps: Record<string, never>, pre: Commands, post: Commands) {
-      const dev: Partial<DevInfo> = rDeps['dev'] ?? {};
-      const d = dev as Record<string, never>;
-
-      dev.oneByOne = getBoolConfig('one_by_one', undefined, d);
-      dev.preCommands = dev.preCommands ?? pre;
-      dev.postCommands = dev.postCommands ?? post;
-
-      return dev as DevInfo;
-    }
-
-    function getConfig<T>(
-      key: string,
-      other?: T,
-      cfg?: Record<string, never>,
-    ): T extends string ? string : string | undefined {
-      const k = underLine2Camel(key);
-
-      cfg ??= config;
-      const result =
-        process.env['BUMPER_' + key.toUpperCase()] ??
-        getOptionFromArgs(k) ??
-        (cfg[k] ? String(cfg[k]) : undefined) ??
-        other;
-
-      return result as never;
-    }
-
-    function getListConfig(key: string, cfg: Record<string, never>, other?: string[]): string[] {
-      return stf(getConfig(key)) ?? cfg[underLine2Camel(key)] ?? other;
-    }
-
-    function getBoolConfig(key: string, other = false, cfg?: Record<string, never>, aliases?: string[]): boolean {
-      if (process.env['BUMPER_' + key.toUpperCase()]) return true;
-
-      const k = underLine2Camel(key);
-      if (process.argv.indexOf('--' + k) !== -1) return true;
-      if (aliases !== undefined) {
-        for (const alias of aliases) {
-          if (process.argv.indexOf('-' + alias) !== -1) return true;
-        }
-      }
-
-      cfg ??= config;
-      return cfg[k] === undefined ? other : Boolean(cfg[k]);
-    }
+  get versionTemplate(): VersionedTemplate {
+    return {
+      version: this.version,
+      versionName: this.tag.name,
+      ticket: this.ticket,
+    };
   }
 
-  async init(command: AllowedCommand) {
-    if (command === 'version') {
-      if (!this.repoLink) {
-        // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-        const repoUrl = await git(true, 'remote', 'get-url', 'origin');
-        const [rawVendor, rawRepoName] = breaker(repoUrl, 1, ':');
-        const vendor = rawVendor?.split('@')[1] ?? 'github.com';
-        const repoName = rawRepoName?.split('.')[0] ?? 'example/example';
-        this.repoLink = `https://${vendor}/${repoName}`;
-      }
+  get contentTemplate(): ContentTemplate {
+    return {
+      ...this.versionTemplate,
+      diffLink: this.diffLink,
+      content: this.diff.content,
+    };
+  }
 
-      if (!this.prInfo.repo) {
-        this.prInfo.repo = breaker(this.repoLink, 3, '/')[3] ?? 'example/example';
-      }
+  get changelogTemplate(): ChangelogTemplate {
+    const date = new Date().toISOString().split('T')[0]!;
+    const time = new Date().toISOString().split('T')[1]!.split('.')[0]!;
 
-      if (this.latestInfo.diff.enable) {
-        let t: string | undefined;
-        const tagInfo = this.tagsInfo[this.stage ?? ''];
-        if (tagInfo) {
-          // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-          t = (await git(true, 'tag', '--sort=v:refname'))
-            .split('\n')
-            .map((e) => e.trim())
-            .reverse()
-            .find((e) => e && getStage(e, this.tagsInfo));
-        }
+    return {
+      ...this.versionTemplate,
+      date,
+      time,
+    };
+  }
 
-        // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-        t ??= (await git(true, 'describe', '--tags', '--abbrev=0')).trim();
-        // @ts-expect-error Argument of type 'boolean' is not assignable to parameter of type 'string'.
-        const d = await git(true, 'log', '--pretty=%H %al %s', `HEAD...${t}`);
-
-        const commits = d
-          .split('\n')
-          .map((e) => {
-            const [hash, rest] = breaker(e.trim(), 1, ' ');
-            if (!hash || !rest) return;
-            const [name, title] = breaker(rest.trim(), 1, ' ');
-
-            return name && title ? [hash, name.trim(), title.trim()] : undefined;
-          })
-          .filter((e) => {
-            if (!e) return;
-
-            const title = e[2] ?? '';
-            const igs = this.latestInfo.diff.ignored;
-            if (igs.some((ig) => new RegExp(ig).test(title))) {
-              return;
-            }
-            const als = this.latestInfo.diff.allowed;
-            return als.length ? als.some((al) => new RegExp(al).test(title)) : true;
-          })
-          .map((e) => {
-            const [hash, name, title] = e as [string, string, string];
-            // if this commit come from PR, don't add hash message
-            if (/#\d+/.test(title)) {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              const result = /\(?#(\d+)\)?/.exec(title)!;
-              const prefix = title.substring(0, result.index);
-              const postfix = title.substring(result.index + result[0].length);
-              const tt = (prefix + postfix).trim();
-              const id = result[1];
-              const l = `${this.repoLink}/pull/${id}`;
-              return `- ([#${id}](${l})) ${tt} - ${name}`;
-            }
-
-            const h = hash.substring(0, 7);
-            const l = `${this.repoLink}/commit/${hash}`;
-            return `- ([${h}](${l})) ${title} - ${name}`;
-          }) as string[];
-
-        if (commits.length) {
-          this.latestInfo.content = commits.join('\n');
-        }
-      }
-    }
-
-    this.verify(command);
+  async init(args: string[]): Promise<void> {
+    await this.initRepo();
+    await this.initVars(args);
 
     verbose(JSON.stringify(this, undefined, 2));
-
-    return this;
   }
 
-  verify(command: AllowedCommand) {
-    if (command === 'version') {
-      if (!this.latestInfo.version) {
-        error(`Missing required 'latestVersion' in config`);
-      }
+  async bumpChangelog(): Promise<void> {
+    const clog = new ChangelogIO(this.changelog.destination);
 
-      for (const tag of Object.values(this.tagsInfo)) {
-        if (!tag.pattern) {
-          error('Required `pattern` in tags config');
-        }
-      }
+    clog.bump(this.repo, {
+      key: this.version,
+      link: this.diffLink,
+      content: this.changelog.section.formatted,
+    });
 
-      for (const [key, meta] of Object.entries(this.prInfo.branches)) {
-        if (!this.tagsInfo[key]) {
-          error(`Missing ${key} in tags config, PR.branches should mappable to tags' keys`);
-        }
-        if (!meta.base) {
-          error('Required `base` in PR.branches config');
+    await this.changelog.addAndCommit(this.versionTemplate);
+  }
+
+  async initRepo(): Promise<void> {
+    if (!this.repo.link) {
+      const repo = await command('git', ['remote', 'get-url', 'origin']);
+      const [rawVendor, rawRepoName] = breaker(repo, 1, ':');
+      const vendor = rawVendor?.split('@')[1] ?? 'github.com';
+      const repoName = rawRepoName?.split('.')[0];
+      if (!repoName) {
+        throw new BumperError(`Cannot find repo name, set it by --repo`);
+      }
+      this.repo.link = `https://${vendor}/${repoName}`;
+    }
+
+    for (const tag of this.tags) {
+      for (const pr of tag.prs) {
+        if (!pr.repo) {
+          pr.repo = this.repo.link;
         }
       }
     }
   }
 
-  get tag(): TagInfo | undefined {
-    if (!this.stage) return;
-    return this.tagsInfo[this.stage];
-  }
-
-  get branch(): BranchInfo | undefined {
-    if (!this.stage) return;
-    return this.prInfo.branches[this.stage];
-  }
-
-  get changelog(): string {
-    return readFile(this.changelogInfo.file);
+  async initVars(args: string[]): Promise<void> {
+    // === Input ===
+    // Ask for wanted vars if not set
+    const input = await askForWantedVars(args, this);
+    this.version = input.version;
+    this.ticket = input.ticket;
+    this.tag = input.tag;
   }
 }
 
-function getOptionFromArgs(key: string): string | undefined {
-  const index = process.argv.findIndex((v) => {
-    return v === '--' + key || v.startsWith('--' + key + '=');
-  });
-  if (index === -1) return;
+/**
+ * Merge two objects.
+ *
+ * If find array, concat them.
+ */
+function softMerge<T extends Record<string, unknown>>(obj1: T, obj2: T): T {
+  for (const key of Object.keys(obj2) as (keyof T)[]) {
+    const value = obj1[key];
+    if (typeof value !== 'object') {
+      obj1[key] = obj2[key];
+      continue;
+    }
 
-  const arg = process.argv[index];
-  if (arg && arg.includes('=')) return breaker(arg, 1, '=')[1];
+    if (Array.isArray(value)) {
+      (obj1[key] as unknown[]).concat(value);
+      continue;
+    }
 
-  const value = process.argv[index + 1];
-  if (!value) return;
-
-  return value;
-}
-
-function loadConfig() {
-  const name = process.env['BUMPER_CONFIG'] ?? getOptionFromArgs('config') ?? DEFAULTS.configFile;
-
-  verbose(`Start loading config from ${path.resolve(name)}`);
-  const content = readFile(path.resolve(name));
-  if (!content) return {};
-
-  try {
-    return JSON.parse(content);
-  } catch (err) {
-    return {};
+    obj1[key] = softMerge(value as never, obj2[key] as never);
   }
-}
 
-function stf<T>(a?: T, delimiter = ','): T extends string ? string[] : undefined {
-  return (typeof a === 'string' ? a.split(delimiter).map((e) => e.trim()) : undefined) as never;
-}
-
-function underLine2Camel(key: string) {
-  return key
-    .split('_')
-    .map((v, i) => (i === 0 ? v : v.charAt(0).toUpperCase() + v.slice(1)))
-    .join('');
-}
-
-function getStage(v: string, tags: TagsInfo, stage?: string): string | undefined {
-  if (stage && tags[stage]) return stage;
-
-  const hit = Object.entries(tags).find((e) => {
-    if (!e[1].pattern) return;
-
-    return new RegExp(e[1].pattern).test(v);
-  });
-
-  return hit ? hit[0] : undefined;
+  return obj1;
 }

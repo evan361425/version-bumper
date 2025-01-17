@@ -1,4 +1,4 @@
-import { getSchemaFile, readFile } from '../helper.js';
+import { getSchemaFile, readFile } from '../util.js';
 
 const PREFIX = '\t';
 const commands: Record<string, string> = {

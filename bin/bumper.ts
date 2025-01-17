@@ -5,8 +5,10 @@
  */
 
 import api from '../lib/api.js';
-import { getPackageJsonFile, npm, readFile } from '../lib/helper.js';
+import { Config } from '../lib/config.js';
+import { BumperError } from '../lib/errors.js';
 import { log } from '../lib/logger.js';
+import { getPackageJsonFile, npm, readFile } from '../lib/util.js';
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -58,10 +60,10 @@ ${message}`);
   process.on('uncaughtException', onFatalError);
   process.on('unhandledRejection', onFatalError);
 
-  const command = !process.argv[2] || process.argv[2].startsWith('-') ? '' : process.argv[2];
+  const args = process.argv.slice(2);
 
-  const needHelp = process.argv.includes('-h') || process.argv.includes('--help') || process.argv.includes('--h');
-  const needVersion = command === 'version' || command === 'v' || process.argv.includes('--version');
+  const needHelp = args.includes('-h') || args.includes('--help') || args.includes('--h');
+  const needVersion = args.includes('--version');
 
   if (needVersion) {
     console.log(`bumper ${getVersion()}
@@ -90,3 +92,34 @@ Update command: npm i -g @evan361425/version-bumper`);
 
   log(`${command} done`);
 })().catch(onFatalError);
+
+async function bump(cfg: Config): Promise<void> {
+  if (cfg.process.checkTag) {
+    if (!(await cfg.git.hasTag(cfg.version))) {
+      throw new BumperError(`Tag ${cfg.version} not found`);
+    }
+  }
+
+  await cfg.diff.prepareContent(cfg.tag);
+  await cfg.changelog.section.formatContent(cfg.changelogTemplate);
+
+  if (cfg.changelog.enable) {
+    await cfg.bumpChangelog();
+  }
+
+  if (cfg.process.bump) {
+    await cfg.git.tag(cfg.version, cfg.changelog.section.formatted);
+  }
+
+  if (cfg.process.push) {
+    await cfg.git.push();
+  }
+
+  if (cfg.process.pr) {
+    await cfg.tag.createPR(cfg.pr, cfg.contentTemplate);
+  }
+
+  if (cfg.process.release) {
+    await cfg.tag.createRelease(cfg.contentTemplate);
+  }
+}

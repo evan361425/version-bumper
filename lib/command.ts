@@ -1,18 +1,22 @@
 import { info } from 'console';
 import { spawn } from 'node:child_process';
+import { isDebug } from './io.js';
+import { verbose } from './logger.js';
 
-let debug = false;
 let mockResponses: string[] = [];
-
-export function isDebug(): boolean {
-  return debug;
-}
 
 export function mockCommandResponse(response: string): void {
   mockResponses.push(response);
 }
 
-export function command(name: string, args: string[]): Promise<string> {
+/**
+ * Spawn a command and return the response
+ *
+ * @param oneByOne - If provided, the function will be called for each line of the response.
+ *   If the function returns true, the command will stop and return the line that return true.
+ * @returns
+ */
+export function command(name: string, args: string[], oneByOne?: (line: string) => boolean): Promise<string> {
   info(`[cmd]: ${name} '${args.join("' '")}'`);
 
   if (isDebug()) {
@@ -25,7 +29,18 @@ export function command(name: string, args: string[]): Promise<string> {
     let response = '';
     let error = '';
 
-    command.stdout.on('data', (data) => (response += data.toString()));
+    command.stdout.on('data', (data) => {
+      const line = data.toString();
+      if (oneByOne !== undefined) {
+        verbose(`[cmd]: ${name} one by one: ${line}`);
+        if (oneByOne(line)) {
+          command.kill();
+          res(line);
+        }
+      } else {
+        response += line;
+      }
+    });
     command.stderr.on('data', (data) => (error += data.toString()));
     command.on('error', (err) => {
       info(`[cmd]: ${name} error: ${err}`);
