@@ -23,6 +23,8 @@ build-assets: ## Build assets
 	@printf '# Makefile possible commands\n\n```shell\n$$ make help\n' > docs/commands.md
 	@make help | sed -r "s/\x1B\[(36|0|1)m//g" >> docs/commands.md
 	@printf '```\n' >> docs/commands.md
+	@node --import tsx bin/schema.ts > schema.json
+	@node --import tsx bin/help.ts > bin/api/help-args.txt
 
 .PHONY: bump
 bump: ## Bump the version

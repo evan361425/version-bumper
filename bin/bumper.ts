@@ -94,5 +94,5 @@ ${message}`);
     return;
   }
 
-  await bumperCommand();
+  await bumperCommand(args);
 })().catch(onFatalError);

@@ -15,6 +15,7 @@
     "呂學洲 <evan.lu@104.com.tw>"
   ],
   "devDependencies": {
+    "@types/json-schema": "^7.0.15",
     "@types/node": "^20",
     "eslint": "^9",
     "eslint-config-prettier": "^9",

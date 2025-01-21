@@ -1,0 +1,192 @@
+	--[no-]debug,-d                  Execute in debug mode without any side effects
+	                                 Also output command input to stdout
+	                           type: boolean
+	                        default: false
+	--[no-]verbose,-v                Output many logs to stdout
+	                           type: boolean
+	                        default: false
+	--config,-c                      Path to the configuration file.
+	                           type: string
+	                        default: bumper.json
+	--tag,-T                         Wanted `tags` item's name, it will then use it to ask for the version number.
+	                                 If not found, it will use the first `tags`'s name.
+	                           type: string
+	                        default: <required>
+	--ticket,-t                      Wanted ticket number.
+	                                 If not found, it will ask for it if `process.wantedTicket` is enabled.
+	                           type: string
+	                        default: <required>
+	--[no-]only-pr                   Only create PR, no any bumping.
+	                           type: boolean
+	                        default: false
+	--[no-]only-release              Only create GitHub release, no any bumping.
+	                           type: boolean
+	                        default: false
+	--repo,-r                        Link to the repository, it will use for tags in Changelog.
+	                           type: string
+	                        default: using `git remote get-url origin`, if not found throw exception
+	--[no-]bump                      Whether to bump the version.
+	                                 It will then try to tag the new version.
+	                           type: boolean
+	                        default: true
+	--[no-]push                      Push all commits and tags.
+	                           type: boolean
+	                        default: true
+	--[no-]pr                        Create PR in tags, and `tags[].prBranches` must be set
+	                           type: boolean
+	                        default: true
+	--[no-]release                   Create release in tags, and `tags[].release` must be set
+	                           type: boolean
+	                        default: true
+	--[no-]check-tag                 Throw error if the tag already exists.
+	                           type: boolean
+	                        default: true
+	--[no-]wanted-ticket             Ask for the ticket number if not found.
+	                           type: boolean
+	                        default: false
+	--[no-]semantic-groups           Use semantic commit message to map the `diff.groups`.
+	                                 - `^fix` as `Fixed`
+	                                 - `^feat`, `^add` as `Added`
+	                                 - `^[\w\(\)]+!`, `BREAKING CHANGE` as `Changed`, with priority 1
+	                           type: boolean
+	                        default: true
+	--[no-]semantic-tag              Add semantic tag naming to `tags`.
+	                                 - Use pattern `v[0-9]+.[0-9]+.[0-9]+` and name `semantic`.
+	                                 - Enable release with default title and body, see default from `tags[].release`.
+	                                 - Enable changelog.
+	                           type: boolean
+	                        default: true
+	--[no-]rc-tag                    Add release candidate (rc) tag naming to `tags`.
+	                                 - Use pattern `v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+` and name `release-candidate`.
+	                                 - Disable release.
+	                                 - Disable changelog.
+	                                 If `useSemanticTag` is enabled, it will pushed after the semantic tag.
+	                           type: boolean
+	                        default: false
+	--[no-]clog                      Enable changelog generation.
+	                           type: boolean
+	                        default: true
+	--clog-dest                      File path to the changelog file.
+	                           type: string
+	                        default: CHANGELOG.md
+	--clog-section                   The changelog of specific version.
+	                                 Allowed variables:
+	                                 - `{content}`: new version changelog body from `diff`.
+	                                 - `{version}`: current version number
+	                                 - `{versionName}`: version name set in tag config
+	                                 - `{diffLink}`: link to the diff of this version
+	                                 - `{ticket}`: ticket number
+	                                 - `{date}`: current date, format is `YYYY-MM-DD`
+	                                 - `{time}`: current time, format is `HH:mm:ss`
+	                           type: undefined
+	                        default: [object Object]
+	--clog-commit                    Commit message template.
+	                                 Allowed variables:
+	                                 - `{version}`: current version number
+	                                 - `{versionName}`: version name set in tag config
+	                                 - `{ticket}`: ticket number
+	                           type: undefined
+	                        default: [object Object]
+	--[no-]clog-commit-add-all       Execute `git add .` not only the changelog.
+	                           type: boolean
+	                        default: false
+	--autolink[]link                 autolink[]link
+	                           type: string
+	                        default: <required>
+	--autolink[]match[]              autolink[]match[]
+	                           type: array
+	                        default: <required>
+	--pr-title                       pr-title
+	                           type: undefined
+	                        default: <required>
+	--pr-body                        pr-body
+	                           type: undefined
+	                        default: <required>
+	--diff-gp[]match[]               diff-gp[]match[]
+	                           type: array
+	                        default: <required>
+	--diff-gp[]title                 diff-gp[]title
+	                           type: string
+	                        default: <required>
+	--diff-gp[]priority              diff-gp[]priority
+	                           type: number
+	                        default: 0
+	--diff-item                      Template of single list item.
+	                                 Allowed variables:
+	                                 - `{title}`: commit title after `:` add will remove all the pr number and autoLink if found
+	                                 - `{titleTail}`: commit title after `:`
+	                                 - `{titleFull}`: full commit title, which is the first line of the commit message
+	                                 - `{author}`: commit author
+	                                 - `{hash}`: commit hash, but only first 7 characters
+	                                 - `{hashFull}`: commit hash
+	                                 - `{pr}`: PR number, if not found, it will use `hash`
+	                                 - `{autoLink}`: value of first match auto links, usually will be ticket number
+	                                 - `{scope}`: commit scope, see `scopeNames`
+	                           type: undefined
+	                        default: [object Object]
+	--diff-scope[]                   Scope names.
+	                                 For example, `feat(core): add something`, the scope is `core`.
+	                                 This will replace the scope with the name in the object.
+	                           type: object
+	                        default: <required>
+	--diff-ignored[]                 Pattern to ignore the commit.
+	                           type: array
+	                        default: <required>
+	--[no-]diff-ignore-others        Ignore commits that don't match any group.
+	                           type: boolean
+	                        default: true
+	--diff-others                    Title of the group that doesn't match any group.
+	                                 If `ignoreOthers` is enabled, this will not be used.
+	                           type: string
+	                        default: Others
+	--tag[]name                      tag[]name
+	                           type: string
+	                        default: 
+	--tag[]pattern                   tag[]pattern
+	                           type: string
+	                        default: <required>
+	--tag[]pr[]head                  tag[]pr[]head
+	                           type: string
+	                        default: main
+	--tag[]pr[]base                  tag[]pr[]base
+	                           type: string
+	                        default: <required>
+	--tag[]pr[]labels[]              tag[]pr[]labels[]
+	                           type: array
+	                        default: <required>
+	--tag[]pr[]reviewers[]           tag[]pr[]reviewers[]
+	                           type: array
+	                        default: <required>
+	--tag[]pr[]commit                tag[]pr[]commit
+	                           type: undefined
+	                        default: <required>
+	--tag[]pr[]repl[]paths[]         tag[]pr[]repl[]paths[]
+	                           type: array
+	                        default: <required>
+	--tag[]pr[]repl[]pattern         tag[]pr[]repl[]pattern
+	                           type: string
+	                        default: <required>
+	--tag[]pr[]repl[]repl            tag[]pr[]repl[]repl
+	                           type: string
+	                        default: <required>
+	--tag[]pr[]repl[]commit          tag[]pr[]repl[]commit
+	                           type: undefined
+	                        default: <required>
+	--[no-]tag[]release              tag[]release
+	                           type: boolean
+	                        default: true
+	--tag[]release-title             tag[]release-title
+	                           type: undefined
+	                        default: {version}
+	--tag[]release-body              tag[]release-body
+	                           type: undefined
+	                        default: {Ticket: "ticket"<NL><NL>}{content}
+	--[no-]tag[]release-draft        tag[]release-draft
+	                           type: boolean
+	                        default: false
+	--[no-]tag[]release-pre-release  tag[]release-pre-release
+	                           type: boolean
+	                        default: false
+	--[no-]tag[]with-clog            tag[]with-clog
+	                           type: boolean
+	                        default: true

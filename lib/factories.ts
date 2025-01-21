@@ -65,10 +65,10 @@ export class Changelog implements IChangelog {
 
   static fromCfg(cfg: IChangelog): Changelog {
     return new Changelog(
-      cfg.enable,
-      cfg.destination,
-      Template.fromCfg(cfg.section),
-      ChangelogCommit.fromCfg(cfg.commit),
+      cfg.enable!,
+      cfg.destination!,
+      Template.fromCfg(cfg.section!),
+      ChangelogCommit.fromCfg(cfg.commit!),
     );
   }
 
@@ -91,7 +91,7 @@ export class ChangelogCommit implements IChangelogCommit {
   ) {}
 
   static fromCfg(cfg: IChangelogCommit): ChangelogCommit {
-    return new ChangelogCommit(Template.fromCfg(cfg.message), cfg.addAll);
+    return new ChangelogCommit(Template.fromCfg(cfg.message!), cfg.addAll!);
   }
 
   async formatMessage(v: VersionedTemplate): Promise<string> {
@@ -171,7 +171,7 @@ export class PR implements IPR {
   ) {}
 
   static fromCfg(cfg: IPR): PR {
-    return new PR(Template.fromCfg(cfg.title), Template.fromCfg(cfg.body));
+    return new PR(Template.fromCfg(cfg.title!), Template.fromCfg(cfg.body!));
   }
 
   formatTitle(v: VersionedTemplate): Promise<string> {
@@ -204,12 +204,12 @@ export class Diff implements IDiff {
 
   static fromCfg(cfg: IDiff, autoLinks: AutoLink[]): Diff {
     return new Diff(
-      cfg.groups.map((g) => DiffGroup.fromCfg(g)),
-      Template.fromCfg(cfg.item),
-      cfg.scopeNames,
-      cfg.ignored,
-      cfg.ignoreOthers,
-      cfg.othersTitle,
+      cfg.groups!.map((g) => DiffGroup.fromCfg(g)),
+      Template.fromCfg(cfg.item!),
+      cfg.scopeNames!,
+      cfg.ignored!,
+      cfg.ignoreOthers!,
+      cfg.othersTitle!,
       autoLinks,
     );
   }
@@ -338,22 +338,22 @@ export class Tag implements ITag {
   protected _lastTag?: string;
 
   constructor(
-    readonly name: string,
+    readonly name: string = '',
     readonly pattern: string,
-    readonly withChangelog: boolean,
+    readonly withChangelog: boolean = true,
     readonly release: Release,
-    readonly prs: TagPR[],
+    readonly prs: TagPR[] = [],
     readonly sort: TagSort,
   ) {}
 
-  static fromCfg(cfg: ITag): Tag {
+  static fromCfg(cfg: ITag, repoLink: string): Tag {
     return new Tag(
       cfg.name,
       cfg.pattern,
       cfg.withChangelog,
-      Release.fromCfg(cfg.release),
-      cfg.prs.map((e) => TagPR.fromCfg(e)),
-      TagSort.fromCfg(cfg.sort),
+      Release.fromCfg(cfg.release ?? {}),
+      cfg.prs?.map((e) => TagPR.fromCfg(e, repoLink)),
+      TagSort.fromCfg(cfg.sort ?? {}),
     );
   }
 
@@ -432,7 +432,7 @@ export class Tag implements ITag {
 
 export class Release implements IRelease {
   constructor(
-    readonly enable: boolean = false,
+    readonly enable: boolean = true,
     readonly title?: Template<VersionedTemplate>,
     readonly body?: Template<ContentTemplate>,
     readonly preRelease: boolean = false,
@@ -474,11 +474,11 @@ export class TagPR implements ITagPR {
 
   constructor(
     public repo: string,
-    readonly head: string,
+    readonly head: string = 'main',
     readonly base: string,
-    readonly labels: string[],
-    readonly reviewers: string[],
-    readonly replacements: PRReplace[],
+    readonly labels: string[] = [],
+    readonly reviewers: string[] = [],
+    readonly replacements: PRReplace[] = [],
     readonly commitMessage?: Template<VersionedTemplate>,
   ) {
     assert(
@@ -488,25 +488,25 @@ export class TagPR implements ITagPR {
     this.git = new GitDatabase(repo, head);
   }
 
-  static fromCfg(cfg: ITagPR): TagPR {
+  static fromCfg(cfg: ITagPR, repoLink: string): TagPR {
     return new TagPR(
-      cfg.repo,
+      cfg.repo ?? repoLink,
       cfg.head,
       cfg.base,
       cfg.labels,
       cfg.reviewers,
-      cfg.replacements.map((e) => PRReplace.fromCfg(e)),
+      cfg.replacements?.map((e) => PRReplace.fromCfg(e)),
       cfg.commitMessage ? Template.fromCfg(cfg.commitMessage) : undefined,
     );
   }
 
-  formatHead(v: Partial<{ name: string }>): string {
+  formatHead(v: { name: string }): string {
     const ts = new Date().getTime();
-    return this.head.replace(/{name}/g, v.name ?? '').replace(/{timestamp}/g, ts.toString());
+    return this.head.replace(/{name}/g, v.name).replace(/{timestamp}/g, ts.toString());
   }
 
-  formatBase(v: Partial<{ name: string }>): string {
-    return this.base.replace(/{name}/g, v.name ?? '');
+  formatBase(v: { name: string }): string {
+    return this.base.replace(/{name}/g, v.name);
   }
 
   async createCommits(v: VersionedTemplate): Promise<void> {
@@ -563,7 +563,7 @@ export class TagPR implements ITagPR {
       '--repo',
       this.repo,
       ...this.reviewers.map((e) => ['--reviewer', e]).flat(),
-      ...(this.labels.map((e) => ['--label', e]).flat() ?? []),
+      ...this.labels.map((e) => ['--label', e]).flat(),
     ]);
   }
 }
@@ -603,8 +603,8 @@ export class TagSort implements ITagSort {
   protected _sortFields: SortField[] | undefined;
 
   constructor(
-    readonly separator: string,
-    readonly fields: string[],
+    readonly separator: string = '.',
+    readonly fields: string[] = ['1,1n'],
   ) {}
 
   static fromCfg(cfg: ITagSort): TagSort {
@@ -638,7 +638,7 @@ export class Template<T extends Record<string, string>> implements ITemplate {
   protected _formatted: string | undefined;
 
   constructor(
-    readonly value: string,
+    readonly value?: string,
     readonly file?: string,
     readonly github?: ITemplateGitHub,
   ) {

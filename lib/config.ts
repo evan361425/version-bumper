@@ -1,6 +1,6 @@
 import { ChangelogIO } from './changelog.js';
 import { command } from './command.js';
-import { askForWantedVars, DeepPartial } from './config-loader.js';
+import { askForWantedVars } from './config-loader.js';
 import { BumperError } from './errors.js';
 import {
   AutoLink,
@@ -14,7 +14,7 @@ import {
   VersionedTemplate,
 } from './factories.js';
 import { GitDatabase } from './git.js';
-import { IConfig, IDiffGroup, IProcess, ITag } from './interfaces.js';
+import { DeepPartial, IConfig, IDiffGroup, IProcess, ITag } from './interfaces.js';
 import { verbose } from './logger.js';
 import { breaker } from './util.js';
 
@@ -109,7 +109,7 @@ export class Config {
   version!: string;
   ticket!: string;
 
-  readonly process: IProcess;
+  readonly process: Required<IProcess>;
   readonly repo: Repo;
   readonly changelog: Changelog;
   readonly pr: PR;
@@ -124,26 +124,26 @@ export class Config {
   constructor(...others: DeepPartial<IConfig>[]) {
     const cfg = { ...DEFAULTS };
     for (const o of others) {
-      softMerge(cfg, o);
+      softMerge(cfg, o as Record<string, unknown>);
     }
 
-    if (cfg.process.useSemanticGroups) {
-      cfg.diff.groups = cfg.diff.groups.concat(SEMANTIC_GROUPS);
+    if (cfg.process!.useSemanticGroups) {
+      cfg.diff!.groups = cfg.diff!.groups!.concat(SEMANTIC_GROUPS);
     }
-    if (cfg.process.useSemanticTag) {
-      cfg.tags.push(SEMANTIC_TAG);
+    if (cfg.process!.useSemanticTag) {
+      cfg.tags!.push(SEMANTIC_TAG);
     }
-    if (cfg.process.useReleaseCandidateTag) {
-      cfg.tags.push(RELEASE_CANDIDATE_TAG);
+    if (cfg.process!.useReleaseCandidateTag) {
+      cfg.tags!.push(RELEASE_CANDIDATE_TAG);
     }
 
-    this.process = cfg.process;
-    this.repo = Repo.fromCfg(cfg.repo);
-    this.changelog = Changelog.fromCfg(cfg.changelog);
-    this.autoLinks = cfg.autoLinks.map((a) => AutoLink.fromCfg(a));
-    this.pr = PR.fromCfg(cfg.pr);
-    this.diff = Diff.fromCfg(cfg.diff, this.autoLinks);
-    this.tags = cfg.tags.map((t) => Tag.fromCfg(t));
+    this.process = cfg.process! as Required<IProcess>;
+    this.repo = Repo.fromCfg(cfg.repo!);
+    this.changelog = Changelog.fromCfg(cfg.changelog!);
+    this.autoLinks = cfg.autoLinks!.map((a) => AutoLink.fromCfg(a));
+    this.pr = PR.fromCfg(cfg.pr!);
+    this.diff = Diff.fromCfg(cfg.diff!, this.autoLinks);
+    this.tags = cfg.tags!.map((t) => Tag.fromCfg(t, this.repo.link));
     this.git = new GitDatabase(this.repo.name, '');
   }
 
@@ -256,3 +256,7 @@ function softMerge<T extends Record<string, unknown>>(obj1: T, obj2: T): T {
 
   return obj1;
 }
+
+type Required<T> = {
+  [K in keyof T]-?: Exclude<T[K], undefined>;
+};

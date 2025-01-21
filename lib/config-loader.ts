@@ -2,12 +2,12 @@ import path from 'node:path';
 import { Config } from './config.js';
 import { BumperError } from './errors.js';
 import { Tag } from './factories.js';
-import { ConfigArguments, DeepPartial, IConfig, IProcess, ITemplate } from './interfaces.js';
+import { DeepPartial, IConfig, IProcess, ITemplate } from './interfaces.js';
 import { askQuestion, readFile } from './io.js';
 import { log, verbose } from './logger.js';
 import { breaker } from './util.js';
 
-const DEFAULT_CONFIG_PATH = 'bumper.json';
+export const DEFAULT_CONFIG_PATH = 'bumper.json';
 
 /**
  * This is the mapping of the command line arguments to the config keys.
@@ -21,7 +21,7 @@ export const configArgsMap: ConfigArguments<IConfig> = {
   process: {
     bump: 'bump',
     push: 'push',
-    pr: 'only',
+    pr: 'pr',
     release: 'release',
     checkTag: 'check-tag',
     wantedTicket: 'wanted-ticket',
@@ -41,7 +41,7 @@ export const configArgsMap: ConfigArguments<IConfig> = {
   autoLinks: [
     {
       link: 'autolink[]link',
-      matches: ['autolink[]matches[]'],
+      matches: ['autolink[]match[]'],
     },
   ],
   pr: {
@@ -51,87 +51,66 @@ export const configArgsMap: ConfigArguments<IConfig> = {
   diff: {
     groups: [
       {
-        matches: ['diff-gp[]matches[]'],
+        matches: ['diff-gp[]match[]'],
         title: 'diff-gp[]title',
         priority: 'diff-gp[]priority',
       },
     ],
     item: 'diff-item',
-    scopeNames: 'diff-scopes[]',
+    scopeNames: 'diff-scope[]',
     ignored: ['diff-ignored[]'],
     ignoreOthers: 'diff-ignore-others',
     othersTitle: 'diff-others',
   },
   tags: [
     {
-      name: 'tags[]name',
-      pattern: 'tags[]pattern',
+      name: 'tag[]name',
+      pattern: 'tag[]pattern',
       prs: [
         {
-          head: 'tags[]pr[]head',
-          base: 'tags[]pr[]base',
-          labels: ['tags[]pr[]labels[]'],
-          reviewers: ['tags[]pr[]reviewers[]'],
-          commitMessage: 'tags[]pr[]commit',
+          head: 'tag[]pr[]head',
+          base: 'tag[]pr[]base',
+          labels: ['tag[]pr[]labels[]'],
+          reviewers: ['tag[]pr[]reviewers[]'],
+          commitMessage: 'tag[]pr[]commit',
           replacements: [
             {
-              paths: ['tags[]pr[]repl[]paths[]'],
-              pattern: 'tags[]pr[]repl[]pattern',
-              replacement: 'tags[]pr[]repl[]repl',
-              commitMessage: 'tags[]pr[]repl[]commit',
+              paths: ['tag[]pr[]repl[]paths[]'],
+              pattern: 'tag[]pr[]repl[]pattern',
+              replacement: 'tag[]pr[]repl[]repl',
+              commitMessage: 'tag[]pr[]repl[]commit',
             },
           ],
         },
       ],
       release: {
-        enable: 'tags[]release',
-        title: 'tags[]release-title',
-        body: 'tags[]release-body',
-        draft: 'tags[]release-draft',
-        preRelease: 'tags[]release-pre-release',
+        enable: 'tag[]release',
+        title: 'tag[]release-title',
+        body: 'tag[]release-body',
+        draft: 'tag[]release-draft',
+        preRelease: 'tag[]release-pre-release',
       },
-      withChangelog: 'tags[]with-clog',
+      withChangelog: 'tag[]with-clog',
     },
   ],
 };
-export const specialArgs = [
-  /**
-   * Path to the configuration file.
-   */
-  'config',
-  /**
-   * Wanted `tags` item's name, it will then use it to ask for the version number.
-   *
-   * If not found, it will use the first `tags`'s name.
-   */
-  'tag',
-  /**
-   * Wanted ticket number.
-   *
-   * If not found, it will ask for it if `process.wantedTicket` is enabled.
-   */
-  'ticket',
-  /**
-   * Only create PR.
-   *
-   * No any bumping.
-   */
-  'only-pr',
-  /**
-   * Only create GitHub release.
-   *
-   * No any bumping.
-   */
-  'only-release',
-];
+export const argsAliases: Record<string, string> = {
+  verbose: 'v',
+  debug: 'd',
+  config: 'c',
+  tag: 'T',
+  ticket: 't',
+  repo: 'r',
+};
 
 /**
  * @param key
  * @param args from `process.argv`
  * @returns
  */
-export function getValueFromArgs(key: string, args: string[], alias?: string): string | undefined {
+export function getValueFromArgs(key: string, args: string[]): string | undefined {
   const index = args.findIndex((v) => {
+    const alias = argsAliases[key];
     if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
     return v === '--' + key || v.startsWith('--' + key + '=');
   });
@@ -143,8 +122,9 @@ export function getValueFromArgs(key: string, args: string[], alias?: string): s
   return args[index + 1];
 }
 
-export function getBoolFromArgs(key: string, args: string[], alias?: string): boolean {
+export function getBoolFromArgs(key: string, args: string[]): boolean {
   const index = args.findIndex((v) => {
+    const alias = argsAliases[key];
     if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
     return v === '--' + key || v === '--no-' + key;
   });
@@ -175,7 +155,7 @@ export function getArrayFromArgs(key: string, args: string[]): string[] {
   return result;
 }
 
-export function loadConfigFromFile(args: string[]): Partial<IConfig> {
+export function loadConfigFromFile(args: string[]): IConfig {
   const name = process.env['BUMPER_CONFIG'] ?? getValueFromArgs('config', args) ?? DEFAULT_CONFIG_PATH;
   const file = path.resolve(name);
 
@@ -195,17 +175,17 @@ export function loadConfigFromFile(args: string[]): Partial<IConfig> {
 }
 
 export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
-  const getV = (k: string, a?: string, ca?: string[]) => getValueFromArgs(k, ca ?? args, a);
-  const getB = (k: string, a?: string, ca?: string[]) => getBoolFromArgs(k, ca ?? args, a);
+  const getV = (k: string, ca?: string[]) => getValueFromArgs(k, ca ?? args);
+  const getB = (k: string, ca?: string[]) => getBoolFromArgs(k, ca ?? args);
 
   function getTemplate(prefix: string, ca?: string[]): DeepPartial<ITemplate> {
     return {
-      value: getV(prefix + '-v', '', ca) ?? '',
-      file: getV(prefix + '-f', '', ca),
+      value: getV(prefix + '-v', ca),
+      file: getV(prefix + '-f', ca),
       github: {
-        repo: getV(prefix + '-gh-repo', '', ca),
-        branch: getV(prefix + '-gh-branch', '', ca),
-        path: getV(prefix + '-gh-path', '', ca),
+        repo: getV(prefix + '-gh-repo', ca),
+        branch: getV(prefix + '-gh-branch', ca),
+        path: getV(prefix + '-gh-path', ca),
       },
     };
   }
@@ -259,7 +239,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
 
   return {
     repo: {
-      link: getV(configArgsMap.repo!.link!, 'r'),
+      link: getV(configArgsMap.repo!.link!),
     },
     process: {
       bump: getB(configArgsMap.process!.bump!),
@@ -282,7 +262,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
     },
     autoLinks: splitArrayArgs(args, 'autolink').map((ca) => {
       return {
-        link: getV(configArgsMap.autoLinks![0]!.link!, '', ca),
+        link: getV(configArgsMap.autoLinks![0]!.link!, ca),
         matches: getArrayFromArgs(configArgsMap.autoLinks![0]!.matches![0]!, ca),
       };
     }),
@@ -294,8 +274,8 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
       groups: splitArrayArgs(args, 'diff-gp').map((ca) => {
         return {
           matches: getArrayFromArgs(configArgsMap.diff!.groups![0]!.matches![0]!, ca),
-          title: getV(configArgsMap.diff!.groups![0]!.title!, '', ca),
-          priority: Number(getV(configArgsMap.diff!.groups![0]!.priority!, '', ca)),
+          title: getV(configArgsMap.diff!.groups![0]!.title!, ca),
+          priority: Number(getV(configArgsMap.diff!.groups![0]!.priority!, ca)),
         };
       }),
       item: getTemplate(configArgsMap.diff!.item!),
@@ -306,38 +286,38 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
       ignoreOthers: getB(configArgsMap.diff!.ignoreOthers!),
       othersTitle: getV(configArgsMap.diff!.othersTitle!),
     },
-    tags: splitArrayArgs(args, 'tags').map((ca) => {
+    tags: splitArrayArgs(args, 'tag').map((ca) => {
       const tag = configArgsMap.tags![0]!;
       return {
-        name: getV(tag.name!, '', ca),
-        pattern: getV(tag.pattern!, '', ca),
-        prs: splitArrayArgs(ca, 'tags[]pr').map((pra) => {
+        name: getV(tag.name!, ca),
+        pattern: getV(tag.pattern!, ca),
+        prs: splitArrayArgs(ca, 'tag[]pr').map((pra) => {
           const pr = tag.prs![0]!;
           return {
-            head: getV(pr.head!, '', pra),
-            base: getV(pr.base!, '', pra),
+            head: getV(pr.head!, pra),
+            base: getV(pr.base!, pra),
             labels: getArrayFromArgs(pr.labels![0]!, pra),
             reviewers: getArrayFromArgs(pr.reviewers![0]!, pra),
             commitMessage: getTemplate(pr.commitMessage!, pra),
-            replacements: splitArrayArgs(pra, 'tags[]pr[]repl').map((repl) => {
+            replacements: splitArrayArgs(pra, 'tag[]pr[]repl').map((repl) => {
               const r = pr.replacements![0]!;
               return {
                 paths: getArrayFromArgs(r.paths![0]!, repl),
-                pattern: getV(r.pattern!, '', repl),
-                replacement: getV(r.replacement!, '', repl),
+                pattern: getV(r.pattern!, repl),
+                replacement: getV(r.replacement!, repl),
                 commitMessage: getTemplate(r.commitMessage!, repl),
               };
             }),
           };
         }),
         release: {
-          enable: getB(tag.release!.enable!, '', ca),
+          enable: getB(tag.release!.enable!, ca),
           title: getTemplate(tag.release!.title!, ca),
           body: getTemplate(tag.release!.body!, ca),
-          draft: getB(tag.release!.draft!, '', ca),
-          preRelease: getB(tag.release!.preRelease!, '', ca),
+          draft: getB(tag.release!.draft!, ca),
+          preRelease: getB(tag.release!.preRelease!, ca),
         },
-        withChangelog: getB(tag.withChangelog!, '', ca),
+        withChangelog: getB(tag.withChangelog!, ca),
       };
     }),
   };
@@ -373,8 +353,16 @@ export async function askForWantedVars(
 
   let ticket: string = '';
   if (cfg.process.wantedTicket) {
-    ticket = getValueFromArgs('ticket', args, 't') ?? (await askQuestion('Please provide the ticket number:\n'));
+    ticket = getValueFromArgs('ticket', args) ?? (await askQuestion('Please provide the ticket number:\n'));
   }
 
   return { version, ticket, tag };
 }
+
+type ConfigArguments<T> = T extends ITemplate
+  ? string
+  : T extends Record<string, any> | undefined
+    ? {
+        [P in keyof T]?: ConfigArguments<T[P]>;
+      }
+    : string;

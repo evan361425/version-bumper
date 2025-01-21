@@ -1,7 +1,11 @@
+import { loadConfigFromArgs, loadConfigFromFile } from '../../lib/config-loader.js';
 import { Config } from '../../lib/config.js';
 import { BumperError } from '../../lib/errors.js';
 
-export async function bumperCommand(cfg: Config): Promise<void> {
+export async function bumperCommand(args: string[]): Promise<void> {
+  const cfg = new Config(loadConfigFromFile(args), loadConfigFromArgs(args));
+  cfg.init(args);
+
   if (cfg.process.checkTag) {
     if (!(await cfg.git.hasTag(cfg.version))) {
       throw new BumperError(`Tag ${cfg.version} not found`);

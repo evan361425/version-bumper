@@ -2,31 +2,16 @@
  * Configuration of the bumper.
  */
 export interface IConfig {
-  repo: IRepo;
-  process: IProcess;
-  changelog: IChangelog;
-  autoLinks: IAutoLink[];
-  pr: IPR;
-  diff: IDiff;
-  tags: ITag[];
+  repo?: IRepo;
+  process?: IProcess;
+  changelog?: IChangelog;
+  autoLinks?: IAutoLink[];
+  pr?: IPR;
+  diff?: IDiff;
+  tags?: ITag[];
 }
 
-export type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
-
-export type PartialConfig = DeepPartial<IConfig>;
-export type ConfigArguments<T> = T extends ITemplate | KVPairs
-  ? string
-  : T extends object
-    ? {
-        [P in keyof T]?: ConfigArguments<T[P]>;
-      }
-    : string;
-
-export type KVPairs = Record<string, string>;
+// export type KVPairs = Record<string, string>;
 
 /**
  * Repository settings.
@@ -35,7 +20,7 @@ export interface IRepo {
   /**
    * Link to the repository, it will use for tags in Changelog.
    *
-   * @default using `git remote get-url origin`, if not found throw exception
+   * @default 'using `git remote get-url origin`, if not found throw exception'
    * @example https://github.com/example/example
    */
   link: string;
@@ -47,29 +32,29 @@ export interface IProcess {
   /**
    * Whether to bump the version.
    *
-   * It will then try to update the changelog file and commit it.
+   * It will then try to tag the new version.
    */
-  bump: boolean;
+  bump?: boolean;
   /**
    * Push all commits and tags.
    */
-  push: boolean;
+  push?: boolean;
   /**
    * Create PR in tags, and `tags[].prBranches` must be set
    */
-  pr: boolean;
+  pr?: boolean;
   /**
    * Create release in tags, and `tags[].release` must be set
    */
-  release: boolean;
+  release?: boolean;
   /**
    * Throw error if the tag already exists.
    */
-  checkTag: boolean;
+  checkTag?: boolean;
   /**
    * Ask for the ticket number if not found.
    */
-  wantedTicket: boolean;
+  wantedTicket?: boolean;
   /**
    * Use semantic commit message to map the `diff.groups`.
    *
@@ -79,7 +64,7 @@ export interface IProcess {
    *
    * @see https://www.conventionalcommits.org/en/v1.0.0/
    */
-  useSemanticGroups: boolean;
+  useSemanticGroups?: boolean;
   /**
    * Add semantic tag naming to `tags`.
    *
@@ -89,7 +74,7 @@ export interface IProcess {
    *
    * @see https://semver.org/
    */
-  useSemanticTag: boolean;
+  useSemanticTag?: boolean;
   /**
    * Add release candidate (rc) tag naming to `tags`.
    *
@@ -101,7 +86,7 @@ export interface IProcess {
    *
    * @see https://semver.org/
    */
-  useReleaseCandidateTag: boolean;
+  useReleaseCandidateTag?: boolean;
 }
 /**
  * Changelog settings.
@@ -110,11 +95,11 @@ export interface IChangelog {
   /**
    * Enable changelog generation.
    */
-  enable: boolean;
+  enable?: boolean;
   /**
    * File path to the changelog file.
    */
-  destination: string;
+  destination?: string;
   /**
    * The changelog of specific version.
    *
@@ -127,11 +112,11 @@ export interface IChangelog {
    * - `{date}`: current date, format is `YYYY-MM-DD`
    * - `{time}`: current time, format is `HH:mm:ss`
    */
-  section: ITemplate;
+  section?: ITemplate;
   /**
    * After update the changelog, commit the changes.
    */
-  commit: IChangelogCommit;
+  commit?: IChangelogCommit;
 }
 /**
  * How to commit the changelog.
@@ -145,11 +130,11 @@ export interface IChangelogCommit {
    * - `{versionName}`: version name set in tag config
    * - `{ticket}`: ticket number
    */
-  message: ITemplate;
+  message?: ITemplate;
   /**
    * Execute `git add .` not only the changelog.
    */
-  addAll: boolean;
+  addAll?: boolean;
 }
 /**
  * Autolink settings.
@@ -196,7 +181,7 @@ export interface IPR {
    * - `{versionName}`: version name set in tag config
    * - `{ticket}`: ticket number
    */
-  title: ITemplate;
+  title?: ITemplate;
   /**
    * PR's body template.
    *
@@ -207,7 +192,7 @@ export interface IPR {
    * - `{content}`: changelog content
    * - `{diffLink}`: link to the diff of this version
    */
-  body: ITemplate;
+  body?: ITemplate;
 }
 /**
  * Auto generate release notes.
@@ -216,7 +201,7 @@ export interface IDiff {
   /**
    * How to group the commits.
    */
-  groups: IDiffGroup[];
+  groups?: IDiffGroup[];
   /**
    * Title of the group that doesn't match any group.
    *
@@ -224,7 +209,7 @@ export interface IDiff {
    *
    * @example Others
    */
-  othersTitle: string;
+  othersTitle?: string;
   /**
    * Template of single list item.
    *
@@ -239,7 +224,7 @@ export interface IDiff {
    * - `{autoLink}`: value of first match auto links, usually will be ticket number
    * - `{scope}`: commit scope, see `scopeNames`
    */
-  item: ITemplate;
+  item?: ITemplate;
   /**
    * Scope names.
    *
@@ -248,15 +233,15 @@ export interface IDiff {
    *
    * @example { core: 'Core', ui: 'Web UI' }
    */
-  scopeNames: KVPairs;
+  scopeNames?: Record<string, string>;
   /**
    * Pattern to ignore the commit.
    */
-  ignored: string[];
+  ignored?: string[];
   /**
    * Ignore commits that don't match any group.
    */
-  ignoreOthers: boolean;
+  ignoreOthers?: boolean;
 }
 /**
  * Group commits in the changelog.
@@ -303,8 +288,9 @@ export interface ITag {
    * Default is empty value which will be considered as no name.
    *
    * @example stable
+   * @default ''
    */
-  name: string;
+  name?: string;
   /**
    * Regular Expression pattern to match the tag.
    *
@@ -313,20 +299,22 @@ export interface ITag {
   pattern: string;
   /**
    * Should use this tag to generate changelog.
+   *
+   * @default true
    */
-  withChangelog: boolean;
+  withChangelog?: boolean;
   /**
    * Something about GitHub Release.
    */
-  release: IRelease;
+  release?: IRelease;
   /**
    * Something about PR's.
    */
-  prs: ITagPR[];
+  prs?: ITagPR[];
   /**
    * Something about sorting the version.
    */
-  sort: ITagSort;
+  sort?: ITagSort;
 }
 /**
  * GitHub Release settings.
@@ -334,8 +322,10 @@ export interface ITag {
 export interface IRelease {
   /**
    * Enable GitHub Release.
+   *
+   * @default true
    */
-  enable: boolean;
+  enable?: boolean;
   /**
    * Title of the release.
    *
@@ -344,8 +334,8 @@ export interface IRelease {
    * - `{versionName}`: version name set in tag config
    * - `{ticket}`: ticket number
    *
-   * @example Stable-{version}
-   * @default {version}
+   * @example 'Stable-{version}'
+   * @default '{version}'
    */
   title?: ITemplate;
   /**
@@ -358,15 +348,19 @@ export interface IRelease {
    * - `{diffLink}`: link to the diff of this version
    * - `{ticket}`: ticket number
    *
-   * @default {Ticket: "ticket"<NL><NL>}{content}
+   * @default '{Ticket: "ticket"<NL><NL>}{content}'
    */
   body?: ITemplate;
   /**
    * Is this a pre-release.
+   *
+   * @default false
    */
   preRelease?: boolean;
   /**
    * Is this a draft release.
+   *
+   * @default false
    */
   draft?: boolean;
 }
@@ -379,10 +373,10 @@ export interface ITagPR {
    *
    * Format: `<owner>/<repo>`
    *
-   * @default using `git remote get-url origin`, if not found, ignore this PR
+   * @default 'using `git remote get-url origin`, if not found, ignore this PR'
    * @example `evan361425/version-bumper`
    */
-  repo: string;
+  repo?: string;
   /**
    * Source branch.
    *
@@ -392,9 +386,10 @@ export interface ITagPR {
    *
    * This will create the branch if not exists.
    *
-   * @example `main`
+   * @example 'master'
+   * @default 'main'
    */
-  head: string;
+  head?: string;
   /**
    * Target branch.
    *
@@ -407,15 +402,15 @@ export interface ITagPR {
   /**
    * Labels to add to the PR.
    */
-  labels: string[];
+  labels?: string[];
   /**
    * Reviewers to add to the PR.
    */
-  reviewers: string[];
+  reviewers?: string[];
   /**
    * What content to replace in the branch.
    */
-  replacements: IPRReplace[];
+  replacements?: IPRReplace[];
   /**
    * Commit message template.
    *
@@ -475,8 +470,9 @@ export interface ITagSort {
    * Same as the `-t` option in the `sort` command.
    *
    * @see https://man7.org/linux/man-pages/man1/sort.1.html
+   * @default '.'
    */
-  separator: string;
+  separator?: string;
   /**
    * Field to sort.
    *
@@ -493,9 +489,10 @@ export interface ITagSort {
    * If both OPTS has given, the last one will be used.
    *
    * @see https://man7.org/linux/man-pages/man1/sort.1.html
-   * @example [['1,1n'], ['2,2n'], ['3,3n'], ['3,3a']]
+   * @example ['1,1n', '2,2n', '3,3n', '3,3a']
+   * @default ['1,1n']
    */
-  fields: string[];
+  fields?: string[];
 }
 /**
  * Template settings.
@@ -512,7 +509,7 @@ export interface ITemplate {
    *
    * Priority: 1, last to be used.
    */
-  value: string;
+  value?: string;
   /**
    * Query to get the template.
    *
@@ -530,8 +527,8 @@ export interface ITemplateGitHub {
   /**
    * The branch to get the template.
    *
-   * @example master
-   * @default main
+   * @example 'master'
+   * @default 'main'
    */
   branch?: string;
   /**
@@ -541,3 +538,9 @@ export interface ITemplateGitHub {
    */
   path: string;
 }
+
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;

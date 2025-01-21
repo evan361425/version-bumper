@@ -31,113 +31,118 @@
           "items": {
             "$ref": "#/definitions/ITag"
           }
+        },
+        "$schema": {
+          "type": "string",
+          "default": "node_modules/@evan361425/version-bumper/schema.json"
         }
       },
-      "required": [
-        "repo",
-        "process",
-        "changelog",
-        "autoLinks",
-        "pr",
-        "diff",
-        "tags"
-      ],
-      "description": "Configuration of the bumper."
+      "additionalProperties": false,
+      "title": "Configuration of the bumper.",
+      "default": {
+        "$schema": "node_modules/@evan361425/version-bumper/schema.json"
+      }
     },
     "IRepo": {
       "type": "object",
       "properties": {
         "link": {
           "type": "string",
-          "description": "Link to the repository, it will use for tags in Changelog.",
-          "default": "using `git remote get-url origin`, if not found throw exception"
+          "default": "using `git remote get-url origin`, if not found throw exception",
+          "title": "Link to the repository, it will use for tags in Changelog."
         }
       },
       "required": [
         "link"
       ],
-      "description": "Repository settings."
+      "additionalProperties": false,
+      "title": "Repository settings."
     },
     "IProcess": {
       "type": "object",
       "properties": {
         "bump": {
           "type": "boolean",
-          "description": "Whether to bump the version.\n\nIt will then try to update the changelog file and commit it."
+          "title": "Whether to bump the version.\n\nIt will then try to tag the new version.",
+          "default": true
         },
         "push": {
           "type": "boolean",
-          "description": "Push all commits and tags."
+          "title": "Push all commits and tags.",
+          "default": true
         },
         "pr": {
           "type": "boolean",
-          "description": "Create PR in tags, and `tags[].prBranches` must be set"
+          "title": "Create PR in tags, and `tags[].prBranches` must be set",
+          "default": true
         },
         "release": {
           "type": "boolean",
-          "description": "Create release in tags, and `tags[].release` must be set"
+          "title": "Create release in tags, and `tags[].release` must be set",
+          "default": true
         },
         "checkTag": {
           "type": "boolean",
-          "description": "Throw error if the tag already exists."
+          "title": "Throw error if the tag already exists.",
+          "default": true
         },
         "wantedTicket": {
           "type": "boolean",
-          "description": "Ask for the ticket number if not found."
+          "title": "Ask for the ticket number if not found.",
+          "default": false
         },
         "useSemanticGroups": {
           "type": "boolean",
-          "description": "Use semantic commit message to map the `diff.groups`.\n\n- `^fix` as `Fixed`\n- `^feat`, `^add` as `Added`\n- `^[\\w\\(\\)]+!`, `BREAKING CHANGE` as `Changed`, with priority 1"
+          "title": "Use semantic commit message to map the `diff.groups`.\n\n- `^fix` as `Fixed`\n- `^feat`, `^add` as `Added`\n- `^[\\w\\(\\)]+!`, `BREAKING CHANGE` as `Changed`, with priority 1",
+          "default": true
         },
         "useSemanticTag": {
           "type": "boolean",
-          "description": "Add semantic tag naming to `tags`.\n\n- Use pattern `v[0-9]+.[0-9]+.[0-9]+` and name `semantic`.\n- Enable release with default title and body, see default from `tags[].release`.\n- Enable changelog."
+          "title": "Add semantic tag naming to `tags`.\n\n- Use pattern `v[0-9]+.[0-9]+.[0-9]+` and name `semantic`.\n- Enable release with default title and body, see default from `tags[].release`.\n- Enable changelog.",
+          "default": true
         },
         "useReleaseCandidateTag": {
           "type": "boolean",
-          "description": "Add release candidate (rc) tag naming to `tags`.\n\n- Use pattern `v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+` and name `release-candidate`.\n- Disable release.\n- Disable changelog.\n\nIf `useSemanticTag` is enabled, it will pushed after the semantic tag."
+          "title": "Add release candidate (rc) tag naming to `tags`.\n\n- Use pattern `v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+` and name `release-candidate`.\n- Disable release.\n- Disable changelog.\n\nIf `useSemanticTag` is enabled, it will pushed after the semantic tag.",
+          "default": false
         }
       },
-      "required": [
-        "bump",
-        "push",
-        "pr",
-        "release",
-        "checkTag",
-        "wantedTicket",
-        "useSemanticGroups",
-        "useSemanticTag",
-        "useReleaseCandidateTag"
-      ],
-      "description": "How to process the version bumping."
+      "additionalProperties": false,
+      "title": "How to process the version bumping."
     },
     "IChangelog": {
       "type": "object",
       "properties": {
         "enable": {
           "type": "boolean",
-          "description": "Enable changelog generation."
+          "title": "Enable changelog generation.",
+          "default": true
         },
         "destination": {
           "type": "string",
-          "description": "File path to the changelog file."
+          "title": "File path to the changelog file.",
+          "default": "CHANGELOG.md"
         },
         "section": {
           "$ref": "#/definitions/ITemplate",
-          "description": "The changelog of specific version.\n\nAllowed variables:\n- `{content}`: new version changelog body from `diff`.\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{diffLink}`: link to the diff of this version\n- `{ticket}`: ticket number\n- `{date}`: current date, format is `YYYY-MM-DD`\n- `{time}`: current time, format is `HH:mm:ss`"
+          "title": "The changelog of specific version.\n\nAllowed variables:\n- `{content}`: new version changelog body from `diff`.\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{diffLink}`: link to the diff of this version\n- `{ticket}`: ticket number\n- `{date}`: current date, format is `YYYY-MM-DD`\n- `{time}`: current time, format is `HH:mm:ss`",
+          "default": {
+            "value": "## [{version}] - {date}\n\n{content}"
+          }
         },
         "commit": {
           "$ref": "#/definitions/IChangelogCommit",
-          "description": "After update the changelog, commit the changes."
+          "title": "After update the changelog, commit the changes.",
+          "default": {
+            "message": {
+              "value": "chore: {\"versionName\" }bump to {version}"
+            },
+            "addAll": false
+          }
         }
       },
-      "required": [
-        "enable",
-        "destination",
-        "section",
-        "commit"
-      ],
-      "description": "Changelog settings."
+      "additionalProperties": false,
+      "title": "Changelog settings."
     },
     "ITemplate": {
       "type": "object",
@@ -155,10 +160,8 @@
           "description": "Query to get the template.\n\nPriority: 3, first to be used."
         }
       },
-      "required": [
-        "value"
-      ],
-      "description": "Template settings."
+      "additionalProperties": false,
+      "title": "Template settings."
     },
     "ITemplateGitHub": {
       "type": "object",
@@ -170,6 +173,9 @@
         "branch": {
           "type": "string",
           "description": "The branch to get the template.",
+          "examples": [
+            "master"
+          ],
           "default": "main"
         },
         "path": {
@@ -180,25 +186,27 @@
       "required": [
         "repo",
         "path"
-      ]
+      ],
+      "additionalProperties": false
     },
     "IChangelogCommit": {
       "type": "object",
       "properties": {
         "message": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Commit message template.\n\nAllowed variables:\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number"
+          "title": "Commit message template.\n\nAllowed variables:\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number",
+          "default": {
+            "value": "chore: {\"versionName\" }bump to {version}"
+          }
         },
         "addAll": {
           "type": "boolean",
-          "description": "Execute `git add .` not only the changelog."
+          "title": "Execute `git add .` not only the changelog.",
+          "default": false
         }
       },
-      "required": [
-        "message",
-        "addAll"
-      ],
-      "description": "How to commit the changelog."
+      "additionalProperties": false,
+      "title": "How to commit the changelog."
     },
     "IAutoLink": {
       "type": "object",
@@ -219,7 +227,8 @@
         "matches",
         "link"
       ],
-      "description": "Autolink settings."
+      "additionalProperties": false,
+      "title": "Autolink settings."
     },
     "IPR": {
       "type": "object",
@@ -233,11 +242,8 @@
           "description": "PR's body template.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config, empty if not set\n- `{ticket}`: ticket number\n- `{content}`: changelog content\n- `{diffLink}`: link to the diff of this version"
         }
       },
-      "required": [
-        "title",
-        "body"
-      ],
-      "description": "Pull Request settings."
+      "additionalProperties": false,
+      "title": "Pull Request settings."
     },
     "IDiff": {
       "type": "object",
@@ -247,47 +253,48 @@
           "items": {
             "$ref": "#/definitions/IDiffGroup"
           },
-          "description": "How to group the commits."
+          "title": "How to group the commits."
         },
         "othersTitle": {
           "type": "string",
-          "description": "Title of the group that doesn't match any group.\n\nIf `ignoreOthers` is enabled, this will not be used."
+          "title": "Title of the group that doesn't match any group.\n\nIf `ignoreOthers` is enabled, this will not be used.",
+          "default": "Others"
         },
         "item": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Template of single list item.\n\nAllowed variables:\n- `{title}`: commit title after `:` add will remove all the pr number and autoLink if found\n- `{titleTail}`: commit title after `:`\n- `{titleFull}`: full commit title, which is the first line of the commit message\n- `{author}`: commit author\n- `{hash}`: commit hash, but only first 7 characters\n- `{hashFull}`: commit hash\n- `{pr}`: PR number, if not found, it will use `hash`\n- `{autoLink}`: value of first match auto links, usually will be ticket number\n- `{scope}`: commit scope, see `scopeNames`"
+          "title": "Template of single list item.\n\nAllowed variables:\n- `{title}`: commit title after `:` add will remove all the pr number and autoLink if found\n- `{titleTail}`: commit title after `:`\n- `{titleFull}`: full commit title, which is the first line of the commit message\n- `{author}`: commit author\n- `{hash}`: commit hash, but only first 7 characters\n- `{hashFull}`: commit hash\n- `{pr}`: PR number, if not found, it will use `hash`\n- `{autoLink}`: value of first match auto links, usually will be ticket number\n- `{scope}`: commit scope, see `scopeNames`",
+          "default": {
+            "value": "- ({pr}{|\"autoLink\"}) {\"scope\": }{title} - {author}"
+          }
         },
         "scopeNames": {
-          "$ref": "#/definitions/KVPairs",
-          "description": "Scope names.\n\nFor example, `feat(core): add something`, the scope is `core`. This will replace the scope with the name in the object.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
           "examples": [
             {
               "core": "Core",
               "ui": "Web UI"
             }
-          ]
+          ],
+          "title": "Scope names.\n\nFor example, `feat(core): add something`, the scope is `core`. This will replace the scope with the name in the object."
         },
         "ignored": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Pattern to ignore the commit."
+          "title": "Pattern to ignore the commit."
         },
         "ignoreOthers": {
           "type": "boolean",
-          "description": "Ignore commits that don't match any group."
+          "title": "Ignore commits that don't match any group.",
+          "default": true
         }
       },
-      "required": [
-        "groups",
-        "othersTitle",
-        "item",
-        "scopeNames",
-        "ignored",
-        "ignoreOthers"
-      ],
-      "description": "Auto generate release notes."
+      "additionalProperties": false,
+      "title": "Auto generate release notes."
     },
     "IDiffGroup": {
       "type": "object",
@@ -316,20 +323,16 @@
         "matches",
         "title"
       ],
-      "description": "Group commits in the changelog."
-    },
-    "KVPairs": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
+      "additionalProperties": false,
+      "title": "Group commits in the changelog."
     },
     "ITag": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string",
-          "description": "Name of the tag.\n\nDefault is empty value which will be considered as no name."
+          "description": "Name of the tag.\n\nDefault is empty value which will be considered as no name.",
+          "default": ""
         },
         "pattern": {
           "type": "string",
@@ -337,7 +340,8 @@
         },
         "withChangelog": {
           "type": "boolean",
-          "description": "Should use this tag to generate changelog."
+          "description": "Should use this tag to generate changelog.",
+          "default": true
         },
         "release": {
           "$ref": "#/definitions/IRelease",
@@ -356,25 +360,25 @@
         }
       },
       "required": [
-        "name",
-        "pattern",
-        "withChangelog",
-        "release",
-        "prs",
-        "sort"
+        "pattern"
       ],
-      "description": "Tag settings.\n\nThis will be used as list and the first match of the pattern will be used."
+      "additionalProperties": false,
+      "title": "Tag settings.\n\nThis will be used as list and the first match of the pattern will be used."
     },
     "IRelease": {
       "type": "object",
       "properties": {
         "enable": {
           "type": "boolean",
-          "description": "Enable GitHub Release."
+          "description": "Enable GitHub Release.",
+          "default": true
         },
         "title": {
           "$ref": "#/definitions/ITemplate",
           "description": "Title of the release.\n\nAllowed variables:\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number",
+          "examples": [
+            "Stable-{version}"
+          ],
           "default": "{version}"
         },
         "body": {
@@ -384,17 +388,17 @@
         },
         "preRelease": {
           "type": "boolean",
-          "description": "Is this a pre-release."
+          "description": "Is this a pre-release.",
+          "default": false
         },
         "draft": {
           "type": "boolean",
-          "description": "Is this a draft release."
+          "description": "Is this a draft release.",
+          "default": false
         }
       },
-      "required": [
-        "enable"
-      ],
-      "description": "GitHub Release settings."
+      "additionalProperties": false,
+      "title": "GitHub Release settings."
     },
     "ITagPR": {
       "type": "object",
@@ -406,7 +410,11 @@
         },
         "head": {
           "type": "string",
-          "description": "Source branch.\n\nAllowed variables:\n- `{name}`: tag name\n- `{timestamp}`: current timestamp\n\nThis will create the branch if not exists."
+          "description": "Source branch.\n\nAllowed variables:\n- `{name}`: tag name\n- `{timestamp}`: current timestamp\n\nThis will create the branch if not exists.",
+          "examples": [
+            "master"
+          ],
+          "default": "main"
         },
         "base": {
           "type": "string",
@@ -439,14 +447,10 @@
         }
       },
       "required": [
-        "repo",
-        "head",
-        "base",
-        "labels",
-        "reviewers",
-        "replacements"
+        "base"
       ],
-      "description": "After tag is created, create PR's."
+      "additionalProperties": false,
+      "title": "After tag is created, create PR's."
     },
     "IPRReplace": {
       "type": "object",
@@ -476,14 +480,16 @@
         "pattern",
         "replacement"
       ],
-      "description": "PR's files replacement settings."
+      "additionalProperties": false,
+      "title": "PR's files replacement settings."
     },
     "ITagSort": {
       "type": "object",
       "properties": {
         "separator": {
           "type": "string",
-          "description": "Separator of the version.\n\nSame as the `-t` option in the `sort` command."
+          "description": "Separator of the version.\n\nSame as the `-t` option in the `sort` command.",
+          "default": "."
         },
         "fields": {
           "type": "array",
@@ -493,27 +499,19 @@
           "description": "Field to sort.\n\nSame as the `-k` option in the `sort` command. `KEYDEF[]`\n\nKEYDEF is F[.C][OPTS][,F[.C][OPTS]] for start and stop position, where F is a field number and C a character position in the field; both are origin 1, and the stop position defaults to the line's end.  If neither -t nor -b is in effect, characters in a field are counted from the beginning of the preceding whitespace. OPTS is one or more single-letter ordering options [bdfMn].  If no key is given, use the `n` (compare according to string numerical value) as the key. If both OPTS has given, the last one will be used.",
           "examples": [
             [
-              [
-                "1,1n"
-              ],
-              [
-                "2,2n"
-              ],
-              [
-                "3,3n"
-              ],
-              [
-                "3,3a"
-              ]
+              "1,1n",
+              "2,2n",
+              "3,3n",
+              "3,3a"
             ]
+          ],
+          "default": [
+            "1,1n"
           ]
         }
       },
-      "required": [
-        "separator",
-        "fields"
-      ],
-      "description": "How to sort the version, using unix sort algorithm."
+      "additionalProperties": false,
+      "title": "How to sort the version, using unix sort algorithm."
     }
   }
 }
