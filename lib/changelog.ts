@@ -22,6 +22,10 @@ export class ChangelogIO {
   bump(repo: Repo, data: { key: string; link: string; content: string }) {
     const section = ChangelogSection.fromString(data.content);
     section.link = data.link;
+    log(`[changelog] bumping ${data.key} with content:
+${section.header}
+
+${section.body}`);
 
     this.content.bump(repo, data.key);
     this.content.prepend(section);

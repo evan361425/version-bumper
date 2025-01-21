@@ -1,8 +1,4 @@
 {
-  "$schema": "schema.json",
-  "repo": {
-    "link": "https://github.com/evan361425/version-bumper"
-  },
   "changelog": {
     "commit": {
       "message": {

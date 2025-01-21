@@ -78,15 +78,17 @@
 	                                 - `{ticket}`: ticket number
 	                                 - `{date}`: current date, format is `YYYY-MM-DD`
 	                                 - `{time}`: current time, format is `HH:mm:ss`
-	                           type: undefined
-	                        default: [object Object]
+	                           type: template
+	                        default: -v=## [{version}] - {date}
+
+{content}
 	--clog-commit                    Commit message template.
 	                                 Allowed variables:
 	                                 - `{version}`: current version number
 	                                 - `{versionName}`: version name set in tag config
 	                                 - `{ticket}`: ticket number
-	                           type: undefined
-	                        default: [object Object]
+	                           type: template
+	                        default: -v=chore: {"versionName" }bump to {version}
 	--[no-]clog-commit-add-all       Execute `git add .` not only the changelog.
 	                           type: boolean
 	                        default: false
@@ -97,10 +99,10 @@
 	                           type: array
 	                        default: <required>
 	--pr-title                       pr-title
-	                           type: undefined
+	                           type: template
 	                        default: <required>
 	--pr-body                        pr-body
-	                           type: undefined
+	                           type: template
 	                        default: <required>
 	--diff-gp[]match[]               diff-gp[]match[]
 	                           type: array
@@ -122,8 +124,8 @@
 	                                 - `{pr}`: PR number, if not found, it will use `hash`
 	                                 - `{autoLink}`: value of first match auto links, usually will be ticket number
 	                                 - `{scope}`: commit scope, see `scopeNames`
-	                           type: undefined
-	                        default: [object Object]
+	                           type: template
+	                        default: -v=- ({pr}{|"autoLink"}) {"scope": }{title} - {author}
 	--diff-scope[]                   Scope names.
 	                                 For example, `feat(core): add something`, the scope is `core`.
 	                                 This will replace the scope with the name in the object.
@@ -158,7 +160,7 @@
 	                           type: array
 	                        default: <required>
 	--tag[]pr[]commit                tag[]pr[]commit
-	                           type: undefined
+	                           type: template
 	                        default: <required>
 	--tag[]pr[]repl[]paths[]         tag[]pr[]repl[]paths[]
 	                           type: array
@@ -170,17 +172,17 @@
 	                           type: string
 	                        default: <required>
 	--tag[]pr[]repl[]commit          tag[]pr[]repl[]commit
-	                           type: undefined
+	                           type: template
 	                        default: <required>
 	--[no-]tag[]release              tag[]release
 	                           type: boolean
 	                        default: true
 	--tag[]release-title             tag[]release-title
-	                           type: undefined
-	                        default: {version}
+	                           type: template
+	                        default: -v=undefined
 	--tag[]release-body              tag[]release-body
-	                           type: undefined
-	                        default: {Ticket: "ticket"<NL><NL>}{content}
+	                           type: template
+	                        default: -v=undefined
 	--[no-]tag[]release-draft        tag[]release-draft
 	                           type: boolean
 	                        default: false

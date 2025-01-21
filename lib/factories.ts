@@ -178,13 +178,7 @@ export class PR implements IPR {
     return this.title.formatContent(v);
   }
 
-  formatBody(v: {
-    version: string;
-    versionName: string;
-    ticket: string;
-    content: string;
-    diffLink: string;
-  }): Promise<string> {
+  formatBody(v: ContentTemplate): Promise<string> {
     return this.body.formatContent(v);
   }
 }
@@ -228,7 +222,7 @@ export class Diff implements IDiff {
 
     const result = await this.fetchCommits(tag);
     if (result.firstTag) {
-      this._content = 'Initial tag.';
+      this._content = 'Initial version.';
       return;
     }
 
@@ -248,6 +242,7 @@ export class Diff implements IDiff {
   async fetchCommits(tag: Tag): Promise<{ firstTag: boolean; commits: GitCommit[] }> {
     const wanted = await tag.findLastTag();
     if (!wanted) {
+      verbose('[diff] No last tag found');
       return { firstTag: true, commits: [] };
     }
 
@@ -265,6 +260,7 @@ export class Diff implements IDiff {
       })
       .filter((e) => e) as GitCommit[];
 
+    verbose(`[diff] Found ${commits.length} commits between ${wanted} and HEAD`);
     return { firstTag: false, commits };
   }
 
@@ -346,23 +342,23 @@ export class Tag implements ITag {
     readonly sort: TagSort,
   ) {}
 
-  static fromCfg(cfg: ITag, repoLink: string): Tag {
+  static fromCfg(cfg: ITag): Tag {
     return new Tag(
       cfg.name,
       cfg.pattern,
       cfg.withChangelog,
       Release.fromCfg(cfg.release ?? {}),
-      cfg.prs?.map((e) => TagPR.fromCfg(e, repoLink)),
+      cfg.prs?.map((e) => TagPR.fromCfg(e, cfg.name ?? '')),
       TagSort.fromCfg(cfg.sort ?? {}),
     );
   }
 
   get wantPR(): boolean {
-    return this.prs.length > 0;
+    return this.prs.length > 0 && this.prs.some((e) => e.repo);
   }
 
   get mustLastTag(): string {
-    if (!this._lastTag) {
+    if (this._lastTag === undefined) {
       // not bumper error, this should be a developer error
       throw new Error('Last tag is not ready');
     }
@@ -381,7 +377,7 @@ export class Tag implements ITag {
    * Find the last same pattern tag.
    */
   async findLastTag(): Promise<string> {
-    if (this._lastTag) return this._lastTag;
+    if (this._lastTag !== undefined) return this._lastTag;
 
     const tag = await command('git', ['tag', '--list', '--sort=-v:refname'], (e) => this.verify(e.trim()));
     return (this._lastTag = tag?.trim() ?? '');
@@ -415,17 +411,20 @@ export class Tag implements ITag {
   async createPR(pr: PR, v: ContentTemplate): Promise<void> {
     if (!this.wantPR) return;
 
-    verbose(`[pr] Creating commits to designated branches for PR`);
-    for await (const branch of this.prs) {
+    const prs = this.prs.filter((e) => e.repo);
+    log(`[pr] Start process ${prs.length} PR for ${this.name}`);
+
+    for await (const branch of prs) {
       await branch.createCommits({ version: v.version, versionName: this.name, ticket: v.ticket });
     }
+    verbose(`[pr] Done replacing files`);
 
     const title = await pr.formatTitle(v);
     const body = await pr.formatBody(v);
 
-    for await (const branch of this.prs) {
-      log(`[bump] Creating PR for ${this.name}: ${branch.head} -> ${branch.base}`);
-      await branch.createPR({ name: this.name, title, body });
+    for await (const branch of prs) {
+      await branch.createPR({ title, body });
+      log(`[bump] Created ${this.name} PR (${branch.head} -> ${branch.base})`);
     }
   }
 }
@@ -447,8 +446,8 @@ export class Release implements IRelease {
   static fromCfg(cfg: IRelease): Release {
     return new Release(
       cfg.enable,
-      cfg.title ? Template.fromCfg(cfg.title) : new Template('{version}'),
-      cfg.body ? Template.fromCfg(cfg.body) : new Template('{Ticket: "ticket"<NL><NL>}{content}'),
+      Template.exist(cfg.title) ? Template.fromCfg(cfg.title!) : new Template('{version}'),
+      Template.exist(cfg.body) ? Template.fromCfg(cfg.body!) : new Template('{Ticket: "ticket"<NL><NL>}{content}'),
       cfg.preRelease,
       cfg.draft,
     );
@@ -458,24 +457,18 @@ export class Release implements IRelease {
     return this.title!.formatContent(v);
   }
 
-  formatBody(v: {
-    version: string;
-    versionName: string;
-    ticket: string;
-    content: string;
-    diffLink: string;
-  }): Promise<string> {
+  formatBody(v: ContentTemplate): Promise<string> {
     return this.body!.formatContent(v);
   }
 }
 
 export class TagPR implements ITagPR {
-  readonly git: GitDatabase;
+  protected readonly git: GitDatabase;
 
   constructor(
     public repo: string,
-    readonly head: string = 'main',
-    readonly base: string,
+    public head: string = 'main',
+    public base: string,
     readonly labels: string[] = [],
     readonly reviewers: string[] = [],
     readonly replacements: PRReplace[] = [],
@@ -488,25 +481,22 @@ export class TagPR implements ITagPR {
     this.git = new GitDatabase(repo, head);
   }
 
-  static fromCfg(cfg: ITagPR, repoLink: string): TagPR {
+  static fromCfg(cfg: ITagPR, tagName: string): TagPR {
+    const ts = new Date().getTime();
     return new TagPR(
-      cfg.repo ?? repoLink,
-      cfg.head,
-      cfg.base,
+      cfg.repo ?? '',
+      cfg.head?.replace(/{name}/g, tagName).replace(/{timestamp}/g, ts.toString()),
+      cfg.base.replace(/{name}/g, tagName),
       cfg.labels,
       cfg.reviewers,
       cfg.replacements?.map((e) => PRReplace.fromCfg(e)),
-      cfg.commitMessage ? Template.fromCfg(cfg.commitMessage) : undefined,
+      Template.exist(cfg.commitMessage) ? Template.fromCfg(cfg.commitMessage!) : undefined,
     );
   }
 
-  formatHead(v: { name: string }): string {
-    const ts = new Date().getTime();
-    return this.head.replace(/{name}/g, v.name).replace(/{timestamp}/g, ts.toString());
-  }
-
-  formatBase(v: { name: string }): string {
-    return this.base.replace(/{name}/g, v.name);
+  updateRepo(repo: string): void {
+    this.repo = repo;
+    this.git.repo = repo;
   }
 
   async createCommits(v: VersionedTemplate): Promise<void> {
@@ -546,7 +536,7 @@ export class TagPR implements ITagPR {
     }
   }
 
-  async createPR(v: { name: string; title: string; body: string }): Promise<void> {
+  async createPR(v: { title: string; body: string }): Promise<void> {
     await command('gh', [
       'pr',
       'create',
@@ -557,9 +547,9 @@ export class TagPR implements ITagPR {
       '--assignee',
       '@me',
       '--base',
-      this.formatBase({ name: v.name }),
+      this.base,
       '--head',
-      this.formatHead({ name: v.name }),
+      this.head,
       '--repo',
       this.repo,
       ...this.reviewers.map((e) => ['--reviewer', e]).flat(),
@@ -581,7 +571,7 @@ export class PRReplace implements IPRReplace {
       cfg.paths,
       cfg.pattern,
       cfg.replacement,
-      cfg.commitMessage ? Template.fromCfg(cfg.commitMessage) : undefined,
+      Template.exist(cfg.commitMessage) ? Template.fromCfg(cfg.commitMessage!) : undefined,
     );
   }
 
@@ -648,6 +638,9 @@ export class Template<T extends Record<string, string>> implements ITemplate {
   static fromCfg<T extends Record<string, string>>(cfg: ITemplate): Template<T> {
     return new Template(cfg.value, cfg.file, cfg.github);
   }
+  static exist(cfg?: ITemplate): boolean {
+    return !!(cfg?.value || cfg?.file || (cfg?.github?.repo && cfg?.github?.path));
+  }
 
   /**
    * Get last formatted content.
@@ -698,6 +691,7 @@ export class Template<T extends Record<string, string>> implements ITemplate {
     }
 
     const gh = new GitDatabase(this.github!.repo, this.github!.branch ?? 'main');
+    verbose(`[template] Fetching content from ${this.github!.repo}:${this.github!.path}`);
     const result = await gh.fetchFiles([this.github!.path]);
     return (this._content = result[0]!);
   }

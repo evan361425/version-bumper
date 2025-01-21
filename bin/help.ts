@@ -99,15 +99,6 @@ function findArgs(): MyArg[] {
     }
 
     if (keys.length > 0) {
-      // special case
-      if (def!.$ref === '#/definitions/ITemplate') {
-        return {
-          type: 'template' as any,
-          title: def!.title,
-          default: def!.default,
-        };
-      }
-
       // Get desired schema, for object or array
       let prop = def!.properties;
       if (!prop) {
@@ -119,6 +110,15 @@ function findArgs(): MyArg[] {
       }
 
       return findSchema(keys.join('.'), prop as Record<string, JSONSchema7>);
+    }
+
+    // special case
+    if (def!.$ref === '#/definitions/ITemplate') {
+      return {
+        type: 'template' as any,
+        title: def!.title,
+        default: def!.default ? `-v=${(def!.default as any).value}` : undefined,
+      };
     }
 
     return def!;

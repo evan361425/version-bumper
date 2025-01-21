@@ -17,7 +17,7 @@ export function mockCommandResponse(response: string): void {
  * @returns
  */
 export function command(name: string, args: string[], oneByOne?: (line: string) => boolean): Promise<string> {
-  info(`[cmd]: ${name} '${args.join("' '")}'`);
+  verbose(`[cmd]: ${name} '${args.join("' '")}'`);
 
   if (isDebug()) {
     const resp = mockResponses.shift();

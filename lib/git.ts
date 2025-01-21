@@ -66,13 +66,13 @@ export class GitDatabase {
     /**
      * Repository name in the format of `owner/repo`.
      */
-    readonly repo: string,
+    public repo: string,
     /**
      * Source branch name.
      *
      * This branch will be used to create new branches.
      */
-    readonly branch: string,
+    readonly branch: string = '',
   ) {}
 
   async tag(version: string, content: string): Promise<void> {
@@ -89,7 +89,7 @@ export class GitDatabase {
    */
   async createBranch(name: string): Promise<string> {
     const sha = await command('gh', ['api', `repos/${this.repo}/git/refs/heads/${this.branch}`, '--jq', '.object.sha']);
-    verbose(`[git] Creating branch '${name}' in ${this.repo}/${this.branch} (${sha})`);
+    verbose(`[git] Creating branch '${name}' in ${this.repo} ${this.branch} in sha: ${sha}`);
 
     return await command('gh', [
       'api',
@@ -97,9 +97,9 @@ export class GitDatabase {
       'POST',
       `repos/${this.repo}/git/refs`,
       '-f',
-      `ref='refs/heads/${name}'`,
+      `ref=refs/heads/${name}`,
       '-f',
-      `sha='${sha}'`,
+      `sha=${sha}`,
       '--jq',
       '.object.sha',
     ]);
@@ -111,7 +111,7 @@ export class GitDatabase {
    * @returns Contents (base64 decoded) of the files.
    */
   async fetchFiles(paths: string[]): Promise<string[]> {
-    verbose(`[git] Getting files in ${this.repo} (${this.branch}): ${paths.join(', ')}`);
+    verbose(`[git] Getting files in ${this.repo} ${this.branch} in paths: ${paths.join(', ')}`);
 
     const result = [];
     for await (const path of paths) {
@@ -134,7 +134,7 @@ export class GitDatabase {
    */
   async updateFiles(baseTree: string, paths: string[], contents: string[]): Promise<string> {
     assert(paths.length === contents.length, 'Paths and contents must have the same length');
-    verbose(`[git] Updating files in ${this.repo} (${this.branch}): ${paths.join(', ')}`);
+    verbose(`[git] Updating files in ${this.repo} ${this.branch} in paths: ${paths.join(', ')}`);
 
     const contentShas = [];
     for await (const content of contents) {
@@ -144,9 +144,9 @@ export class GitDatabase {
         'POST',
         `repos/${this.repo}/git/blobs`,
         '-f',
-        `content='${Buffer.from(content).toString('base64')}'`,
+        `content=${Buffer.from(content).toString('base64')}`,
         '-f',
-        `encoding='base64'`,
+        `encoding=base64`,
         '--jq',
         '.sha',
       ]);
@@ -180,7 +180,7 @@ export class GitDatabase {
    * @returns new commit sha
    */
   async createCommit(baseTree: string, tree: string, message: string): Promise<string> {
-    verbose(`[git] Creating commit in ${this.repo} (${this.branch}): ${message}`);
+    verbose(`[git] Creating commit in ${this.repo} ${this.branch} with message: ${message}`);
 
     return await command('gh', [
       'api',

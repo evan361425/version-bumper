@@ -3,7 +3,7 @@ import { Config } from './config.js';
 import { BumperError } from './errors.js';
 import { Tag } from './factories.js';
 import { DeepPartial, IConfig, IProcess, ITemplate } from './interfaces.js';
-import { askQuestion, readFile } from './io.js';
+import { askQuestion, readFile, startDebug, startVerbose } from './io.js';
 import { log, verbose } from './logger.js';
 import { breaker } from './util.js';
 
@@ -68,6 +68,7 @@ export const configArgsMap: ConfigArguments<IConfig> = {
       pattern: 'tag[]pattern',
       prs: [
         {
+          repo: 'tag[]pr[]repo',
           head: 'tag[]pr[]head',
           base: 'tag[]pr[]base',
           labels: ['tag[]pr[]labels[]'],
@@ -122,13 +123,13 @@ export function getValueFromArgs(key: string, args: string[]): string | undefine
   return args[index + 1];
 }
 
-export function getBoolFromArgs(key: string, args: string[]): boolean {
+export function getBoolFromArgs(key: string, args: string[]): boolean | undefined {
   const index = args.findIndex((v) => {
     const alias = argsAliases[key];
     if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
     return v === '--' + key || v === '--no-' + key;
   });
-  if (index === -1) return false;
+  if (index === -1) return undefined;
 
   const arg = args[index]!;
   if (arg.includes('=')) return breaker(arg, 1, '=')[1] !== 'false';
@@ -192,39 +193,44 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
 
   function splitArrayArgs(args: string[], prefix: string): string[][] {
     // get actual wanted args
-    const wanted: string[] = [];
+    const wanted: string[][] = [];
     args.forEach((arg, idx) => {
       if (!arg.startsWith(`--${prefix}[]`)) {
         return;
       }
 
-      wanted.push(arg);
+      const v = [arg];
       // check if next arg is value, not flag
       if (args[idx + 1]?.startsWith('-') === false) {
-        wanted.push(args[idx + 1]!);
+        v.push(args[idx + 1]!);
       }
+
+      wanted.push(v);
     });
 
     const result: string[][] = [];
     let parts: string[] = [];
-    for (const arg of args) {
-      const idx = arg.substring(prefix.length + 4).indexOf('[]');
+    for (const arg of wanted) {
+      const idx = arg[0]!.substring(prefix.length + 4).indexOf('[]');
       // check if this is not pure key-value pair
       if (idx !== -1) {
-        parts.push(arg);
+        parts.push(...arg);
         continue;
       }
 
-      if (parts.indexOf(arg) !== -1) {
+      if (parts.indexOf(arg[0]!) !== -1) {
         result.push(parts);
         parts = [];
       }
-      parts.push(arg);
+      parts.push(...arg);
     }
 
     result.push(parts);
     return result;
   }
+
+  getB('verbose') && startVerbose();
+  getB('debug') && startDebug();
 
   // only mode
   const processInfo: Partial<IProcess> = {};
@@ -294,6 +300,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
         prs: splitArrayArgs(ca, 'tag[]pr').map((pra) => {
           const pr = tag.prs![0]!;
           return {
+            repo: getV(pr.repo!, pra),
             head: getV(pr.head!, pra),
             base: getV(pr.base!, pra),
             labels: getArrayFromArgs(pr.labels![0]!, pra),
