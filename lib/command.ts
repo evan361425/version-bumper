@@ -1,7 +1,6 @@
-import { info } from 'console';
 import { spawn } from 'node:child_process';
 import { isDebug } from './io.js';
-import { verbose } from './logger.js';
+import { log, verbose } from './logger.js';
 
 let mockResponses: string[] = [];
 
@@ -30,26 +29,31 @@ export function command(name: string, args: string[], oneByOne?: (line: string) 
     let error = '';
 
     command.stdout.on('data', (data) => {
-      const line = data.toString();
+      const lines = data.toString();
       if (oneByOne !== undefined) {
-        verbose(`[cmd]: ${name} one by one: ${line}`);
-        if (oneByOne(line)) {
-          command.kill();
-          res(line);
+        for (const line of lines.split('\n').filter(Boolean)) {
+          verbose(`[cmd]: ${name} one by one: ${line}`);
+          if (oneByOne(line)) {
+            command.kill();
+            res(line);
+            return;
+          }
         }
       } else {
-        response += line;
+        response += lines;
       }
     });
     command.stderr.on('data', (data) => (error += data.toString()));
-    command.on('error', (err) => {
-      info(`[cmd]: ${name} error: ${err}`);
+    command.on('error', (error) => {
+      const err = `${error}`.trim();
+      log(`[cmd]: ${name} error: ${err}`);
       rej(err);
     });
     command.on('close', () => {
       if (error !== '') {
-        info(`[cmd]: ${name} error: ${error}`);
-        rej(new Error(`Command: ${name} ${args.join(' ')} \nerror:\n${error}`));
+        const err = `${error}`.trim();
+        log(`[cmd]: ${name} close with error: ${err}`);
+        rej(new Error(`Command: ${name} ${args.join(' ')} \nerror:\n${err}`));
       } else {
         res(response);
       }

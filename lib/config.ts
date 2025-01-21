@@ -1,5 +1,5 @@
 import { ChangelogIO } from './changelog.js';
-import { command, mockCommandResponse } from './command.js';
+import { command } from './command.js';
 import { askForWantedVars } from './config-loader.js';
 import { BumperError } from './errors.js';
 import {
@@ -15,8 +15,6 @@ import {
 } from './factories.js';
 import { GitDatabase } from './git.js';
 import { DeepPartial, IConfig, IDiffGroup, IProcess, ITag } from './interfaces.js';
-import { isDebug } from './io.js';
-import { verbose } from './logger.js';
 import { breaker } from './util.js';
 
 export const DEFAULTS: IConfig = {
@@ -64,7 +62,7 @@ export const DEFAULTS: IConfig = {
   diff: {
     groups: [],
     item: {
-      value: `- ({pr}{|"autoLink"}) {"scope": }{title} - {author}`,
+      value: `- ({prLink}{|"autoLink"}) {"scope": }{title} - {author}`,
     },
     scopeNames: {},
     ignored: [],
@@ -193,9 +191,6 @@ export class Config {
   async init(args: string[]): Promise<void> {
     await this.initRepo();
     await this.initVars(args);
-
-    const { tag, ...v } = this;
-    verbose(JSON.stringify(v, undefined, 2));
   }
 
   async bumpChangelog(): Promise<void> {
@@ -212,7 +207,6 @@ export class Config {
 
   async initRepo(): Promise<void> {
     if (!this.repo.link) {
-      isDebug() && mockCommandResponse('https://github.com/evan361425/version-bumper.git');
       const repo = await command('git', ['remote', 'get-url', 'origin']);
 
       const [_, rawRepoName] = breaker(repo, 1, 'github.com/');

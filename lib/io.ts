@@ -1,28 +1,27 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import readline from 'node:readline';
 
-let mode: 'debug' | 'normal' | 'verbose' = 'normal';
+let debug = false;
+let verbose = false;
 let rl: readline.Interface | undefined;
 let mockFileContents: string[] = [];
 
 export function startDebug(): void {
-  mode = 'debug';
+  debug = true;
+}
+export function stopDebug(): void {
+  debug = false;
+}
+export function isDebug(): boolean {
+  return debug;
 }
 
 export function startVerbose(): void {
-  mode = 'verbose';
+  console.log('===== start verbose mode =====');
+  verbose = true;
 }
-
-export function stopDebug(): void {
-  mode = 'normal';
-}
-
-export function isDebug(): boolean {
-  return mode === 'debug';
-}
-
 export function isVerbose(): boolean {
-  return mode === 'verbose' || mode === 'debug';
+  return verbose;
 }
 
 export function mockFileContent(text: string): void {

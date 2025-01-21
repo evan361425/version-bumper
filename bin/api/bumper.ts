@@ -1,12 +1,22 @@
 import { loadConfigFromArgs, loadConfigFromFile } from '../../lib/config-loader.js';
 import { Config } from '../../lib/config.js';
 import { BumperError } from '../../lib/errors.js';
+import { isDebug, startDebug, stopDebug } from '../../lib/io.js';
 import { log, verbose } from '../../lib/logger.js';
 
 export async function bumperCommand(args: string[]): Promise<void> {
   const cfg = new Config(loadConfigFromFile(args), loadConfigFromArgs(args));
+  // Stop debugging for getting basic information
+  const debug = isDebug();
+
+  debug && stopDebug();
   await cfg.init(args);
-  verbose('[bump] finish parsing config');
+  if (debug) {
+    console.log('===== start debug mode =====');
+
+    const { tag, ...config } = cfg;
+    verbose(JSON.stringify(config, undefined, 2));
+  }
 
   if (cfg.process.checkTag) {
     if (await cfg.git.hasTag(cfg.version)) {
@@ -18,6 +28,7 @@ export async function bumperCommand(args: string[]): Promise<void> {
   await cfg.diff.prepareContent(cfg.tag);
   await cfg.changelog.section.formatContent(cfg.changelogTemplate);
 
+  debug && startDebug();
   if (cfg.changelog.enable && cfg.tag.withChangelog) {
     await cfg.bumpChangelog();
   }

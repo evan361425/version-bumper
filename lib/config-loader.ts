@@ -110,8 +110,8 @@ export const argsAliases: Record<string, string> = {
  * @returns
  */
 export function getValueFromArgs(key: string, args: string[]): string | undefined {
+  const alias = argsAliases[key];
   const index = args.findIndex((v) => {
-    const alias = argsAliases[key];
     if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
     return v === '--' + key || v.startsWith('--' + key + '=');
   });
@@ -124,8 +124,8 @@ export function getValueFromArgs(key: string, args: string[]): string | undefine
 }
 
 export function getBoolFromArgs(key: string, args: string[]): boolean | undefined {
+  const alias = argsAliases[key];
   const index = args.findIndex((v) => {
-    const alias = argsAliases[key];
     if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
     return v === '--' + key || v === '--no-' + key;
   });
@@ -134,7 +134,7 @@ export function getBoolFromArgs(key: string, args: string[]): boolean | undefine
   const arg = args[index]!;
   if (arg.includes('=')) return breaker(arg, 1, '=')[1] !== 'false';
 
-  return arg === '--' + key;
+  return arg === '--' + key || arg === '-' + alias;
 }
 
 export function getArrayFromArgs(key: string, args: string[]): string[] {

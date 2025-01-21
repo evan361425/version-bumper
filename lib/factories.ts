@@ -217,7 +217,7 @@ export class Diff implements IDiff {
     return this._content;
   }
 
-  async prepareContent(tag: Tag): Promise<void> {
+  async prepareContent(tag: Tag, repo: Repo): Promise<void> {
     if (this._content) return;
 
     const result = await this.fetchCommits(tag);
@@ -231,7 +231,7 @@ export class Diff implements IDiff {
       return;
     }
 
-    this._content = await this.formatCommit(result.commits);
+    this._content = await this.formatCommit(result.commits, repo);
   }
 
   /**
@@ -267,7 +267,7 @@ export class Diff implements IDiff {
   /**
    * Format each commit.
    */
-  async formatCommit(commits: GitCommit[]): Promise<string> {
+  async formatCommit(commits: GitCommit[], repo: Repo): Promise<string> {
     const groups: Record<string, string[]> = {};
     const others = new DiffGroup([], this.othersTitle);
     const ignored = this.ignored.map((i) => new RegExp(i));
@@ -285,14 +285,17 @@ export class Diff implements IDiff {
         continue;
       }
 
+      const hashLink = `[${commit.hash}](${repo.commitLink(commit.hashFull)})`;
       const content = await this.item.formatContent({
         title: commit.parseTitle(this.autoLinks),
         titleTail: commit.titleTail,
         titleFull: commit.titleFull,
         author: commit.author,
         hash: commit.hash,
+        hashLink,
         hashFull: commit.hashFull,
         pr: commit.pr,
+        prLink: commit.pr === commit.hash ? hashLink : `[${commit.pr}](${repo.prLink(Number(commit.pr))})`,
         scope: commit.scope,
         autoLink: commit.parseAutoLink(this.autoLinks),
       });
@@ -303,7 +306,7 @@ export class Diff implements IDiff {
 
     return Object.entries(groups)
       .map(([title, listItems]) => {
-        const items = listItems.map((e) => `- ${e}`).join('\n');
+        const items = listItems.join('\n');
         return `### ${title}\n\n${items}`;
       })
       .join('\n\n');
@@ -716,8 +719,10 @@ export type CommitTemplate = {
   titleFull: string;
   author: string;
   hash: string;
+  hashLink: string;
   hashFull: string;
   pr: string;
+  prLink: string;
   autoLink: string;
   scope: string;
 };

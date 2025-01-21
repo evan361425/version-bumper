@@ -219,8 +219,10 @@ export interface IDiff {
    * - `{titleFull}`: full commit title, which is the first line of the commit message
    * - `{author}`: commit author
    * - `{hash}`: commit hash, but only first 7 characters
+   * - `{hashLink}`: commit hash with link, like `[hash](link)`
    * - `{hashFull}`: commit hash
    * - `{pr}`: PR number, if not found, it will use `hash`
+   * - `{prLink}`: PR number with link, like `[PR](link)`
    * - `{autoLink}`: value of first match auto links, usually will be ticket number
    * - `{scope}`: commit scope, see `scopeNames`
    */
