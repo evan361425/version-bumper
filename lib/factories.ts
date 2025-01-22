@@ -4,6 +4,7 @@ import { command } from './command.js';
 import { GitCommit, GitDatabase } from './git.js';
 import {
   IAutoLink,
+  IAutoLinkMatch,
   IChangelog,
   IChangelogCommit,
   IDiff,
@@ -107,15 +108,23 @@ export class AutoLink implements IAutoLink {
    *
    * This contains all the matches and will be used to find the ticket number.
    */
-  readonly targets: RegExp;
+  readonly #targets: RegExp;
 
   constructor(
     readonly matches: string[],
     readonly link: string,
   ) {
-    const v = matches.join('|');
+    const v = matches
+      .map((e) =>
+        e
+          .replaceAll('@', '')
+          .replaceAll('{num}', '@')
+          .replaceAll(/[^\w@-]/g, '')
+          .replaceAll('@', '(\\d+)'),
+      )
+      .join('|');
     // patterns must start with whitespace/newline or in first char of line
-    this.targets = new RegExp(`(^|[\\n\\r\\s]{1})(${v})(\\d*)?`, 'mi');
+    this.#targets = new RegExp(`(^|[\\s|([]{1})(${v})`, 'mi');
   }
 
   static fromCfg(cfg: IAutoLink): AutoLink {
@@ -129,14 +138,14 @@ export class AutoLink implements IAutoLink {
     let result = '';
 
     do {
-      const index = content.search(this.targets);
+      const index = content.search(this.#targets);
       if (index === -1) {
         return result + content;
       }
 
-      const [hit, prefix, target, num] = this.targets.exec(content.substring(index))!;
-      verbose(`[auto-links] hit(${hit}), target(${target}), num(${num})`);
-      const rest = index + hit.length;
+      const match = this.extract(content.substring(index))!;
+      verbose(`[auto-links] hit: ${match.hit}, target: ${match.target}`);
+      const rest = index + match.hit.length;
       const isInLink = AutoLink.inLink.test(content.substring(rest));
 
       result += content.substring(0, isInLink ? rest : index);
@@ -144,9 +153,7 @@ export class AutoLink implements IAutoLink {
       // only add link if not in link
       if (!isInLink) {
         verbose(`[auto-links] start add link`);
-        const link = this.link.replace(/{num}/g, num ?? '');
-        const targetWithNum = num ? target!.concat(num) : target!;
-        result += `${prefix}[${targetWithNum}](${link})`;
+        result += `${match.prefix}[${match.target}](${match.link})`;
       }
 
       content = content.substring(rest);
@@ -155,12 +162,13 @@ export class AutoLink implements IAutoLink {
     return result;
   }
 
-  extract(content: string): string | undefined {
-    const result = this.targets.exec(content);
+  extract(content: string): IAutoLinkMatch | undefined {
+    const result = this.#targets.exec(content);
     if (!result) return;
 
-    const [_, __, target, num] = result;
-    return num ? target!.concat(num) : target!;
+    const [hit, prefix, target, ...numList] = result;
+    const link = this.link.replace(/{num}/g, numList.find((e) => e) ?? '');
+    return { hit, prefix: prefix!, target: target!, link };
   }
 }
 
@@ -184,7 +192,8 @@ export class PR implements IPR {
 }
 
 export class Diff implements IDiff {
-  protected _content: string | undefined;
+  #content: string | undefined;
+  #autoLinks: AutoLink[];
 
   constructor(
     readonly groups: DiffGroup[],
@@ -193,8 +202,10 @@ export class Diff implements IDiff {
     readonly ignored: string[],
     readonly ignoreOthers: boolean,
     readonly othersTitle: string,
-    readonly autoLinks: AutoLink[],
-  ) {}
+    autoLinks: AutoLink[],
+  ) {
+    this.#autoLinks = autoLinks;
+  }
 
   static fromCfg(cfg: IDiff, autoLinks: AutoLink[]): Diff {
     return new Diff(
@@ -209,29 +220,29 @@ export class Diff implements IDiff {
   }
 
   get content(): string {
-    if (!this._content) {
+    if (!this.#content) {
       // not bumper error, this should be a developer error
       throw new Error('Content is not prepared yet');
     }
 
-    return this._content;
+    return this.#content;
   }
 
   async prepareContent(tag: Tag, repo: Repo): Promise<void> {
-    if (this._content) return;
+    if (this.#content) return;
 
     const result = await this.fetchCommits(tag);
     if (result.firstTag) {
-      this._content = 'Initial version.';
+      this.#content = 'Initial version.';
       return;
     }
 
     if (result.commits.length === 0) {
-      this._content = 'No commits found.';
+      this.#content = 'No commits found.';
       return;
     }
 
-    this._content = await this.formatCommit(result.commits, repo);
+    this.#content = await this.formatCommit(result.commits, repo);
   }
 
   /**
@@ -286,8 +297,9 @@ export class Diff implements IDiff {
       }
 
       const hashLink = `[${commit.hash}](${repo.commitLink(commit.hashFull)})`;
+      const autoLink = commit.parseAutoLink(this.#autoLinks);
       const content = await this.item.formatContent({
-        title: commit.parseTitle(this.autoLinks),
+        title: commit.parseTitle(this.#autoLinks),
         titleTail: commit.titleTail,
         titleFull: commit.titleFull,
         author: commit.author,
@@ -297,7 +309,7 @@ export class Diff implements IDiff {
         pr: commit.pr,
         prLink: commit.pr === commit.hash ? hashLink : `[${commit.pr}](${repo.prLink(Number(commit.pr))})`,
         scope: commit.scope,
-        autoLink: commit.parseAutoLink(this.autoLinks),
+        autoLink: autoLink ? `[${autoLink.target}](${autoLink.link})` : '',
       });
 
       groups[group.title] ??= [];
@@ -314,14 +326,14 @@ export class Diff implements IDiff {
 }
 
 export class DiffGroup implements IDiffGroup {
-  protected readonly matchesRegExp: RegExp[];
+  readonly #matchesRegExp: RegExp[];
 
   constructor(
     readonly matches: string[],
     readonly title: string,
     readonly priority = 0,
   ) {
-    this.matchesRegExp = matches.map((m) => new RegExp(m));
+    this.#matchesRegExp = matches.map((m) => new RegExp(m));
   }
 
   static fromCfg(cfg: IDiffGroup): DiffGroup {
@@ -329,12 +341,12 @@ export class DiffGroup implements IDiffGroup {
   }
 
   verify(title: string): boolean {
-    return this.matchesRegExp.some((m) => m.test(title));
+    return this.#matchesRegExp.some((m) => m.test(title));
   }
 }
 
 export class Tag implements ITag {
-  protected _lastTag?: string;
+  #lastTag?: string;
 
   constructor(
     readonly name: string = '',
@@ -361,12 +373,12 @@ export class Tag implements ITag {
   }
 
   get mustLastTag(): string {
-    if (this._lastTag === undefined) {
+    if (this.#lastTag === undefined) {
       // not bumper error, this should be a developer error
       throw new Error('Last tag is not ready');
     }
 
-    return this._lastTag;
+    return this.#lastTag;
   }
 
   /**
@@ -380,10 +392,10 @@ export class Tag implements ITag {
    * Find the last same pattern tag.
    */
   async findLastTag(): Promise<string> {
-    if (this._lastTag !== undefined) return this._lastTag;
+    if (this.#lastTag !== undefined) return this.#lastTag;
 
     const tag = await command('git', ['tag', '--list', '--sort=-v:refname'], (e) => this.verify(e.trim()));
-    return (this._lastTag = tag?.trim() ?? '');
+    return (this.#lastTag = tag?.trim() ?? '');
   }
 
   /**
@@ -466,7 +478,7 @@ export class Release implements IRelease {
 }
 
 export class TagPR implements ITagPR {
-  protected readonly git: GitDatabase;
+  #git: GitDatabase;
 
   constructor(
     public repo: string,
@@ -481,7 +493,7 @@ export class TagPR implements ITagPR {
       commitMessage || replacements.every((e) => e.commitMessage),
       "At least one of commitMessage or all replacements' commitMessage should be set",
     );
-    this.git = new GitDatabase(repo, head);
+    this.#git = new GitDatabase(repo, head);
   }
 
   static fromCfg(cfg: ITagPR, tagName: string): TagPR {
@@ -499,7 +511,7 @@ export class TagPR implements ITagPR {
 
   updateRepo(repo: string): void {
     this.repo = repo;
-    this.git.repo = repo;
+    this.#git.repo = repo;
   }
 
   async createCommits(v: VersionedTemplate): Promise<void> {
@@ -510,14 +522,14 @@ export class TagPR implements ITagPR {
     ].filter((e) => Boolean(e));
     await Promise.all(promises);
 
-    const baseTree = await this.git.createBranch(this.base);
+    const baseTree = await this.#git.createBranch(this.base);
 
     // first create separate commit for replacement if needed
     for await (const replace of this.replacements.filter((e) => e.commitMessage)) {
-      const tree = await replace.createTree(this.git, baseTree);
+      const tree = await replace.createTree(this.#git, baseTree);
       const msg = await replace.commitMessage!.formatContent(v);
 
-      await this.git.createCommit(baseTree, tree, msg);
+      await this.#git.createCommit(baseTree, tree, msg);
     }
 
     // then create commit all replacements
@@ -525,17 +537,17 @@ export class TagPR implements ITagPR {
       const replacements = this.replacements.filter((e) => !e.commitMessage);
       const files = [];
       for await (const replace of replacements) {
-        files.push(...(await replace.replaceFiles(this.git)));
+        files.push(...(await replace.replaceFiles(this.#git)));
       }
 
       const msg = await this.commitMessage.formatContent(v);
-      const tree = await this.git.updateFiles(
+      const tree = await this.#git.updateFiles(
         baseTree,
         replacements.flatMap((e) => e.paths),
         files,
       );
 
-      await this.git.createCommit(baseTree, tree, msg);
+      await this.#git.createCommit(baseTree, tree, msg);
     }
   }
 
@@ -593,7 +605,7 @@ export class PRReplace implements IPRReplace {
 }
 
 export class TagSort implements ITagSort {
-  protected _sortFields: SortField[] | undefined;
+  #sortFields: SortField[] | undefined;
 
   constructor(
     readonly separator: string = '.',
@@ -605,11 +617,11 @@ export class TagSort implements ITagSort {
   }
 
   get sortFields(): SortField[] {
-    if (!this._sortFields) {
-      this._sortFields = this.fields.map((f) => SortField.fromString(f));
+    if (!this.#sortFields) {
+      this.#sortFields = this.fields.map((f) => SortField.fromString(f));
     }
 
-    return this._sortFields;
+    return this.#sortFields;
   }
 
   firstIsGreaterThanSecond(first: string, second?: string): boolean {
@@ -661,7 +673,7 @@ export class Template<T extends Record<string, string>> implements ITemplate {
     let content = await this.fetchContent();
 
     Object.entries(data).forEach(([key, value]) => {
-      content = content.replace(new RegExp(`\{[^"}]*"?(${key})"?[^"}]*\}`, 'g'), (key) => {
+      content = content.replace(new RegExp(`\{([^"}]*"(${key})"[^"}]*|${key})\}`, 'g'), (key) => {
         if (!value) {
           return '';
         }

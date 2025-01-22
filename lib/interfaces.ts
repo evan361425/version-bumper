@@ -145,7 +145,7 @@ export interface IAutoLink {
    *
    * This is not a regular expression, but a list of prefixes.
    *
-   * Special variables:
+   * Only allow characters `[a-zA-Z0-9-_]` and have special variables:
    * - `{num}`: ticket number
    *
    * @example `MYPROJ-{num}`
@@ -162,9 +162,9 @@ export interface IAutoLink {
   link: string;
 
   /**
-   * Extract ticket from the content.
+   * Extract auto link from the content.
    */
-  extract(content: string): string | undefined;
+  extract(content: string): IAutoLinkMatch | undefined;
 }
 /**
  * Pull Request settings.
@@ -540,6 +540,26 @@ export interface ITemplateGitHub {
    */
   path: string;
 }
+export type IAutoLinkMatch = {
+  /**
+   * Hit pattern
+   */
+  hit: string;
+  /**
+   * Matched prefix
+   */
+  prefix: string;
+  /**
+   * Auto link key
+   *
+   * @example ABC-123
+   */
+  target: string;
+  /**
+   * Formatted (replaced <num>) link
+   */
+  link: string;
+};
 
 export type DeepPartial<T> = T extends object
   ? {

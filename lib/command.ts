@@ -32,7 +32,6 @@ export function command(name: string, args: string[], oneByOne?: (line: string) 
       const lines = data.toString();
       if (oneByOne !== undefined) {
         for (const line of lines.split('\n').filter(Boolean)) {
-          verbose(`[cmd]: ${name} one by one: ${line}`);
           if (oneByOne(line)) {
             command.kill();
             res(line);

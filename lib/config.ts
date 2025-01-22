@@ -62,7 +62,7 @@ export const DEFAULTS: IConfig = {
   diff: {
     groups: [],
     item: {
-      value: `- ({prLink}{|"autoLink"}) {"scope": }{title} - {author}`,
+      value: `- ({prLink}{|"autoLink"}) {"scope": }{title}{ - @"author"}`,
     },
     scopeNames: {},
     ignored: [],
@@ -104,7 +104,7 @@ const RELEASE_CANDIDATE_TAG: ITag = {
 };
 
 export class Config {
-  tag!: Tag;
+  #tag!: Tag;
   version!: string;
   ticket!: string;
 
@@ -152,19 +152,27 @@ export class Config {
     this.git = new GitDatabase(this.repo.name);
   }
 
+  get tag(): Tag {
+    return this.#tag;
+  }
+
+  set tag(tag: Tag) {
+    this.#tag = tag;
+  }
+
   /**
    * Get the last tag diff link.
    *
    * It must call after `askForWantedVars` for last tag fetching.
    */
   get diffLink(): string {
-    return this.repo.compareLink({ from: this.tag.mustLastTag, to: this.version });
+    return this.repo.compareLink({ from: this.#tag.mustLastTag, to: this.version });
   }
 
   get versionTemplate(): VersionedTemplate {
     return {
       version: this.version,
-      versionName: this.tag.name,
+      versionName: this.#tag.name,
       ticket: this.ticket,
     };
   }
@@ -234,7 +242,7 @@ export class Config {
     const input = await askForWantedVars(args, this);
     this.version = input.version;
     this.ticket = input.ticket;
-    this.tag = input.tag;
+    this.#tag = input.tag;
   }
 }
 

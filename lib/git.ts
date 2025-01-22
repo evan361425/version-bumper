@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { command } from './command.js';
-import { IAutoLink } from './interfaces.js';
+import { IAutoLink, IAutoLinkMatch } from './interfaces.js';
 import { verbose } from './logger.js';
 import { removeMarkdownLinks } from './util.js';
 
@@ -35,25 +35,23 @@ export class GitCommit {
     return (this._scope ??= this.titleFull.match(/^\w+\((\w+)\)/)?.[1] ?? '');
   }
 
-  parseAutoLink(autoLinks: IAutoLink[]): string {
+  parseAutoLink(autoLinks: IAutoLink[]): IAutoLinkMatch | undefined {
     for (const link of autoLinks) {
       const match = link.extract(this.titleFull);
       if (match) return match;
     }
 
-    return '';
+    return;
   }
 
   parseTitle(autoLinks: IAutoLink[]): string {
     if (this._title) return this._title;
 
-    let title = this.titleTail.replace(/\(?#\d+\)/, '');
+    let title = this.titleTail.replace(/#\d+/, '');
 
-    for (const link of autoLinks) {
-      const match = link.extract(title);
-      if (match) {
-        title = title.replace(match, '').trim();
-      }
+    const match = this.parseAutoLink(autoLinks);
+    if (match) {
+      title = title.replace(match.target, '').trim();
     }
 
     // avoid double space
@@ -205,10 +203,10 @@ export class GitDatabase {
         return true;
       }
 
-      const remote = await command('gh', ['api', `repos/${this.repo}/git/ref/tags/${tag}`]);
-      if (remote.includes(`"refs/tags/${tag}"`)) {
-        return true;
-      }
+      // const remote = await command('gh', ['api', `repos/${this.repo}/git/ref/tags/${tag}`]);
+      // if (remote.includes(`"refs/tags/${tag}"`)) {
+      //   return true;
+      // }
     } catch (error) {
       verbose(`[git] Tag ${tag} not found: ${error}`);
     }

@@ -25,7 +25,7 @@ export async function bumperCommand(args: string[]): Promise<void> {
   }
   log(`[bump] version validation passed: ${cfg.version}`);
 
-  await cfg.diff.prepareContent(cfg.tag);
+  await cfg.diff.prepareContent(cfg.tag, cfg.repo);
   await cfg.changelog.section.formatContent(cfg.changelogTemplate);
 
   debug && startDebug();
