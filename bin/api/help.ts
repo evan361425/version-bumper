@@ -55,6 +55,7 @@ export function helpCommand(firstArg: string): void {
       '- {<key>} for the <key> name, like {versionName} for the name of version',
       '- {<prefix>"<key>"<suffix>} for the <key> name with prefix and suffix, like "Hi, {Version "version" is created}"',
       '  If <version> is "1.0.0", it will be "Hi, Version 1.0.0 is created" and if <version> is empty, it will be "Hi, "',
+      '- Special characters "<NL>" will be replaced with new line',
     ].join('\n'),
   );
 }

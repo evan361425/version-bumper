@@ -681,12 +681,13 @@ export class Template<T extends Record<string, string>> implements ITemplate {
         // remove the curly braces
         let [prefix, name, suffix] = key.slice(1, -1).split('"');
         // not using quote mode
-        if (!name || !prefix) {
+        if (!name) {
           return value;
         }
 
-        prefix = prefix.replace(/<NL>/g, '\n');
-        suffix = suffix?.replace(/<NL>/g, '\n') ?? '';
+        prefix = prefix?.replaceAll('<NL>', '\n') ?? '';
+        suffix = suffix?.replaceAll('<NL>', '\n') ?? '';
+        console.log(key, name, `${prefix}${value}${suffix}`);
         return `${prefix}${value}${suffix}`;
       });
     });
