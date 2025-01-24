@@ -232,6 +232,10 @@ export class Diff implements IDiff {
     return this.#content;
   }
 
+  set content(v: string) {
+    this.#content = v;
+  }
+
   async prepareContent(tag: Tag, repo: Repo): Promise<void> {
     if (this.#content) return;
 
@@ -742,8 +746,8 @@ export class HookCommand {
 }
 
 export class Template<T extends Record<string, string>> implements ITemplate {
-  protected _content: string | undefined;
-  protected _formatted: string | undefined;
+  #content: string | undefined;
+  #formatted: string | undefined;
 
   constructor(
     readonly value?: string,
@@ -764,12 +768,16 @@ export class Template<T extends Record<string, string>> implements ITemplate {
    * Get last formatted content.
    */
   get formatted(): string {
-    if (!this._formatted) {
+    if (!this.#formatted) {
       // not bumper error, this should be a developer error
       throw new Error('Formatted content is not prepared yet');
     }
 
-    return this._formatted;
+    return this.#formatted;
+  }
+
+  set formatted(v: string) {
+    this.#formatted = v;
   }
 
   async formatContent(data: T): Promise<string> {
@@ -794,24 +802,24 @@ export class Template<T extends Record<string, string>> implements ITemplate {
       });
     });
 
-    return (this._formatted = content);
+    return (this.#formatted = content);
   }
 
   async fetchContent(): Promise<string> {
-    if (this._content) return this._content;
+    if (this.#content) return this.#content;
 
     if (this.value) {
-      return (this._content = this.value);
+      return (this.#content = this.value);
     }
 
     if (this.file) {
-      return (this._content = readFileSync(this.file, 'utf-8'));
+      return (this.#content = readFileSync(this.file, 'utf-8'));
     }
 
     const gh = new GitDatabase(this.github!.repo, this.github!.branch ?? 'main');
     verbose(`[template] Fetching content from ${this.github!.repo}:${this.github!.path}`);
     const result = await gh.fetchFiles([this.github!.path]);
-    return (this._content = result[0]!);
+    return (this.#content = result[0]!);
   }
 }
 

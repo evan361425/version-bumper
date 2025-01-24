@@ -1,3 +1,4 @@
+import { ChangelogIO } from './changelog.js';
 import { Config } from './config.js';
 import { BumperError } from './errors.js';
 import { askQuestion } from './io.js';
@@ -13,8 +14,20 @@ export async function checkTag(cfg: Config): Promise<void> {
 }
 
 export async function prepare(cfg: Config): Promise<void> {
-  await cfg.diff.prepareContent(cfg.tag, cfg.repo);
-  await cfg.changelog.section.formatContent(cfg.changelogTemplate);
+  // push/release only
+  if (!cfg.process.bump && !cfg.process.push && (cfg.process.pr || cfg.process.release)) {
+    const clog = new ChangelogIO(cfg.changelog.destination, cfg.changelog.destination);
+    const section = clog.content.sections.find((s) => s.header.includes(cfg.version));
+    if (!section) {
+      throw new BumperError(`When using only mode changelog section must be provided, not found: ${cfg.version}`);
+    }
+
+    cfg.diff.content = section.body;
+    return;
+  } else {
+    await cfg.diff.prepareContent(cfg.tag, cfg.repo);
+    await cfg.changelog.section.formatContent(cfg.changelogTemplate);
+  }
 
   if (cfg.process.askToVerifyContent) {
     log('====== Content is in below:');
@@ -28,11 +41,11 @@ export async function prepare(cfg: Config): Promise<void> {
 
 export async function bump(cfg: Config): Promise<void> {
   const hasClog = cfg.changelog.enable && cfg.tag.withChangelog;
-  if (hasClog) {
-    await cfg.bumpChangelog();
-  }
-
   if (cfg.process.bump) {
+    if (hasClog) {
+      await cfg.bumpChangelog();
+    }
+
     await cfg.git.tag(cfg.version, cfg.changelog.section.formatted);
   }
 

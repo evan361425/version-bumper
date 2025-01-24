@@ -191,12 +191,14 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
   // only mode
   const processInfo: Partial<IProcess> = {};
   if (getB('only-pr') || getB('only-release')) {
-    processInfo.pr = getB('only-pr');
-    processInfo.release = getB('only-release');
+    processInfo.pr = getB('only-pr') ?? false;
+    processInfo.release = getB('only-release') ?? false;
 
     processInfo.bump = false;
     processInfo.checkTag = false;
+    processInfo.checkRemoteTag = false;
     processInfo.push = false;
+    processInfo.askToVerifyContent = false;
   }
 
   return {
@@ -204,13 +206,13 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
       link: getV(configArgsMap.repo!.link!),
     },
     process: {
-      bump: getB(configArgsMap.process!.bump!),
-      push: getB(configArgsMap.process!.push!),
-      pr: getB(configArgsMap.process!.pr!),
-      release: getB(configArgsMap.process!.release!),
-      checkTag: getB(configArgsMap.process!.checkTag!),
-      checkRemoteTag: getB(configArgsMap.process!.checkRemoteTag!),
-      askToVerifyContent: getB(configArgsMap.process!.askToVerifyContent!),
+      bump: processInfo.bump ?? getB(configArgsMap.process!.bump!),
+      push: processInfo.push ?? getB(configArgsMap.process!.push!),
+      pr: processInfo.pr ?? getB(configArgsMap.process!.pr!),
+      release: processInfo.release ?? getB(configArgsMap.process!.release!),
+      checkTag: processInfo.checkTag ?? getB(configArgsMap.process!.checkTag!),
+      checkRemoteTag: processInfo.checkRemoteTag ?? getB(configArgsMap.process!.checkRemoteTag!),
+      askToVerifyContent: processInfo.askToVerifyContent ?? getB(configArgsMap.process!.askToVerifyContent!),
       useSemanticGroups: getB(configArgsMap.process!.useSemanticGroups!),
       useSemanticTag: getB(configArgsMap.process!.useSemanticTag!),
       useReleaseCandidateTag: getB(configArgsMap.process!.useReleaseCandidateTag!),
