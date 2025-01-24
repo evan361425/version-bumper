@@ -15,12 +15,6 @@ Please check git diff.
 
 - ([72287f4](https://github.com/evan361425/version-bumper/commit/72287f43a2cc76c9117737b7f46e50dbbd0b24e7)) helper - @wu0dj2k7ao3
 
-## [v2.0.1] - 2025-01-24
-
-### Fixed
-
-- ([72287f4](https://github.com/evan361425/version-bumper/commit/72287f43a2cc76c9117737b7f46e50dbbd0b24e7)) helper - @wu0dj2k7ao3
-
 ## [v2.0.0] - 2025-01-24
 
 - New interfaces to make command line more easy.
@@ -224,7 +218,6 @@ Please check git diff.
 Initialize Release
 
 [unreleased]: https://github.com/evan361425/version-bumper/compare/v2.0.1...HEAD
-[v2.0.1]: https://github.com/evan361425/version-bumper/compare/v2.0.0...v2.0.1
 [v2.0.1]: https://github.com/evan361425/version-bumper/compare/v2.0.0...v2.0.1
 [v1.1.4]: https://github.com/evan361425/version-bumper/compare/v1.1.3...v1.1.4
 [v1.1.3]: https://github.com/evan361425/version-bumper/compare/v1.1.2...v1.1.3

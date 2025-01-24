@@ -188,7 +188,7 @@
             "message": {
               "value": "chore: bump to {version}"
             },
-            "addAll": false
+            "addAll": true
           }
         }
       },
@@ -253,7 +253,7 @@
         "addAll": {
           "type": "boolean",
           "title": "Execute `git add .` not only the changelog.",
-          "default": false
+          "default": true
         }
       },
       "additionalProperties": false,
@@ -502,7 +502,7 @@
         "commitMessage": {
           "$ref": "#/definitions/ITemplate",
           "description": "Commit message template.\n\nIf not set, it will use the message in `tag.prBranches[].replacements[].commitMessage`. One of them must be set.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number",
-          "default": "Bump to {version}"
+          "default": "chore: bump to {version}"
         }
       },
       "required": [

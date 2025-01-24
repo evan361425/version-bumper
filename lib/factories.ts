@@ -726,7 +726,7 @@ export class HookCommand {
 
       try {
         const result = await command(cmd, args);
-        log(`[hook] #${idx} ${cmd} result: ${result}`);
+        log(`[hook] #${idx} ${cmd} result: ${result.trim()}`);
       } catch (error) {
         throw new BumperError(`Hook#${idx} ${error}`);
       }

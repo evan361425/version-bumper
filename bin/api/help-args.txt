@@ -154,7 +154,7 @@
     - `{ticket}`: ticket number
   --[no-]clog-commit-add-all
     type: boolean
-    default: false
+    default: true
     Execute `git add .` not only the changelog.
   --autolink[]link
     type: string

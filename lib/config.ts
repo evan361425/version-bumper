@@ -47,7 +47,7 @@ export const DEFAULTS: IConfig = {
       message: {
         value: 'chore: bump to {version}',
       },
-      addAll: false,
+      addAll: true,
     },
   },
   autoLinks: [],

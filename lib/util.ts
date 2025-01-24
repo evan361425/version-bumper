@@ -105,7 +105,6 @@ export class SortField {
     if (this.numericSort) {
       const match1 = /[0-9]+/.exec(v1);
       const match2 = /[0-9]+/.exec(v2);
-      console.log(match1, match2);
       if (!match1) return false;
       if (!match2) return true;
 

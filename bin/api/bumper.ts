@@ -11,12 +11,8 @@ export async function bumperCommand(args: string[]): Promise<void> {
 
   debug && stopDebug();
   await cfg.init(args);
-  if (debug) {
-    console.log('===== start debug mode =====');
-
-    const { tag, ...config } = cfg;
-    verbose(JSON.stringify(config, undefined, 2));
-  }
+  const { tag, ...config } = cfg;
+  verbose(JSON.stringify(config, undefined, 2));
 
   await checkTag(cfg); // 1. 檢查要求的版本是否已經存在
   await prepare(cfg); // 2. 準備好待會要用的各種東西
