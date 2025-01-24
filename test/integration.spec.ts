@@ -108,7 +108,7 @@ void describe('Bump', function () {
 
     const today = new Date().toISOString().split('T')[0];
     await bump(cfg);
-    assert.strictEqual(getFirstMockedCommand(), 'git add CHANGELOG.md');
+    assert.strictEqual(getFirstMockedCommand(), 'git add .');
     assert.strictEqual(getFirstMockedCommand(), 'git commit -m chore: bump to v1.2.3');
     assert.strictEqual(
       getFirstMockedCommand(),
