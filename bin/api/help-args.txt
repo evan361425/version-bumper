@@ -77,6 +77,7 @@
 	                                 - `{version}`: version number
 	                                 - `{versionName}`: version name set in tag config
 	                                 - `{versionLast}`: last version number
+	                                 - `{versionNoPrefix}`: remove any character before first number
 	                                 - `{ticket}`: ticket number
 	                           type: array
 	                        default: <required>
@@ -87,6 +88,7 @@
 	                                 - `{version}`: version number
 	                                 - `{versionName}`: version name set in tag config
 	                                 - `{versionLast}`: last version number
+	                                 - `{versionNoPrefix}`: remove any character before first number
 	                                 - `{ticket}`: ticket number
 	                           type: array
 	                        default: <required>
@@ -105,6 +107,8 @@
 	                                 - `{content}`: new version changelog body from `diff`.
 	                                 - `{version}`: current version number
 	                                 - `{versionName}`: version name set in tag config
+	                                 - `{versionLast}`: last version number
+	                                 - `{versionNoPrefix}`: remove any character before first number
 	                                 - `{diffLink}`: link to the diff of this version
 	                                 - `{ticket}`: ticket number
 	                                 - `{date}`: current date, format is `YYYY-MM-DD`
@@ -117,6 +121,8 @@
 	                                 Allowed variables:
 	                                 - `{version}`: current version number
 	                                 - `{versionName}`: version name set in tag config
+	                                 - `{versionLast}`: last version number
+	                                 - `{versionNoPrefix}`: remove any character before first number
 	                                 - `{ticket}`: ticket number
 	                           type: template
 	                        default: -v=chore: bump to {version}

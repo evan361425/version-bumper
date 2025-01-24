@@ -135,7 +135,7 @@
               "echo \"version: {version}\""
             ]
           ],
-          "title": "Commands to run after version is verified.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nCommand exit code must be 0 to continue the process.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
+          "title": "Commands to run after version is verified.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nCommand exit code must be 0 to continue the process.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number"
         },
         "afterAll": {
           "type": "array",
@@ -147,7 +147,7 @@
               "echo \"version: {version}\""
             ]
           ],
-          "title": "Commands to run after all the process is done.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
+          "title": "Commands to run after all the process is done.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number"
         }
       },
       "additionalProperties": false,
@@ -176,7 +176,7 @@
         },
         "section": {
           "$ref": "#/definitions/ITemplate",
-          "title": "The changelog of specific version.\n\nDefault will prepend `## ` before the first line.\n\nAllowed variables:\n- `{content}`: new version changelog body from `diff`.\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{diffLink}`: link to the diff of this version\n- `{ticket}`: ticket number\n- `{date}`: current date, format is `YYYY-MM-DD`\n- `{time}`: current time, format is `HH:mm:ss`",
+          "title": "The changelog of specific version.\n\nDefault will prepend `## ` before the first line.\n\nAllowed variables:\n- `{content}`: new version changelog body from `diff`.\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{diffLink}`: link to the diff of this version\n- `{ticket}`: ticket number\n- `{date}`: current date, format is `YYYY-MM-DD`\n- `{time}`: current time, format is `HH:mm:ss`",
           "default": {
             "value": "[{version}] - {date}\n\n{content}"
           }
@@ -245,7 +245,7 @@
       "properties": {
         "message": {
           "$ref": "#/definitions/ITemplate",
-          "title": "Commit message template.\n\nAllowed variables:\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number",
+          "title": "Commit message template.\n\nAllowed variables:\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number",
           "default": {
             "value": "chore: bump to {version}"
           }
@@ -286,11 +286,11 @@
       "properties": {
         "title": {
           "$ref": "#/definitions/ITemplate",
-          "description": "PR's title template.\n\nThis will trim the title to 100 characters and append `...` if it's too long. Will replace new line with space and trim the title before use.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number"
+          "description": "PR's title template.\n\nThis will trim the title to 100 characters and append `...` if it's too long. Will replace new line with space and trim the title before use.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number"
         },
         "body": {
           "$ref": "#/definitions/ITemplate",
-          "description": "PR's body template.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config, empty if not set\n- `{ticket}`: ticket number\n- `{content}`: changelog content\n- `{diffLink}`: link to the diff of this version"
+          "description": "PR's body template.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config, empty if not set\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number\n- `{content}`: changelog content\n- `{diffLink}`: link to the diff of this version"
         }
       },
       "additionalProperties": false,
@@ -426,7 +426,7 @@
         },
         "title": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Title of the release.\n\nAllowed variables:\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number",
+          "description": "Title of the release.\n\nAllowed variables:\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number",
           "examples": [
             "Stable-{version}"
           ],
@@ -434,7 +434,7 @@
         },
         "body": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Release body.\n\nAllowed variables:\n- `{content}`: new version changelog body.\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{diffLink}`: link to the diff of this version\n- `{ticket}`: ticket number",
+          "description": "Release body.\n\nAllowed variables:\n- `{content}`: new version changelog body.\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{diffLink}`: link to the diff of this version\n- `{ticket}`: ticket number",
           "default": "{Ticket: \"ticket\"<NL><NL>}{content}"
         },
         "preRelease": {
@@ -501,7 +501,7 @@
         },
         "commitMessage": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Commit message template.\n\nIf not set, it will use the message in `tag.prBranches[].replacements[].commitMessage`. One of them must be set.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number",
+          "description": "Commit message template.\n\nIf not set, it will use the message in `tag.prBranches[].replacements[].commitMessage`. One of them must be set.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number",
           "default": "Bump to {version}"
         }
       },
@@ -516,7 +516,7 @@
       "properties": {
         "commitMessage": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Commit message template.\n\nIf not set, it will use the message in `tag.prBranches[].commitMessage`. One of them must be set.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number"
+          "description": "Commit message template.\n\nIf not set, it will use the message in `tag.prBranches[].commitMessage`. One of them must be set.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number"
         },
         "paths": {
           "type": "array",
@@ -531,7 +531,7 @@
         },
         "replacement": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Replacement string.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
+          "description": "Replacement string.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{versionNoPrefix}`: remove any character before first number\n- `{ticket}`: ticket number"
         }
       },
       "required": [

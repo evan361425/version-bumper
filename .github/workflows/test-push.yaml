@@ -24,4 +24,5 @@ jobs:
 
       - name: Test
         run: |
+          make install
           make test
