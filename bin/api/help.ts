@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 const commands: Record<string, string> = {
   version: 'Show latest version of this package',
@@ -94,6 +95,10 @@ function printCommands() {
 }
 
 function printArgsFromSchema() {
-  const msg = readFileSync('bin/api/help-args.txt', 'utf-8');
+  const file = path.join(import.meta.url, '..', 'help-args.txt');
+  const schemaIndex = file.indexOf(':');
+  const f = schemaIndex === -1 ? file : file.substring(schemaIndex + 1);
+
+  const msg = readFileSync(f, 'utf-8');
   console.log(msg);
 }
