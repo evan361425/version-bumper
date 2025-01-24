@@ -48,7 +48,7 @@ export class Repo implements IRepo {
       return `${this.link}/compare/${compare.from}...HEAD`;
     }
     if (compare.to) {
-      return `${this.link}/commits/${compare.to}`;
+      return `${this.link}/releases/tag/${compare.to}`;
     }
     return this.link;
   }
@@ -361,13 +361,15 @@ export class Tag implements ITag {
     readonly sort: TagSort,
   ) {}
 
-  static fromCfg(cfg: ITag): Tag {
+  static fromCfg(cfg: ITag): Tag | undefined {
+    if (!cfg.pattern) return;
+
     return new Tag(
       cfg.name,
       cfg.pattern,
       cfg.withChangelog,
       Release.fromCfg(cfg.release ?? {}),
-      cfg.prs?.map((e) => TagPR.fromCfg(e, cfg.name ?? '')),
+      cfg.prs?.map((e) => TagPR.fromCfg(e, cfg.name ?? '')).filter(Boolean) as TagPR[],
       TagSort.fromCfg(cfg.sort ?? {}),
     );
   }
@@ -502,7 +504,9 @@ export class TagPR implements ITagPR {
     this.#git = new GitDatabase(repo, head);
   }
 
-  static fromCfg(cfg: ITagPR, tagName: string): TagPR {
+  static fromCfg(cfg: ITagPR, tagName: string): TagPR | undefined {
+    if (!cfg.base) return;
+
     const ts = new Date().getTime();
     return new TagPR(
       cfg.repo ?? '',
@@ -512,7 +516,7 @@ export class TagPR implements ITagPR {
       cfg.labels,
       cfg.reviewers,
       cfg.replacements?.map((e) => PRReplace.fromCfg(e)),
-      Template.fromCfg(Template.exist(cfg.commitMessage) ? cfg.commitMessage! : { value: 'Bump to {version}' }),
+      Template.fromCfg(Template.exist(cfg.commitMessage) ? cfg.commitMessage! : { value: 'chore: bump to {version}' }),
     );
   }
 

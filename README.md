@@ -4,12 +4,12 @@ Yet, another helper for bumping version.
 
 Features:
 
-- Changelog
-- Hooking: before commit, before, after scripts
+- Collect commits and build Changelog
+- Hooking: before, after commit scripts
 - Autolink for tickets (e.g. Jira)
-- GitHub PR
+- GitHub PR, allow update files and create branch
 - GitHub release
-- Highly flexible by configuration
+- Highly flexible by configuration and power template on variables
 - Tiny without any dependencies
 
 ## Usage
@@ -23,30 +23,73 @@ npm i -g @evan361425/version-bumper
 npm i -D @evan361425/version-bumper
 ```
 
-You can see command's details by:
+This package require GitHub command tools `gh`,
+see [installation document](https://github.com/cli/cli?tab=readme-ov-file#installation).
+
+<details>
+<summary>Help message</summary>
 
 ```bash
 $ bumper help
-Usage: (npx) bumper <command> [args]
+Usage: (npx) bumper <command|$tag> [args]
 Commands
-        (default) Update the version of NPM project
-        version   Show the installed and latest version
-        deps      Update dependencies with hooking
-        help      Show this message
-        init      Setup configuration files
+        version Show latest version of this package
+        help    Show this message
+        $tag    Specific version to bump
 
 Args:
-        -h, --help Show command's arguments
-        -v, --version version info
+        --help,-h    Show available arguments
+        --version,-V Show versio
 ```
 
-Usually, you will need to `init` for a new project:
+</details>
+
+Bump [semantic version](https://semver.org/) is extremely easy:
 
 ```bash
-$ bumper init
-File bumper.json for configuration creating!
-File docs/LATEST_VERSION.md for latest version info creating!
-File CHANGELOG.md for changelog creating!
+$ bumper
+Enter new semantic version (last version is v1.1.4) with pattern: v[0-9]+\.[0-9]+\.[0-9]+
+```
+
+Or release candidate format:
+
+```bash
+# or bumper --rc-tag -T release-candidate
+$ bumper --rc-tag --no-semantic-tag
+Enter new release-candidate version (last version is v1.1.4-rc.1) with pattern: v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+
+```
+
+Other patterns tag can easily setup by configuration file or command arguments.
+
+### Config File
+
+Read specific config by setting `--config,-c` (default is `bumper.json`).
+
+> [!Note]
+>
+> The JSON file is follow the [./schema.json](schema.json)'s schema.
+>
+> You can see the schema prettier in [JSON Schema Viewer](https://json-schema.app/view/%23/%23%2Fproperties%2Fdeps?url=https%3A%2F%2Fraw.githubusercontent.com%2Fevan361425%2Fversion-bumper%2Fmaster%2Fschema.json)
+
+Here is an example of setting calendar version:
+
+```json
+{
+  "tags": [
+    {
+      "name": "calendar",
+      "pattern": "\\d\\d\\.(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\\.\\d+",
+      "sort": {
+        "separator": ".",
+        "fields": [
+          "1,1",
+          "2,2M",
+          "3,3"
+        ],
+      }
+    }
+  ]
+}
 ```
 
 ### Args
@@ -54,143 +97,116 @@ File CHANGELOG.md for changelog creating!
 Add `-h/--help` to get information on command:
 
 ```bash
-$ bumper deps -h | less
-Usage: (npx) bumper deps [args]
+$ bumper tag -h | less
+Usage: (npx) bumper <$tag> [args]
+If no version given in first arg, it will ask for it
 Args:
 ...
 ```
 
-## Configuration
-
-You should add `./bumper.json` on the project root folder, else set it by the arguments.
-
-> The JSON file is follow the [./schema.json](schema.json)'s schema.
-> After `bumper init`, you should automatically bind to the schema.
->
-> You can see the schema prettier in [JSON Schema Viewer](https://json-schema.app/view/%23/%23%2Fproperties%2Fdeps?url=https%3A%2F%2Fraw.githubusercontent.com%2Fevan361425%2Fversion-bumper%2Fmaster%2Fschema.json)
-
-You can start by `bumper init` or write it yourself, for example:
-
-```jsonc
-{
-  // Please go to https://json-schema.app/view/%23/%23%2Fproperties%2Fdeps?url=https%3A%2F%2Fraw.githubusercontent.com%2Fevan361425%2Fversion-bumper%2Fmaster%2Fschema.json
-  // for better description!
-  "$schema": "node_modules/@evan361425/version-bumper/schema.json",
-  "repoLink": "https://github.com/example/example", // default using current repo
-  "beforeCommit": [
-    "npm version --no-git-tag-version --no-commit-hooks {tag}"
-  ],
-  "changelog": {
-    "header": "# Changelog\n\nThis is my awesome changelog.",
-    "template": "ticket: {ticket}\n\n{content}",
-    "commitMessage": "chore: bump to {version}\n\nticket: {ticket}\nstage: {stage}"
-  },
-  "tags": {
-    "develop": {
-      "pattern": "beta\\d+"
-    },
-    "staging": {
-      "pattern": "v[0-9]+.[0-9]+.[0-9]+-rc\\d+"
-    },
-    "production": {
-      "pattern": "v[0-9]+.[0-9]+.[0-9]+",
-      "changelog": true, // Edit changelog and commit/push it
-      "release": {
-        "enable": true // GitHub Release
-      }
-    }
-  },
-  "pr": {
-    "repo": "example/other-repo",
-    "template": "This PR is auto-generated from bumper\n\n- ticket: {ticket}\n- stage: {stage}\n- version: {version}\n- [diff]({diff})\n\n{content}",
-    "branches": {
-      "develop": {
-        "base": "deploy/develop",
-        "head": "master"
-      },
-      "staging": {
-        "base": "deploy/staging",
-        "head": "deploy/develop",
-        "labels": ["staging"],
-        "reviewers": ["some-guy"]
-      },
-      "production": {
-        "base": "deploy/production",
-        "head": "deploy/staging",
-        "labels": ["production"],
-        "siblings": {
-          "dr": {
-            "head": "deploy/dr",
-            "labels": ["dr"]
-          }
-        }
-      }
-    }
-  },
-  "deps": {
-    "latestDeps": ["*"],
-    "postCommands": [
-      "npm run test",
-      "git add package.json package-lock.json",
-      ["git", "commit", "-m", "chore: bump {name} to {target}\n\nOrigin: {current}"]
-    ],
-    "ignored": ["some-package", "dev-package"],
-    "appendOnly": true,
-    "useExact": true,
-    "output": "docs/LATEST_UPGRADE.md",
-    "dev": {
-      "postCommands": [
-        "npm run test",
-        "git add package.json package-lock.json",
-        ["git", "commit", "-m", "chore(dev): bump dev-deps"]
-      ]
-    }
-  }
-}
-```
-
 ### Priority
 
-Arguments can be sent in environment/command/file (see details in `bumper <command> -h`).
+Arguments can be sent in command and file.
 
-The highest priority will be the environment variables,
-and the lowest priority will be the settings in configuration file.
+The highest priority will be arguments,
+and the lowest priority will be the default settings in code.
 
 ```txt
-Env > Command > Configuration file
+Command > Configuration file > Default
+```
+
+## Use Cases
+
+### Change files in other repo and create PR
+
+Create PR by creating new branch `temp-{name}` from `master`
+and changing files `file1.txt`, `file2.txt` to base branch `master`.
+
+```bash
+bumper \
+  --pr-only
+  --tag[]name=semantic \
+  --tag[]pr[]repo=evan361425/version-bumper-deploy \
+  --tag[]pr[]head=temp-{name} \
+  --tag[]pr[]head-from=master \
+  --tag[]pr[]base=master \
+  --tag[]pr[]repl[]pattern='version: v\d+\.\d+\.\d+$' \
+  --tag[]pr[]repl[]paths[]='file1.txt' \
+  --tag[]pr[]repl[]paths[]='file2.txt' \
+  --tag[]pr[]repl[]repl-v='version: {version}'
+```
+
+### Create PR only (usually re-create)
+
+```bash
+bumper \
+  --pr-only
+  --tag[]name=semantic \
+  --tag[]pr[]repo=evan361425/version-bumper-deploy \
+  --tag[]pr[]head=master \
+  --tag[]pr[]base=deploy \
+  --tag[]pr[]labels[]=label-1 \
+  --tag[]pr[]reviewers[]=user-1
 ```
 
 ## Changelog
 
-Changelog using bellow format:
+Changelog default using [keep a changelog](https://keepachangelog.com/en/1.0.0/) format
+and commit follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format.
+
+Here are some example commits.
 
 ```text
-{changelog.header}
-
-- [Unreleased]
-
-Please check git diff.
-
-- [{tag1}] - {date1}
-
-{template}
-
-- [{tag2}] - {date2}
-
-{template}
-
-[unreleased]: {diff}
-[{tag1}]: {diff1}
-[{tag2}]: {diff2}
+fix(ABC-123): should update auto link
+fix(test)!: breaking  change with pr #123
+add(scope): some scope and auto link ABC-123
+feat: simple feature
+no any match should be ignored
+fix: specific ignoring CHORE
 ```
 
-Set the format by `--changelogTemplate` or `changelog.template` in configuration, for example:
+and if we bump from v1.2.3 to v2.0.0, it will (default, and configurable) render as:
 
-```text
-- ticket: {ticket}
-- version: {version}
-- stage: {stage}
-- [diff]({diff})
+```bash
+$ bumper \
+  v2.0.0 \
+  --autolink[]link 'https://jira-domain.com/ABC-{num}' \
+  --autolink[]match[]='ABC-{num}' \
+  --diff-ignored[]=CHORE \
+  --diff-scope[]=scope=ScopeName \
+  --ask-to-verify-content
+====== Content is in below:
+# Changelog
 
-{content}
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+See git diff
+
+## [v2.0.0] - 2024-01-01
+
+### Fixed
+
+- ([hash1ha](https://github.com/evan361425/version-bumper/commit/hash1hash1hash1hash1)|[ABC-123](https://jira-domain.com/ABC-123)) should update auto link - @wu0dj2k7ao3
+- ([hash2ha](https://github.com/evan361425/version-bumper/commit/hash2hash2hash2hash2)) test: breaking change with pr - @wu0dj2k7ao3
+
+### Added
+
+- ([hash3ha](https://github.com/evan361425/version-bumper/commit/hash3hash3hash3hash3)|[ABC-123](https://jira-domain.com/ABC-123)) ScopeName: some scope and auto link - @wu0dj2k7ao3
+- ([hash4ha](https://github.com/evan361425/version-bumper/commit/hash4hash4hash4hash4)) simple feature - @wu0dj2k7ao3
+
+## [v1.2.3] - 2023-12-31
+
+...
+
+[unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v2.0.0...HEAD
+[v2.0.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v1.2.3...v2.0.0
+[v1.2.3]: https://github.com/olivierlacan/keep-a-changelog/compare/v1.2.2...v1.2.3
+...
+[0.0.1]: https://github.com/olivierlacan/keep-a-changelog/releases/tag/v0.0.1
+====== Is this OK? [Y/n]
 ```

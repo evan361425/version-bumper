@@ -39,7 +39,7 @@ export class ChangelogIO {
    * Write content to the destination file.
    */
   write(): void {
-    writeFileSync(this.dst, this.content.toString());
+    writeFileSync(this.dst, this.content.toString() + '\n');
   }
 }
 

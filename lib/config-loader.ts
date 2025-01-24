@@ -119,7 +119,7 @@ export function loadConfigFromFile(args: string[]): IConfig {
   verbose(`Start loading config from ${file}.`);
   const content = readFile(file);
   if (!content) {
-    log(`Config file ${file} not found, ignore it.`);
+    verbose(`[cfg] config file ${file} not found, ignore it.`);
     return {};
   }
 
@@ -182,7 +182,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
     }
 
     result.push(parts);
-    return result;
+    return result.filter((r) => r.length > 0);
   }
 
   getB('verbose') && startVerbose();
@@ -312,7 +312,7 @@ export async function askForWantedVars(
   if (!version || version.startsWith('-')) {
     const nameInfo = tag.name ? `${tag.name} ` : '';
     const lastInfo = last ? `(last version is ${last})` : '(no previous version found)';
-    version = await askQuestion(`Enter new ${nameInfo}version ${lastInfo}: ${tag.pattern}\n`);
+    version = await askQuestion(`Enter new ${nameInfo}version ${lastInfo} with pattern: ${tag.pattern}\n`);
   }
 
   if (!tag.verify(version)) {

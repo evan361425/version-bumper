@@ -18,32 +18,27 @@ class MyArg {
     return (this._key ??= this.alias ? `${name},-${this.alias}` : name);
   }
 
-  parseMsg(spaces: string): string {
-    const info = `--${this.key}${spaces}`;
-    const prefix = ' '.repeat(info.length + 2);
+  parseMsg(): string {
+    const info = `--${this.key}`;
     const msg = this.title
       .split('\n')
       .filter(Boolean)
       .flatMap((m) => m.split('. ').map((m, i, a) => (i === a.length - 1 ? m : `${m}.`)));
 
     return [
-      info + '  ' + msg[0],
-      ...msg.slice(1).map((m) => prefix + m),
-      ' '.repeat(info.length - 4) + `type: ${this.type}`,
-      ' '.repeat(info.length - 7) + `default: ${this.other ?? '<required>'}`,
+      info,
+      `  type: ${this.type}`,
+      `  default: ${this.other ?? '<required>'}`, // no default means required
+      ...msg.map((m) => `  ${m}`),
     ]
-      .map((m) => '\t' + m)
+      .map((m) => '  ' + m)
       .join('\n');
   }
 }
 
 (function main() {
-  const args = findArgs();
-  const keyMaxLength = args.map((arg) => arg.key.length).reduce((prev, curr) => (curr > prev ? curr : prev));
-
-  for (const arg of args) {
-    const spaces = keyMaxLength - arg.key.length;
-    console.log(arg.parseMsg(' '.repeat(spaces)));
+  for (const arg of findArgs()) {
+    console.log(arg.parseMsg());
   }
 })();
 
@@ -69,10 +64,11 @@ function findArgs(): MyArg[] {
   const defs: Record<string, JSONSchema7> = JSON.parse(readFileSync('schema.json').toString('utf-8')).definitions;
   for (const [key, name] of Object.entries(rings)) {
     const def = findSchema(key, defs);
+    const title = [def.title, def.description].filter(Boolean).join('\n');
     args.push(
       new MyArg(
         name,
-        def.title ?? name,
+        title ? title : 'No description provided.',
         def.type as 'string' | 'boolean' | 'number' | 'template',
         argsAliases[name],
         def.default as string | boolean | number | undefined,
@@ -117,6 +113,7 @@ function findArgs(): MyArg[] {
       return {
         type: 'template' as any,
         title: def!.title,
+        description: def!.description,
         default: def!.default ? `-v=${(def!.default as any).value}` : undefined,
       };
     }

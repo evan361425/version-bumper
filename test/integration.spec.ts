@@ -48,7 +48,7 @@ void describe('Bump', function () {
         `--tag[]pr[]reviewers[]=user-1`,
         `--tag[]pr[]reviewers[]=user-2`,
         `--tag[]pr[]commit-v`,
-        `chore: bump to {version}`,
+        `custom bump to {version}`,
         `--tag[]pr[]repl[]pattern=version: v[0-9]+.[0-9]+.[0-9]+$`,
         `--tag[]pr[]repl[]paths[]`,
         'package.json',
@@ -83,7 +83,7 @@ void describe('Bump', function () {
     assert.deepStrictEqual(pr.labels, ['label-1', 'label-2']);
     assert.deepStrictEqual(pr.reviewers, ['user-1', 'user-2']);
     assert.deepStrictEqual(pr.reviewers, ['user-1', 'user-2']);
-    assert.strictEqual(pr.commitMessage?.value, 'chore: bump to {version}');
+    assert.strictEqual(pr.commitMessage?.value, 'custom bump to {version}');
     assert.strictEqual(pr.replacements[0]!.pattern, 'version: v[0-9]+.[0-9]+.[0-9]+$');
     assert.deepStrictEqual(pr.replacements[0]!.paths, ['package.json', 'other.txt']);
     assert.strictEqual(pr.replacements[0]!.replacement.value, 'version: {version}');
@@ -176,7 +176,7 @@ void describe('Bump', function () {
     );
     assert.strictEqual(
       getFirstMockedCommand(),
-      "gh api -X POST repos/evan361425/version-bumper-2/git/commits -f message='chore: bump to v1.2.3' -f tree=new-sha -f parents[]=base-sha --jq .sha",
+      "gh api -X POST repos/evan361425/version-bumper-2/git/commits -f message='custom bump to v1.2.3' -f tree=new-sha -f parents[]=base-sha --jq .sha",
     );
     assert.strictEqual(
       getFirstMockedCommand(),
@@ -218,7 +218,7 @@ ${content}`,
     await cfg.init([]);
 
     assert.strictEqual(cfg.ticket, '');
-    assert.strictEqual(cfg.tag.prs[0]!.commitMessage?.value, 'Bump to {version}');
+    assert.strictEqual(cfg.tag.prs[0]!.commitMessage?.value, 'chore: bump to {version}');
 
     await checkTag(cfg);
     await prepare(cfg);

@@ -1,239 +1,370 @@
-	--[no-]debug,-d                  Execute in debug mode without any side effects
-	                                 Also output command input to stdout
-	                           type: boolean
-	                        default: false
-	--[no-]verbose,-v                Output many logs to stdout
-	                           type: boolean
-	                        default: false
-	--config,-c                      Path to the configuration file.
-	                           type: string
-	                        default: bumper.json
-	--tag,-T                         Wanted `tags` item's name, it will then use it to ask for the version number.
-	                                 If not found, it will use the first `tags`'s name.
-	                           type: string
-	                        default: <required>
-	--ticket,-t                      Wanted ticket number.
-	                                 If not found, it will ask for it if `process.wantedTicket` is enabled.
-	                           type: string
-	                        default: <required>
-	--[no-]only-pr                   Only create PR, no any bumping.
-	                           type: boolean
-	                        default: false
-	--[no-]only-release              Only create GitHub release, no any bumping.
-	                           type: boolean
-	                        default: false
-	--repo,-r                        Link to the repository, it will use for tags in Changelog.
-	                           type: string
-	                        default: using `git remote get-url origin`, if not found throw exception
-	--[no-]bump                      Whether to bump the version.
-	                                 It will then try to tag the new version.
-	                           type: boolean
-	                        default: true
-	--[no-]push                      Push all commits and tags.
-	                           type: boolean
-	                        default: true
-	--[no-]pr                        Create PR in tags, and `tags[].prBranches` must be set
-	                           type: boolean
-	                        default: true
-	--[no-]release                   Create release in tags, and `tags[].release` must be set
-	                           type: boolean
-	                        default: true
-	--[no-]check-tag                 Throw error if tag already exists in local.
-	                           type: boolean
-	                        default: true
-	--[no-]check-remote-tag          Throw error if tag already exists in remote.
-	                           type: boolean
-	                        default: false
-	--[no-]wanted-ticket             Ask for the ticket number if not found.
-	                           type: boolean
-	                        default: false
-	--[no-]ask-to-verify-content     Ask for verification of the changelog content.
-	                           type: boolean
-	                        default: <required>
-	--[no-]semantic-groups           Use semantic commit message to map the `diff.groups`.
-	                                 - `^fix` as `Fixed`
-	                                 - `^feat`, `^add` as `Added`
-	                                 - `^[\w\(\)]+!`, `BREAKING CHANGE` as `Changed`, with priority 1
-	                           type: boolean
-	                        default: true
-	--[no-]semantic-tag              Add semantic tag naming to `tags`.
-	                                 - Use pattern `v[0-9]+.[0-9]+.[0-9]+` and name `semantic`.
-	                                 - Enable release with default title and body, see default from `tags[].release`.
-	                                 - Enable changelog.
-	                           type: boolean
-	                        default: true
-	--[no-]rc-tag                    Add release candidate (rc) tag naming to `tags`.
-	                                 - Use pattern `v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+` and name `release-candidate`.
-	                                 - Disable release.
-	                                 - Disable changelog.
-	                                 If `useSemanticTag` is enabled, it will pushed after the semantic tag.
-	                           type: boolean
-	                        default: false
-	--hook-after-verified[]          Commands to run after version is verified.
-	                                 Each string will be separated by space except the string inside the quotes.
-	                                 This will be run even in debug mode and not support templating as `Template`.
-	                                 Command exit code must be 0 to continue the process.
-	                                 Allowed variables:
-	                                 - `{version}`: version number
-	                                 - `{versionName}`: version name set in tag config
-	                                 - `{versionLast}`: last version number
-	                                 - `{versionNoPrefix}`: remove any character before first number
-	                                 - `{ticket}`: ticket number
-	                           type: array
-	                        default: <required>
-	--hook-after-all[]               Commands to run after all the process is done.
-	                                 Each string will be separated by space except the string inside the quotes.
-	                                 This will be run even in debug mode and not support templating as `Template`.
-	                                 Allowed variables:
-	                                 - `{version}`: version number
-	                                 - `{versionName}`: version name set in tag config
-	                                 - `{versionLast}`: last version number
-	                                 - `{versionNoPrefix}`: remove any character before first number
-	                                 - `{ticket}`: ticket number
-	                           type: array
-	                        default: <required>
-	--[no-]clog                      Enable changelog generation.
-	                           type: boolean
-	                        default: true
-	--clog-dest                      File path to the changelog file.
-	                           type: string
-	                        default: CHANGELOG.md
-	--clog-dest-debug                Destination of changelog when in debug mode.
-	                           type: string
-	                        default: `destination` with `.debug` suffix before the extension
-	--clog-section                   The changelog of specific version.
-	                                 Default will prepend `## ` before the first line.
-	                                 Allowed variables:
-	                                 - `{content}`: new version changelog body from `diff`.
-	                                 - `{version}`: current version number
-	                                 - `{versionName}`: version name set in tag config
-	                                 - `{versionLast}`: last version number
-	                                 - `{versionNoPrefix}`: remove any character before first number
-	                                 - `{diffLink}`: link to the diff of this version
-	                                 - `{ticket}`: ticket number
-	                                 - `{date}`: current date, format is `YYYY-MM-DD`
-	                                 - `{time}`: current time, format is `HH:mm:ss`
-	                           type: template
-	                        default: -v=[{version}] - {date}
+  --[no-]debug,-d
+    type: boolean
+    default: false
+    Execute in debug mode without any side effects
+    Also output command input to stdout
+  --[no-]verbose,-v
+    type: boolean
+    default: false
+    Output many logs to stdout
+  --config,-c
+    type: string
+    default: bumper.json
+    Path to the configuration file.
+  --tag,-T
+    type: string
+    default: <required>
+    Wanted `tags` item's name, it will then use it to ask for the version number.
+    If not found, it will use the first `tags`'s name.
+  --ticket,-t
+    type: string
+    default: <required>
+    Wanted ticket number.
+    If not found, it will ask for it if `process.wantedTicket` is enabled.
+  --[no-]only-pr
+    type: boolean
+    default: false
+    Only create PR, no any bumping.
+  --[no-]only-release
+    type: boolean
+    default: false
+    Only create GitHub release, no any bumping.
+  --repo,-r
+    type: string
+    default: using `git remote get-url origin`, if not found throw exception
+    Link to the repository, it will use for tags in Changelog.
+  --[no-]bump
+    type: boolean
+    default: true
+    Whether to bump the version.
+    It will then try to tag the new version.
+  --[no-]push
+    type: boolean
+    default: true
+    Push all commits and tags.
+  --[no-]pr
+    type: boolean
+    default: true
+    Create PR in tags, and `tags[].prBranches` must be set
+  --[no-]release
+    type: boolean
+    default: true
+    Create release in tags, and `tags[].release` must be set
+  --[no-]check-tag
+    type: boolean
+    default: true
+    Throw error if tag already exists in local.
+  --[no-]check-remote-tag
+    type: boolean
+    default: false
+    Throw error if tag already exists in remote.
+  --[no-]wanted-ticket
+    type: boolean
+    default: false
+    Ask for the ticket number if not found.
+  --[no-]ask-to-verify-content
+    type: boolean
+    default: <required>
+    Ask for verification of the changelog content.
+  --[no-]semantic-groups
+    type: boolean
+    default: true
+    Use semantic commit message to map the `diff.groups`.
+    - `^fix` as `Fixed`
+    - `^feat`, `^add` as `Added`
+    - `^[\w\(\)]+!`, `BREAKING CHANGE` as `Changed`, with priority 1
+  --[no-]semantic-tag
+    type: boolean
+    default: true
+    Add semantic tag naming to `tags`.
+    - Use pattern `v[0-9]+.[0-9]+.[0-9]+` and name `semantic`.
+    - Enable release with default title and body, see default from `tags[].release`.
+    - Enable changelog.
+  --[no-]rc-tag
+    type: boolean
+    default: false
+    Add release candidate (rc) tag naming to `tags`.
+    - Use pattern `v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+` and name `release-candidate`.
+    - Disable release.
+    - Disable changelog.
+    If `useSemanticTag` is enabled, it will pushed after the semantic tag.
+  --hook-after-verified[]
+    type: array
+    default: <required>
+    Commands to run after version is verified.
+    Each string will be separated by space except the string inside the quotes.
+    This will be run even in debug mode and not support templating as `Template`.
+    Command exit code must be 0 to continue the process.
+    Allowed variables:
+    - `{version}`: version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+  --hook-after-all[]
+    type: array
+    default: <required>
+    Commands to run after all the process is done.
+    Each string will be separated by space except the string inside the quotes.
+    This will be run even in debug mode and not support templating as `Template`.
+    Allowed variables:
+    - `{version}`: version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+  --[no-]clog
+    type: boolean
+    default: true
+    Enable changelog generation.
+  --clog-dest
+    type: string
+    default: CHANGELOG.md
+    File path to the changelog file.
+  --clog-dest-debug
+    type: string
+    default: `destination` with `.debug` suffix before the extension
+    Destination of changelog when in debug mode.
+  --clog-section
+    type: template
+    default: -v=[{version}] - {date}
 
 {content}
-	--clog-commit                    Commit message template.
-	                                 Allowed variables:
-	                                 - `{version}`: current version number
-	                                 - `{versionName}`: version name set in tag config
-	                                 - `{versionLast}`: last version number
-	                                 - `{versionNoPrefix}`: remove any character before first number
-	                                 - `{ticket}`: ticket number
-	                           type: template
-	                        default: -v=chore: bump to {version}
-	--[no-]clog-commit-add-all       Execute `git add .` not only the changelog.
-	                           type: boolean
-	                        default: false
-	--autolink[]link                 autolink[]link
-	                           type: string
-	                        default: <required>
-	--autolink[]match[]              autolink[]match[]
-	                           type: array
-	                        default: <required>
-	--pr-title                       pr-title
-	                           type: template
-	                        default: <required>
-	--pr-body                        pr-body
-	                           type: template
-	                        default: <required>
-	--diff-gp[]match[]               diff-gp[]match[]
-	                           type: array
-	                        default: <required>
-	--diff-gp[]title                 diff-gp[]title
-	                           type: string
-	                        default: <required>
-	--diff-gp[]priority              diff-gp[]priority
-	                           type: number
-	                        default: 0
-	--diff-item                      Template of single list item.
-	                                 Allowed variables:
-	                                 - `{title}`: commit title after `:` add will remove all the pr number and autoLink if found
-	                                 - `{titleTail}`: commit title after `:`
-	                                 - `{titleFull}`: full commit title, which is the first line of the commit message
-	                                 - `{author}`: commit author
-	                                 - `{hash}`: commit hash, but only first 7 characters
-	                                 - `{hashLink}`: commit hash with link, like `[hash](link)`
-	                                 - `{hashFull}`: commit hash
-	                                 - `{pr}`: PR number, if not found, it will use `hash`
-	                                 - `{prLink}`: PR number with link, like `[PR](link)`
-	                                 - `{autoLink}`: value of first match auto links, usually will be ticket number
-	                                 - `{scope}`: commit scope, see `scopeNames`
-	                           type: template
-	                        default: -v=- ({prLink}{|"autoLink"}) {"scope": }{title}{ - @"author"}
-	--diff-scope[]                   Scope names.
-	                                 For example, `feat(core): add something`, the scope is `core`.
-	                                 This will replace the scope with the name in the object.
-	                           type: object
-	                        default: <required>
-	--diff-ignored[]                 Pattern to ignore the commit.
-	                           type: array
-	                        default: <required>
-	--[no-]diff-ignore-others        Ignore commits that don't match any group.
-	                           type: boolean
-	                        default: true
-	--diff-others                    Title of the group that doesn't match any group.
-	                                 If `ignoreOthers` is enabled, this will not be used.
-	                           type: string
-	                        default: Others
-	--tag[]name                      tag[]name
-	                           type: string
-	                        default: 
-	--tag[]pattern                   tag[]pattern
-	                           type: string
-	                        default: <required>
-	--tag[]pr[]repo                  tag[]pr[]repo
-	                           type: string
-	                        default: using `git remote get-url origin`, if not found, ignore this PR
-	--tag[]pr[]head                  tag[]pr[]head
-	                           type: string
-	                        default: main
-	--tag[]pr[]head-from             tag[]pr[]head-from
-	                           type: string
-	                        default: <required>
-	--tag[]pr[]base                  tag[]pr[]base
-	                           type: string
-	                        default: <required>
-	--tag[]pr[]labels[]              tag[]pr[]labels[]
-	                           type: array
-	                        default: <required>
-	--tag[]pr[]reviewers[]           tag[]pr[]reviewers[]
-	                           type: array
-	                        default: <required>
-	--tag[]pr[]commit                tag[]pr[]commit
-	                           type: template
-	                        default: -v=undefined
-	--tag[]pr[]repl[]paths[]         tag[]pr[]repl[]paths[]
-	                           type: array
-	                        default: <required>
-	--tag[]pr[]repl[]pattern         tag[]pr[]repl[]pattern
-	                           type: string
-	                        default: <required>
-	--tag[]pr[]repl[]repl            tag[]pr[]repl[]repl
-	                           type: template
-	                        default: <required>
-	--tag[]pr[]repl[]commit          tag[]pr[]repl[]commit
-	                           type: template
-	                        default: <required>
-	--[no-]tag[]release              tag[]release
-	                           type: boolean
-	                        default: true
-	--tag[]release-title             tag[]release-title
-	                           type: template
-	                        default: -v=undefined
-	--tag[]release-body              tag[]release-body
-	                           type: template
-	                        default: -v=undefined
-	--[no-]tag[]release-draft        tag[]release-draft
-	                           type: boolean
-	                        default: false
-	--[no-]tag[]release-pre-release  tag[]release-pre-release
-	                           type: boolean
-	                        default: false
-	--[no-]tag[]with-clog            tag[]with-clog
-	                           type: boolean
-	                        default: true
+    The changelog of specific version.
+    Default will prepend `## ` before the first line.
+    Allowed variables:
+    - `{content}`: new version changelog body from `diff`.
+    - `{version}`: current version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{diffLink}`: link to the diff of this version
+    - `{ticket}`: ticket number
+    - `{date}`: current date, format is `YYYY-MM-DD`
+    - `{time}`: current time, format is `HH:mm:ss`
+  --clog-commit
+    type: template
+    default: -v=chore: bump to {version}
+    Commit message template.
+    Allowed variables:
+    - `{version}`: current version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+  --[no-]clog-commit-add-all
+    type: boolean
+    default: false
+    Execute `git add .` not only the changelog.
+  --autolink[]link
+    type: string
+    default: <required>
+    Replace the matched pattern with the link.
+    Allowed variables:
+    - `{num}`: ticket number
+  --autolink[]match[]
+    type: array
+    default: <required>
+    Pattern to match the commit title.
+    This is not a regular expression, but a list of prefixes.
+    Only allow characters `[a-zA-Z0-9-_]` and have special variables:
+    - `{num}`: ticket number
+  --pr-title
+    type: template
+    default: <required>
+    PR's title template.
+    This will trim the title to 100 characters and append `...` if it's too long.
+    Will replace new line with space and trim the title before use.
+    Allowed variables:
+    - `{version}`: version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+  --pr-body
+    type: template
+    default: <required>
+    PR's body template.
+    Allowed variables:
+    - `{version}`: version number
+    - `{versionName}`: version name set in tag config, empty if not set
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+    - `{content}`: changelog content
+    - `{diffLink}`: link to the diff of this version
+  --diff-gp[]match[]
+    type: array
+    default: <required>
+    Which commits to include.
+    Regular Expression pattern to match the commit title.
+    Recommended to follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format.
+  --diff-gp[]title
+    type: string
+    default: <required>
+    Title of the group.
+    Recommended to follow the [KeepAChangelog](https://keepachangelog.com/en/1.0.0/) format.
+  --diff-gp[]priority
+    type: number
+    default: 0
+    Priority of the group.
+    If the commit matches multiple groups, the group with the highest priority will be used.
+    If two groups have the same priority, the first one will be used.
+  --diff-item
+    type: template
+    default: -v=- ({prLink}{|"autoLink"}) {"scope": }{title}{ - @"author"}
+    Template of single list item.
+    Allowed variables:
+    - `{title}`: commit title after `:` add will remove all the pr number and autoLink if found
+    - `{titleTail}`: commit title after `:`
+    - `{titleFull}`: full commit title, which is the first line of the commit message
+    - `{author}`: commit author
+    - `{hash}`: commit hash, but only first 7 characters
+    - `{hashLink}`: commit hash with link, like `[hash](link)`
+    - `{hashFull}`: commit hash
+    - `{pr}`: PR number, if not found, it will use `hash`
+    - `{prLink}`: PR number with link, like `[PR](link)`
+    - `{autoLink}`: value of first match auto links, usually will be ticket number
+    - `{scope}`: commit scope, see `scopeNames`
+  --diff-scope[]
+    type: object
+    default: <required>
+    Scope names.
+    For example, `feat(core): add something`, the scope is `core`.
+    This will replace the scope with the name in the object.
+  --diff-ignored[]
+    type: array
+    default: <required>
+    Pattern to ignore the commit.
+  --[no-]diff-ignore-others
+    type: boolean
+    default: true
+    Ignore commits that don't match any group.
+  --diff-others
+    type: string
+    default: Others
+    Title of the group that doesn't match any group.
+    If `ignoreOthers` is enabled, this will not be used.
+  --tag[]name
+    type: string
+    default: 
+    Name of the tag.
+    Default is empty value which will be considered as no name.
+  --tag[]pattern
+    type: string
+    default: <required>
+    Regular Expression pattern to match the tag.
+  --tag[]pr[]repo
+    type: string
+    default: using `git remote get-url origin`, if not found, ignore this PR
+    Repository name.
+    Format: `<owner>/<repo>`
+  --tag[]pr[]head
+    type: string
+    default: main
+    Source branch.
+    Allowed variables:
+    - `{name}`: tag name
+    - `{timestamp}`: current timestamp
+    This will create the branch if not exists.
+  --tag[]pr[]head-from
+    type: string
+    default: <required>
+    Where to create the head branch.
+    If this is not set, it will not create the head branch and use it directly to create the PR.
+    Allowed variables:
+    - `{name}`: tag name
+  --tag[]pr[]base
+    type: string
+    default: <required>
+    Target branch.
+    Allowed variables:
+    - `{name}`: tag name
+  --tag[]pr[]labels[]
+    type: array
+    default: <required>
+    Labels to add to the PR.
+  --tag[]pr[]reviewers[]
+    type: array
+    default: <required>
+    Reviewers to add to the PR.
+  --tag[]pr[]commit
+    type: template
+    default: -v=undefined
+    Commit message template.
+    If not set, it will use the message in `tag.prBranches[].replacements[].commitMessage`.
+    One of them must be set.
+    Allowed variables:
+    - `{version}`: version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+  --tag[]pr[]repl[]paths[]
+    type: array
+    default: <required>
+    File path to replace.
+  --tag[]pr[]repl[]pattern
+    type: string
+    default: <required>
+    Regular Expression pattern to find the text and replace it by `replacement`.
+  --tag[]pr[]repl[]repl
+    type: template
+    default: <required>
+    Replacement string.
+    Allowed variables:
+    - `{version}`: version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+  --tag[]pr[]repl[]commit
+    type: template
+    default: <required>
+    Commit message template.
+    If not set, it will use the message in `tag.prBranches[].commitMessage`.
+    One of them must be set.
+    Allowed variables:
+    - `{version}`: version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+  --[no-]tag[]release
+    type: boolean
+    default: true
+    Enable GitHub Release.
+  --tag[]release-title
+    type: template
+    default: -v=undefined
+    Title of the release.
+    Allowed variables:
+    - `{version}`: current version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{ticket}`: ticket number
+  --tag[]release-body
+    type: template
+    default: -v=undefined
+    Release body.
+    Allowed variables:
+    - `{content}`: new version changelog body.
+    - `{version}`: current version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{versionNoPrefix}`: remove any character before first number
+    - `{diffLink}`: link to the diff of this version
+    - `{ticket}`: ticket number
+  --[no-]tag[]release-draft
+    type: boolean
+    default: false
+    Is this a draft release.
+  --[no-]tag[]release-pre-release
+    type: boolean
+    default: false
+    Is this a pre-release.
+  --[no-]tag[]with-clog
+    type: boolean
+    default: true
+    Should use this tag to generate changelog.

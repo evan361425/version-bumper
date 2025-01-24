@@ -54,6 +54,7 @@ function onFatalError(error: unknown) {
     if (error.name === 'BumperError') {
       console.error(error.message);
       process.exitCode = 1;
+      return;
     }
   }
 
@@ -80,7 +81,7 @@ ${message}`);
   const args = process.argv.slice(2);
 
   const needHelp = args.includes('-h') || args.includes('--help') || args.includes('--h');
-  const showVersion = args.includes('--version');
+  const showVersion = args.includes('--version') || args.includes('-V');
 
   if (showVersion) {
     console.log(`bumper ${getVersion()}`);

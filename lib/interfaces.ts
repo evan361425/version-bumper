@@ -509,7 +509,7 @@ export interface ITagPR {
    * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
-   * @default 'Bump to {version}'
+   * @default 'chore: bump to {version}'
    */
   commitMessage?: ITemplate;
 }

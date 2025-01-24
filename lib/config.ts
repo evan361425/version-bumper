@@ -157,7 +157,9 @@ export class Config {
     this.autoLinks = cfg.autoLinks!.map((a) => AutoLink.fromCfg(a));
     this.pr = PR.fromCfg(cfg.pr!);
     this.diff = Diff.fromCfg(cfg.diff!, this.autoLinks);
-    this.tags = combineTags(tags).map((t) => Tag.fromCfg(t));
+    this.tags = combineTags(tags)
+      .map((t) => Tag.fromCfg(t))
+      .filter(Boolean) as Tag[];
     this.git = new GitDatabase(this.repo.name);
   }
 

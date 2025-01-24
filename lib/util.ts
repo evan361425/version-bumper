@@ -97,14 +97,15 @@ export class SortField {
   }
 
   firstIsGreaterThanSecond(a: string[], b: string[]): boolean {
-    let v1 = a[this.field1];
-    let v2 = b[this.field2];
+    let v1 = a[this.field1 - 1];
+    let v2 = b[this.field2 - 1];
     if (!v1) return false;
     if (!v2) return true;
 
     if (this.numericSort) {
       const match1 = /[0-9]+/.exec(v1);
       const match2 = /[0-9]+/.exec(v2);
+      console.log(match1, match2);
       if (!match1) return false;
       if (!match2) return true;
 

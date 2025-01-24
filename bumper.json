@@ -1,9 +1,0 @@
-{
-  "changelog": {
-    "commit": {
-      "message": {
-        "value": "chore: bump to {version}"
-      }
-    }
-  }
-}
