@@ -4,9 +4,11 @@
  * @author 呂學洲 <evan.lu@104.com.tw>
  */
 
-import api from '../lib/api.js';
-import { getPackageJsonFile, npm, readFile } from '../lib/helper.js';
-import { notice } from '../lib/logger.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { bumperCommand } from './api/bumper.js';
+import { helpCommand } from './api/help.js';
+import { versionCommand } from './api/version.js';
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -31,13 +33,30 @@ function getErrorMessage(error: unknown) {
 
 function getVersion(): string {
   try {
-    return JSON.parse(readFile(getPackageJsonFile())).version;
+    return JSON.parse(readFileSync(getPackageJsonFile()).toString('utf-8')).version;
   } catch (error) {
     return "can't find package.json";
   }
 }
 
+function getPackageJsonFile() {
+  const paths = ['..', '..', 'package.json'];
+  if (import.meta.url.endsWith('.js')) paths.unshift('..');
+  const file = path.join(import.meta.url, ...paths);
+  const schemaIndex = file.indexOf(':');
+  if (schemaIndex === -1) return file;
+
+  return file.substring(schemaIndex + 1);
+}
+
 function onFatalError(error: unknown) {
+  if (error instanceof Error) {
+    if (error.name === 'BumperError') {
+      console.error(error.message);
+      process.exitCode = 1;
+    }
+  }
+
   process.exitCode = 2;
 
   const message = getErrorMessage(error);
@@ -58,35 +77,29 @@ ${message}`);
   process.on('uncaughtException', onFatalError);
   process.on('unhandledRejection', onFatalError);
 
-  const command = !process.argv[2] || process.argv[2].startsWith('-') ? '' : process.argv[2];
+  const args = process.argv.slice(2);
 
-  const needHelp = process.argv.includes('-h') || process.argv.includes('--help') || process.argv.includes('--h');
-  const needVersion = command === 'version' || command === 'v' || process.argv.includes('--version');
+  const needHelp = args.includes('-h') || args.includes('--help') || args.includes('--h');
+  const showVersion = args.includes('--version');
 
-  if (needVersion) {
-    console.log(`bumper ${getVersion()}
-Update command: npm i -g @evan361425/version-bumper`);
-    const info = await npm('search', '@evan361425/version-bumper', '--parseable', '--prefer-online');
-    const result = info
-      .split('\t')
-      .map((e) => e.trim())
-      .filter((e) => Boolean(e));
-    const latestVer = result[result.length - 1]?.trim();
-    console.log(`Latest version: ${latestVer}`);
+  if (showVersion) {
+    console.log(`bumper ${getVersion()}`);
     return;
   }
 
-  if (needHelp) {
-    return api.help(command);
-  } else if (command === '') {
-    await api.bumper();
-  } else if (command === 'deps') {
-    await api.deps();
-  } else if (command === 'init') {
-    await api.init();
-  } else {
-    return api.help(command);
+  const firstArg = args[0] ?? '';
+  if (needHelp || firstArg === 'help') {
+    helpCommand(firstArg);
+    return;
   }
 
-  notice(`${command} done`);
+  if (firstArg === 'version') {
+    console.log('searching for latest version...');
+    console.log(`Current version: ${getVersion()}`);
+    console.log(`Latest version: ${await versionCommand()}`);
+    console.log('Update command: npm i -g @evan361425/version-bumper');
+    return;
+  }
+
+  await bumperCommand(args);
 })().catch(onFatalError);

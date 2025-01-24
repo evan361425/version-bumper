@@ -23,22 +23,14 @@ build-assets: ## Build assets
 	@printf '# Makefile possible commands\n\n```shell\n$$ make help\n' > docs/commands.md
 	@make help | sed -r "s/\x1B\[(36|0|1)m//g" >> docs/commands.md
 	@printf '```\n' >> docs/commands.md
+	@node --import tsx bin/schema.ts > schema.json
+	@node --import tsx bin/help.ts > bin/api/help-args.txt
 
 .PHONY: bump
 bump: ## Bump the version
-	@current=$$(echo '$(version)' | cut -c 2-); \
-	read -p "Enter new version(origin version $$current): " target; \
-	if [[ ! $$target =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
-		echo "Version must be in x.x.x format"; \
-		exit 1; \
-	fi; \
-	if [[ $$(echo -e "$$target\n$$current" | sort -V | head -n1) == $$target ]]; then \
-		echo "Version must be above $$current"; \
-		exit 1; \
-	fi; \
 	make build-assets; \
-	npm version --no-commit-hooks --no-git-tag-version $$target; \
-	bumper --latestVersion=v$$target
+	bumper \
+		--hook-after-verified[] 'npm version --no-commit-hooks --no-git-tag-version {versionNoPrefix}'
 
 ##@ Dev
 
@@ -56,7 +48,7 @@ format: ## Format by prettier
 
 .PHONY: lint
 lint: ## Lint by eslint
-	npx eslint 'lib/**/*.ts' 'test/*.ts'
+	npx eslint
 	npx prettier --check 'lib/**/*.ts' 'test/*.ts'
 
 .PHONY: lint-image
@@ -78,18 +70,13 @@ lint-image: ## Lint image by trivy
 test: lint ## Run tests by Node.js test runner
 	node --import tsx --test --test-timeout 60000 test/*.spec.ts
 
+.PHONY: test-unit
+test-unit: ## Run tests without lint
+	node --import tsx --test --test-timeout 60000 test/*.spec.ts
+
 .PHONY: test-only
 test-only: ## Run tests with only statement
 	node --import tsx --test-only --test --test-timeout 60000 test/*.spec.ts
-
-.PHONY: test-ci
-test-ci: clean ## Run tests for CI
-	mkdir -p coverage
-	npx tsc # compile files
-	if ! node --test --experimental-test-coverage --test-timeout 60000 --test-reporter=spec \
-		dist/test/*.spec.js; then \
-		node --test dist/test/*.spec.js; \
-	fi
 
 .PHONY: test-coverage
 test-coverage: clean ## Run tests with coverage and re-run without coverage if failed (to show error message)

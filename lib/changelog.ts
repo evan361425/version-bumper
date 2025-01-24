@@ -1,177 +1,178 @@
-import { Config } from './config.js';
-import { info } from './logger.js';
-import { Tag } from './tag.js';
+import { writeFileSync } from 'node:fs';
+import { Repo } from './factories.js';
+import { readFile } from './io.js';
+import { log, verbose } from './logger.js';
+import { breaker } from './util.js';
 
-export class Changelog {
-  readonly tags: Tag[];
+const DEFAULT_HEADER = `# Changelog
 
-  readonly header: string;
+All notable changes to this project will be documented in this file.
 
-  readonly firstTagKey: string;
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).`;
 
-  readonly redundant: string = '';
+export class ChangelogIO {
+  protected _content?: ChangelogContent;
 
-  constructor(origin: string) {
-    this.tags = [Tag.veryFirst()];
-    this.header = Config.instance.changelogInfo.header;
-    this.firstTagKey = Tag.veryFirstTagKey;
-    if (typeof origin !== 'string' || origin === '') {
-      info('[changelog] No need parse');
-      return;
+  constructor(
+    readonly src: string,
+    readonly dst: string,
+  ) {}
+
+  get content(): ChangelogContent {
+    return (this._content ??= ChangelogContent.fromString(readFile(this.src)));
+  }
+
+  bump(repo: Repo, data: { key: string; link: string; content: string }) {
+    const section = ChangelogSection.fromString(data.content);
+    section.link = data.link;
+    verbose(`[changelog] bumping ${data.key} with header: ${section.header}`);
+    verbose(`[changelog] body: ${section.body}`);
+
+    this.content.bump(repo, data.key);
+    this.content.prepend(section);
+
+    this.write();
+  }
+
+  /**
+   * Write content to the destination file.
+   */
+  write(): void {
+    writeFileSync(this.dst, this.content.toString());
+  }
+}
+
+class ChangelogContent {
+  constructor(
+    readonly header: string,
+    readonly suffix: string,
+    readonly footers: ChangelogFooter[],
+    readonly sections: ChangelogSection[],
+    readonly unreleased?: ChangelogSection,
+  ) {}
+
+  static fromString(content: string): ChangelogContent {
+    const headerIdx = content.search(/\n## /);
+    const footerIdx = content.search(/\n\[[^\]]+\]:/);
+
+    let footers: ChangelogFooter[] = [];
+    let suffix = '';
+    if (footerIdx !== -1) {
+      const footer = content.substring(footerIdx).trim();
+      footers = footer.split('\n').map(ChangelogFooter.fromString).filter(Boolean) as ChangelogFooter[];
+      const unreleasedIdx = footers.findIndex((footer) => footer.key.toLowerCase() === 'unreleased');
+      footers = footers.filter((_, idx) => idx !== unreleasedIdx);
+
+      const lastIdx = footer.search(/\n\n/);
+      suffix = lastIdx === -1 ? '' : footer.substring(lastIdx).trim();
+    } else {
+      verbose('[changelog] No footers found');
     }
-
-    info('[changelog] Start parsing');
-
-    const headerIdx = origin.search(/\n## \[/);
-    const footerIdx = origin.search(/\n\[[^\]]+\]:/);
 
     if (headerIdx === -1) {
-      this.header = origin;
-      info('[changelog] Not found any tags');
-      return;
+      log('[changelog] No sections found');
+      return new ChangelogContent(DEFAULT_HEADER, suffix, footers, []);
     }
 
-    // parse tags
-    this.header = origin.substring(0, headerIdx).trim();
-    this.tags = origin
+    const header = content.substring(0, headerIdx).trim();
+    const sections = content
       .substring(headerIdx, footerIdx === -1 ? undefined : footerIdx)
       .split('\n## ')
       .map((e) => e.trim())
-      .filter((e) => Boolean(e))
-      .map((e) => Tag.fromString(e));
-    this.tags.length === 0 && this.tags.push(Tag.veryFirst());
-    this.firstTagKey = this.tags[0]?.key ?? Tag.veryFirstTagKey;
+      .filter(Boolean)
+      .map((e) => ChangelogSection.fromString(e));
 
-    // parse footer links
-    if (footerIdx === -1) {
-      info('[changelog] Not found footer');
-      return;
-    }
-    origin
-      .substring(footerIdx)
-      .trim()
-      .split('\n')
-      .forEach((e) => {
-        // [tag]: link
-        const [key, link] = e.split(']: ');
-        if (key && link) {
-          this.getTagByKey(key.substring(1))?.setLink(link);
-        }
-      });
-
-    const footLastIdx = origin.substring(footerIdx).search(/\n\n/);
-    this.redundant = footLastIdx === -1 ? '' : origin.substring(footerIdx + footLastIdx).trim();
-  }
-
-  get firstIsUnreleased(): boolean {
-    return this.firstTagKey.toLowerCase() === Tag.veryFirstTagKey.toLowerCase();
-  }
-
-  get latestTag(): Tag | undefined {
-    if (!this.firstIsUnreleased) {
-      return this.tags[0];
+    let unreleased: ChangelogSection | undefined;
+    if (sections[0]?.linkedKey?.toLowerCase() === 'unreleased') {
+      unreleased = sections.shift();
     }
 
-    return this.tags.find((tag) => {
-      return tag.key.toLowerCase() !== this.firstTagKey.toLowerCase();
-    });
+    return new ChangelogContent(header, suffix, footers, sections, unreleased);
   }
 
-  getTagByKey(key: string): Tag | undefined {
-    key = key.toLowerCase();
-
-    return this.tags.find((tag) => tag.key.toLowerCase() === key);
-  }
-
-  addTag(tag: Tag) {
-    if (this.getTagByKey(tag.key)) {
-      throw new Error(`tag ${tag.key} exist, should not add again`);
+  bump(repo: Repo, key: string): void {
+    if (this.unreleased) {
+      this.unreleased.link = repo.compareLink({ from: key });
     }
+  }
 
-    const first = this.getTagByKey(this.firstTagKey);
-    first && first.setDiffLink(tag.key, 'HEAD');
-
-    tag.setDiffLink(this.latestTag?.key).setBody(tag.body).setIsNew(true);
-
-    this.tags.splice(this.firstIsUnreleased ? 1 : 0, 0, tag);
-
-    return this;
+  prepend(section: ChangelogSection) {
+    this.sections.splice(0, 0, section);
+    this.footers.splice(0, 0, new ChangelogFooter(section.linkedKey, section.link!));
   }
 
   toString(): string {
-    const content = [
-      this.header,
-      ...this.tags.map((tag) => {
-        let body = tag.toString();
-        if (tag.isNew) {
-          const ignoreStart = '<!-- bumper-changelog-ignore-start -->';
-          const ignoreEnd = '<!-- bumper-changelog-ignore-end -->';
-          while (tag) {
-            const start = body.search(ignoreStart);
-            if (start === -1) break;
-
-            const end = body.search(ignoreEnd);
-            const r = end === -1 ? '' : body.substring(end + ignoreEnd.length) + '\n';
-            body = body.substring(0, start).trim() + r.trim();
-          }
-        }
-        return body;
-      }),
-    ];
-
-    const footer = this.tags
-      .map((tag) => tag.toLink())
-      .filter((link) => Boolean(link))
+    const sections = this.sections
+      .map((section) => section.toString().trim())
+      .filter(Boolean)
+      .join('\n\n');
+    const footers = this.footers
+      .map((footer) => footer.toString().trim())
+      .filter(Boolean)
       .join('\n');
 
-    const result = content.join('\n\n## ').trim() + '\n\n' + footer + '\n';
-    return this.redundant ? `${result}\n${this.redundant}\n` : result;
+    return [
+      this.header.trim(),
+      this.unreleased?.toString(),
+      sections,
+      (this.unreleased ? `[unreleased]: ${this.unreleased!.link}\n` : '') + footers,
+      this.suffix.trim(),
+    ]
+      .filter(Boolean)
+      .join('\n\n');
+  }
+}
+
+class ChangelogSection {
+  link?: string;
+
+  protected _linkedKey?: string;
+
+  constructor(
+    readonly header: string,
+    readonly body: string,
+  ) {}
+
+  static fromString(content: string): ChangelogSection {
+    const [header, body] = breaker(content.trim());
+
+    return new ChangelogSection((header ?? '').trim(), (body ?? '').trim());
   }
 
-  static fitAutoLinks(body: string, links: Record<string, string>): string {
-    if (!body || Object.keys(links).length === 0) return body;
+  get linkedKey(): string {
+    if (this._linkedKey) return this._linkedKey;
 
-    const casedLinks: Record<string, string> = {};
-    Object.entries(links).map(([k, v]) => (casedLinks[k.toLowerCase()] = v));
+    // for example: [v3.7.3-rc1] - 2022-08-30, should get `v3.7.3-rc1`
+    const match = /\[([^\[\]]+)\]( |$)/.exec(this.header);
+    return (this._linkedKey ??= match?.[1] ?? '');
+  }
 
-    const prefixes = Object.keys(casedLinks).join('|');
-    // patterns must start with whitespace/newline or in first char of line
-    const linker = new RegExp(`(^|[\\n\\r\\s]{1})(${prefixes})(\\d*)?`, 'mi');
-    // must not in the link
-    const inLink = new RegExp(`^[^\\[]*\\]`);
-    let result = '';
+  set linkedKey(value: string) {
+    this._linkedKey = value;
+  }
 
-    do {
-      const index = body.search(linker);
-      if (index === -1) {
-        result += body;
-        break;
-      }
+  toString(): string {
+    return '## ' + this.header + '\n\n' + this.body;
+  }
+}
 
-      const [hit, prefix, target, num] = linker.exec(body.substring(index)) as unknown as [
-        string,
-        string,
-        string,
-        string,
-      ];
-      info(`[auto-links] hit(${hit}), target(${target}), num(${num})`);
-      const rest = index + hit.length;
-      const isInLink = inLink.test(body.substring(rest));
+class ChangelogFooter {
+  constructor(
+    readonly key: string,
+    public link: string,
+  ) {}
 
-      result += body.substring(0, isInLink ? rest : index);
+  static fromString(content: string): ChangelogFooter | undefined {
+    const match = /\[([^\]]+)\]: *([^\s]+)/.exec(content);
+    if (!match) {
+      return undefined;
+    }
 
-      // only add link if not in link
-      if (!isInLink) {
-        info(`[auto-links] is not in link`);
-        const rawLink = casedLinks[target.toLowerCase()];
-        const link = rawLink?.replace(/{num}/g, num ?? '');
-        const origin = num ? target.concat(num) : target;
-        result += `${prefix}[${origin}](${link})`;
-      }
+    return new ChangelogFooter(match[1]!, match[2]!);
+  }
 
-      body = body.substring(rest);
-    } while (body !== '');
-
-    return result;
+  toString(): string {
+    return `[${this.key}]: ${this.link}`;
   }
 }
