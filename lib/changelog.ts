@@ -1,3 +1,4 @@
+import { writeFileSync } from 'node:fs';
 import { Repo } from './factories.js';
 import { readFile } from './io.js';
 import { log, verbose } from './logger.js';
@@ -13,19 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 export class ChangelogIO {
   protected _content?: ChangelogContent;
 
-  constructor(readonly file: string) {}
+  constructor(
+    readonly src: string,
+    readonly dst: string,
+  ) {}
 
   get content(): ChangelogContent {
-    return (this._content ??= ChangelogContent.fromString(readFile(this.file)));
+    return (this._content ??= ChangelogContent.fromString(readFile(this.src)));
   }
 
   bump(repo: Repo, data: { key: string; link: string; content: string }) {
     const section = ChangelogSection.fromString(data.content);
     section.link = data.link;
-    log(`[changelog] bumping ${data.key} with content:
-${section.header}
-
-${section.body}`);
+    verbose(`[changelog] bumping ${data.key} with header: ${section.header}`);
+    verbose(`[changelog] body: ${section.body}`);
 
     this.content.bump(repo, data.key);
     this.content.prepend(section);
@@ -36,7 +38,9 @@ ${section.body}`);
   /**
    * Write content to the destination file.
    */
-  write(): void {}
+  write(): void {
+    writeFileSync(this.dst, this.content.toString());
+  }
 }
 
 class ChangelogContent {
@@ -57,6 +61,8 @@ class ChangelogContent {
     if (footerIdx !== -1) {
       const footer = content.substring(footerIdx).trim();
       footers = footer.split('\n').map(ChangelogFooter.fromString).filter(Boolean) as ChangelogFooter[];
+      const unreleasedIdx = footers.findIndex((footer) => footer.key.toLowerCase() === 'unreleased');
+      footers = footers.filter((_, idx) => idx !== unreleasedIdx);
 
       const lastIdx = footer.search(/\n\n/);
       suffix = lastIdx === -1 ? '' : footer.substring(lastIdx).trim();
@@ -93,6 +99,28 @@ class ChangelogContent {
 
   prepend(section: ChangelogSection) {
     this.sections.splice(0, 0, section);
+    this.footers.splice(0, 0, new ChangelogFooter(section.linkedKey, section.link!));
+  }
+
+  toString(): string {
+    const sections = this.sections
+      .map((section) => section.toString().trim())
+      .filter(Boolean)
+      .join('\n\n');
+    const footers = this.footers
+      .map((footer) => footer.toString().trim())
+      .filter(Boolean)
+      .join('\n');
+
+    return [
+      this.header.trim(),
+      this.unreleased?.toString(),
+      sections,
+      (this.unreleased ? `[unreleased]: ${this.unreleased!.link}\n` : '') + footers,
+      this.suffix.trim(),
+    ]
+      .filter(Boolean)
+      .join('\n\n');
   }
 }
 
@@ -123,6 +151,10 @@ class ChangelogSection {
   set linkedKey(value: string) {
     this._linkedKey = value;
   }
+
+  toString(): string {
+    return '## ' + this.header + '\n\n' + this.body;
+  }
 }
 
 class ChangelogFooter {
@@ -139,71 +171,8 @@ class ChangelogFooter {
 
     return new ChangelogFooter(match[1]!, match[2]!);
   }
+
+  toString(): string {
+    return `[${this.key}]: ${this.link}`;
+  }
 }
-
-// export class Changelog {
-//   get firstIsUnreleased(): boolean {
-//     return this.firstTagKey.toLowerCase() === Tag.veryFirstTagKey.toLowerCase();
-//   }
-
-//   get latestTag(): Tag | undefined {
-//     if (!this.firstIsUnreleased) {
-//       return this.tags[0];
-//     }
-
-//     return this.tags.find((tag) => {
-//       return tag.key.toLowerCase() !== this.firstTagKey.toLowerCase();
-//     });
-//   }
-
-//   getTagByKey(key: string): Tag | undefined {
-//     key = key.toLowerCase();
-
-//     return this.tags.find((tag) => tag.key.toLowerCase() === key);
-//   }
-
-//   addTag(tag: Tag) {
-//     if (this.getTagByKey(tag.key)) {
-//       throw new Error(`tag ${tag.key} exist, should not add again`);
-//     }
-
-//     const first = this.getTagByKey(this.firstTagKey);
-//     first && first.setDiffLink(tag.key, 'HEAD');
-
-//     tag.setDiffLink(this.latestTag?.key).setBody(tag.body).setIsNew(true);
-
-//     this.tags.splice(this.firstIsUnreleased ? 1 : 0, 0, tag);
-
-//     return this;
-//   }
-
-//   toString(): string {
-//     const content = [
-//       this.header,
-//       ...this.tags.map((tag) => {
-//         let body = tag.toString();
-//         if (tag.isNew) {
-//           const ignoreStart = '<!-- bumper-changelog-ignore-start -->';
-//           const ignoreEnd = '<!-- bumper-changelog-ignore-end -->';
-//           while (tag) {
-//             const start = body.search(ignoreStart);
-//             if (start === -1) break;
-
-//             const end = body.search(ignoreEnd);
-//             const r = end === -1 ? '' : body.substring(end + ignoreEnd.length) + '\n';
-//             body = body.substring(0, start).trim() + r.trim();
-//           }
-//         }
-//         return body;
-//       }),
-//     ];
-
-//     const footer = this.tags
-//       .map((tag) => tag.toLink())
-//       .filter((link) => Boolean(link))
-//       .join('\n');
-
-//     const result = content.join('\n\n## ').trim() + '\n\n' + footer + '\n';
-//     return this.redundant ? `${result}\n${this.redundant}\n` : result;
-//   }
-// }

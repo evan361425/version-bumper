@@ -38,12 +38,18 @@
 	--[no-]release                   Create release in tags, and `tags[].release` must be set
 	                           type: boolean
 	                        default: true
-	--[no-]check-tag                 Throw error if the tag already exists.
+	--[no-]check-tag                 Throw error if tag already exists in local.
 	                           type: boolean
 	                        default: true
+	--[no-]check-remote-tag          Throw error if tag already exists in remote.
+	                           type: boolean
+	                        default: false
 	--[no-]wanted-ticket             Ask for the ticket number if not found.
 	                           type: boolean
 	                        default: false
+	--[no-]ask-to-verify-content     Ask for verification of the changelog content.
+	                           type: boolean
+	                        default: <required>
 	--[no-]semantic-groups           Use semantic commit message to map the `diff.groups`.
 	                                 - `^fix` as `Fixed`
 	                                 - `^feat`, `^add` as `Added`
@@ -63,13 +69,23 @@
 	                                 If `useSemanticTag` is enabled, it will pushed after the semantic tag.
 	                           type: boolean
 	                        default: false
+	--hook-after-verified[]          hook-after-verified[]
+	                           type: array
+	                        default: <required>
+	--hook-after-all[]               hook-after-all[]
+	                           type: array
+	                        default: <required>
 	--[no-]clog                      Enable changelog generation.
 	                           type: boolean
 	                        default: true
 	--clog-dest                      File path to the changelog file.
 	                           type: string
 	                        default: CHANGELOG.md
+	--clog-dest-debug                Destination of changelog when in debug mode.
+	                           type: string
+	                        default: `destination` with `.debug` suffix before the extension
 	--clog-section                   The changelog of specific version.
+	                                 Default will prepend `## ` before the first line.
 	                                 Allowed variables:
 	                                 - `{content}`: new version changelog body from `diff`.
 	                                 - `{version}`: current version number
@@ -79,7 +95,7 @@
 	                                 - `{date}`: current date, format is `YYYY-MM-DD`
 	                                 - `{time}`: current time, format is `HH:mm:ss`
 	                           type: template
-	                        default: -v=## [{version}] - {date}
+	                        default: -v=[{version}] - {date}
 
 {content}
 	--clog-commit                    Commit message template.
@@ -120,12 +136,14 @@
 	                                 - `{titleFull}`: full commit title, which is the first line of the commit message
 	                                 - `{author}`: commit author
 	                                 - `{hash}`: commit hash, but only first 7 characters
+	                                 - `{hashLink}`: commit hash with link, like `[hash](link)`
 	                                 - `{hashFull}`: commit hash
 	                                 - `{pr}`: PR number, if not found, it will use `hash`
+	                                 - `{prLink}`: PR number with link, like `[PR](link)`
 	                                 - `{autoLink}`: value of first match auto links, usually will be ticket number
 	                                 - `{scope}`: commit scope, see `scopeNames`
 	                           type: template
-	                        default: -v=- ({pr}{|"autoLink"}) {"scope": }{title} - {author}
+	                        default: -v=- ({prLink}{|"autoLink"}) {"scope": }{title}{ - @"author"}
 	--diff-scope[]                   Scope names.
 	                                 For example, `feat(core): add something`, the scope is `core`.
 	                                 This will replace the scope with the name in the object.
@@ -147,6 +165,9 @@
 	--tag[]pattern                   tag[]pattern
 	                           type: string
 	                        default: <required>
+	--tag[]pr[]repo                  tag[]pr[]repo
+	                           type: string
+	                        default: using `git remote get-url origin`, if not found, ignore this PR
 	--tag[]pr[]head                  tag[]pr[]head
 	                           type: string
 	                        default: main
@@ -169,7 +190,7 @@
 	                           type: string
 	                        default: <required>
 	--tag[]pr[]repl[]repl            tag[]pr[]repl[]repl
-	                           type: string
+	                           type: template
 	                        default: <required>
 	--tag[]pr[]repl[]commit          tag[]pr[]repl[]commit
 	                           type: template

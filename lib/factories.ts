@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
 import { command } from './command.js';
+import { BumperError } from './errors.js';
 import { GitCommit, GitDatabase } from './git.js';
 import {
   IAutoLink,
@@ -9,6 +10,7 @@ import {
   IChangelogCommit,
   IDiff,
   IDiffGroup,
+  IHook,
   IPR,
   IPRReplace,
   IRelease,
@@ -60,6 +62,7 @@ export class Changelog implements IChangelog {
   constructor(
     readonly enable: boolean,
     readonly destination: string,
+    readonly destinationDebug: string | undefined,
     readonly section: Template<ChangelogTemplate>,
     readonly commit: ChangelogCommit,
   ) {}
@@ -68,6 +71,7 @@ export class Changelog implements IChangelog {
     return new Changelog(
       cfg.enable!,
       cfg.destination!,
+      cfg.destinationDebug,
       Template.fromCfg(cfg.section!),
       ChangelogCommit.fromCfg(cfg.commit!),
     );
@@ -308,7 +312,7 @@ export class Diff implements IDiff {
         hashFull: commit.hashFull,
         pr: commit.pr,
         prLink: commit.pr === commit.hash ? hashLink : `[${commit.pr}](${repo.prLink(Number(commit.pr))})`,
-        scope: commit.scope,
+        scope: this.scopeNames[commit.scope] ?? commit.scope,
         autoLink: autoLink ? `[${autoLink.target}](${autoLink.link})` : '',
       });
 
@@ -429,17 +433,17 @@ export class Tag implements ITag {
     const prs = this.prs.filter((e) => e.repo);
     log(`[pr] Start process ${prs.length} PR for ${this.name}`);
 
-    for await (const branch of prs) {
-      await branch.createCommits({ version: v.version, versionName: this.name, ticket: v.ticket });
+    for await (const pr of prs) {
+      await pr.replaceFiles(v);
     }
     verbose(`[pr] Done replacing files`);
 
     const title = await pr.formatTitle(v);
     const body = await pr.formatBody(v);
 
-    for await (const branch of prs) {
-      await branch.createPR({ title, body });
-      log(`[bump] Created ${this.name} PR (${branch.head} -> ${branch.base})`);
+    for await (const pr of prs) {
+      await pr.createPR({ title, body });
+      log(`[bump] Created ${this.name} PR (${pr.head} -> ${pr.base})`);
     }
   }
 }
@@ -479,10 +483,12 @@ export class Release implements IRelease {
 
 export class TagPR implements ITagPR {
   #git: GitDatabase;
+  #repl?: PRReplace[];
 
   constructor(
     public repo: string,
     public head: string = 'main',
+    public headFrom: string = '',
     public base: string,
     readonly labels: string[] = [],
     readonly reviewers: string[] = [],
@@ -500,12 +506,20 @@ export class TagPR implements ITagPR {
     const ts = new Date().getTime();
     return new TagPR(
       cfg.repo ?? '',
-      cfg.head?.replace(/{name}/g, tagName).replace(/{timestamp}/g, ts.toString()),
-      cfg.base.replace(/{name}/g, tagName),
+      cfg.head?.replaceAll('{name}', tagName).replaceAll('{timestamp}', ts.toString()),
+      cfg.headFrom?.replaceAll('{name}', tagName),
+      cfg.base.replaceAll('{name}', tagName),
       cfg.labels,
       cfg.reviewers,
       cfg.replacements?.map((e) => PRReplace.fromCfg(e)),
-      Template.exist(cfg.commitMessage) ? Template.fromCfg(cfg.commitMessage!) : undefined,
+      Template.fromCfg(Template.exist(cfg.commitMessage) ? cfg.commitMessage! : { value: 'Bump to {version}' }),
+    );
+  }
+
+  get repl(): PRReplace[] {
+    return (
+      this.#repl ??
+      (this.#repl = this.replacements.filter((e) => !e.isEmpty(`${this.repo} ${this.head} -> ${this.base}`)))
     );
   }
 
@@ -514,39 +528,39 @@ export class TagPR implements ITagPR {
     this.#git.repo = repo;
   }
 
-  async createCommits(v: VersionedTemplate): Promise<void> {
+  async replaceFiles(v: VersionedTemplate): Promise<void> {
+    if (this.repl.length === 0) return;
+
     // check all commit messages are ready
     const promises = [
-      this.commitMessage?.fetchContent(),
-      this.replacements.map((e) => e.commitMessage?.fetchContent()),
+      this.commitMessage?.fetchContent(), // commit message
+      this.repl.map((e) => e.commitMessage?.fetchContent()), // replacements
     ].filter((e) => Boolean(e));
     await Promise.all(promises);
 
-    const baseTree = await this.#git.createBranch(this.base);
-
+    let baseTree = await (this.headFrom ? this.#git.createBranch(this.headFrom) : this.#git.getRefSha());
     // first create separate commit for replacement if needed
-    for await (const replace of this.replacements.filter((e) => e.commitMessage)) {
-      const tree = await replace.createTree(this.#git, baseTree);
+    for await (const replace of this.repl.filter((e) => e.commitMessage)) {
+      log(`[pr] Start process PR for commit: ${replace.commitMessage!.formatted}`);
+      const tree = await replace.createTree(this.#git, baseTree, v);
       const msg = await replace.commitMessage!.formatContent(v);
 
-      await this.#git.createCommit(baseTree, tree, msg);
+      baseTree = await this.#git.createCommit(baseTree, tree, msg);
     }
 
     // then create commit all replacements
-    if (this.commitMessage) {
-      const replacements = this.replacements.filter((e) => !e.commitMessage);
+    const replacements = this.repl.filter((e) => !e.commitMessage);
+    if (this.commitMessage && replacements.length > 0) {
+      const msg = await this.commitMessage.formatContent(v);
+      log(`[pr] Start process PR for commit: ${msg}`);
+
       const files = [];
+      const paths = replacements.flatMap((e) => e.paths);
       for await (const replace of replacements) {
-        files.push(...(await replace.replaceFiles(this.#git)));
+        files.push(...(await replace.replaceFiles(this.#git, v)));
       }
 
-      const msg = await this.commitMessage.formatContent(v);
-      const tree = await this.#git.updateFiles(
-        baseTree,
-        replacements.flatMap((e) => e.paths),
-        files,
-      );
-
+      const tree = await this.#git.updateFiles(baseTree, paths, files);
       await this.#git.createCommit(baseTree, tree, msg);
     }
   }
@@ -577,7 +591,7 @@ export class PRReplace implements IPRReplace {
   constructor(
     readonly paths: string[],
     readonly pattern: string,
-    readonly replacement: string,
+    readonly replacement: Template<VersionedTemplate>,
     readonly commitMessage?: Template<VersionedTemplate>,
   ) {}
 
@@ -585,20 +599,41 @@ export class PRReplace implements IPRReplace {
     return new PRReplace(
       cfg.paths,
       cfg.pattern,
-      cfg.replacement,
+      Template.fromCfg(cfg.replacement),
       Template.exist(cfg.commitMessage) ? Template.fromCfg(cfg.commitMessage!) : undefined,
     );
   }
 
-  async replaceFiles(git: GitDatabase): Promise<string[]> {
-    const pattern = new RegExp(this.pattern);
+  isEmpty(name: string): boolean {
+    if (this.paths.length === 0) {
+      log(`[pr] No PR replace paths found in ${name}, skip it`);
+      return true;
+    }
 
-    const files = await git.fetchFiles(this.paths);
-    return files.map((f) => f.replace(pattern, this.replacement));
+    if (!this.pattern) {
+      log(`[pr] No PR replace pattern found in ${name}, skip it`);
+      return true;
+    }
+
+    if (!Template.exist(this.replacement)) {
+      log(`[cfg] No PR replace replacement found in ${name}, skip it`);
+      return true;
+    }
+
+    return false;
   }
 
-  async createTree(git: GitDatabase, baseTree: string): Promise<string> {
-    const files = await this.replaceFiles(git);
+  async replaceFiles(git: GitDatabase, v: VersionedTemplate): Promise<string[]> {
+    const pattern = new RegExp(this.pattern, 'm');
+
+    const files = await git.fetchFiles(this.paths);
+    const content = await this.replacement.formatContent(v);
+
+    return files.map((f) => f.replace(pattern, content));
+  }
+
+  async createTree(git: GitDatabase, baseTree: string, v: VersionedTemplate): Promise<string> {
+    const files = await this.replaceFiles(git, v);
 
     return await git.updateFiles(baseTree, this.paths, files);
   }
@@ -635,6 +670,70 @@ export class TagSort implements ITagSort {
     }
 
     return false;
+  }
+}
+
+export class Hook implements IHook {
+  readonly #afterVerified: HookCommand[];
+  readonly #afterAll: HookCommand[];
+
+  constructor(
+    readonly afterVerified: string[] = [],
+    readonly afterAll: string[] = [],
+  ) {
+    this.#afterVerified = afterVerified.map((c) => new HookCommand(c));
+    this.#afterAll = afterAll.map((c) => new HookCommand(c));
+  }
+
+  static fromCfg(cfg: IHook): Hook {
+    return new Hook(cfg.afterVerified, cfg.afterAll);
+  }
+
+  async runAfterVerified(v: VersionedTemplate): Promise<void> {
+    let i = 1;
+    for await (const hook of this.#afterVerified) {
+      await hook.run(v, i++);
+    }
+  }
+
+  async runAfterAll(v: VersionedTemplate): Promise<void> {
+    let i = 1;
+    for await (const hook of this.#afterAll) {
+      await hook.run(v, i++);
+    }
+  }
+}
+
+export class HookCommand {
+  #splitted?: string[];
+
+  constructor(readonly command: string) {}
+
+  async run(v: VersionedTemplate, idx: number): Promise<void> {
+    let [cmd, ...args] = this.split();
+    if (cmd) {
+      args = args.map((a) => {
+        Object.entries(v).forEach(([key, value]) => {
+          a = a.replaceAll(`{${key}}`, value);
+        });
+
+        return a;
+      });
+
+      try {
+        const result = await command(cmd, args);
+        log(`[hook] #${idx} ${cmd} result: ${result}`);
+      } catch (error) {
+        throw new BumperError(`Hook#${idx} ${error}`);
+      }
+    }
+  }
+
+  protected split(): string[] {
+    return (this.#splitted ??=
+      this.command.match(/"([^"]+)"|'([^']+)'|\S+/g)?.map(
+        (token) => token.replace(/^['"]|['"]$/g, ''), // 移除引號
+      ) ?? []);
   }
 }
 
@@ -687,7 +786,6 @@ export class Template<T extends Record<string, string>> implements ITemplate {
 
         prefix = prefix?.replaceAll('<NL>', '\n') ?? '';
         suffix = suffix?.replaceAll('<NL>', '\n') ?? '';
-        console.log(key, name, `${prefix}${value}${suffix}`);
         return `${prefix}${value}${suffix}`;
       });
     });
@@ -716,6 +814,7 @@ export class Template<T extends Record<string, string>> implements ITemplate {
 export type VersionedTemplate = {
   version: string;
   versionName: string;
+  versionLast: string;
   ticket: string;
 };
 export type ContentTemplate = VersionedTemplate & {

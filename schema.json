@@ -11,6 +11,9 @@
         "process": {
           "$ref": "#/definitions/IProcess"
         },
+        "hook": {
+          "$ref": "#/definitions/IHook"
+        },
         "changelog": {
           "$ref": "#/definitions/IChangelog"
         },
@@ -83,13 +86,22 @@
         },
         "checkTag": {
           "type": "boolean",
-          "title": "Throw error if the tag already exists.",
+          "title": "Throw error if tag already exists in local.",
           "default": true
+        },
+        "checkRemoteTag": {
+          "type": "boolean",
+          "title": "Throw error if tag already exists in remote.",
+          "default": false
         },
         "wantedTicket": {
           "type": "boolean",
           "title": "Ask for the ticket number if not found.",
           "default": false
+        },
+        "askToVerifyContent": {
+          "type": "boolean",
+          "title": "Ask for verification of the changelog content."
         },
         "useSemanticGroups": {
           "type": "boolean",
@@ -110,6 +122,37 @@
       "additionalProperties": false,
       "title": "How to process the version bumping."
     },
+    "IHook": {
+      "type": "object",
+      "properties": {
+        "afterVerified": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Commands to run after version is verified.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nCommand exit code must be 0 to continue the process.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number",
+          "examples": [
+            [
+              "echo \"version: {version}\""
+            ]
+          ]
+        },
+        "afterAll": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Commands to run after all the process is done.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number",
+          "examples": [
+            [
+              "echo \"version: {version}\""
+            ]
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "title": "Commands to run before and after the process."
+    },
     "IChangelog": {
       "type": "object",
       "properties": {
@@ -123,11 +166,19 @@
           "title": "File path to the changelog file.",
           "default": "CHANGELOG.md"
         },
+        "destinationDebug": {
+          "type": "string",
+          "examples": [
+            "CHANGELOG.debug.md"
+          ],
+          "default": "`destination` with `.debug` suffix before the extension",
+          "title": "Destination of changelog when in debug mode."
+        },
         "section": {
           "$ref": "#/definitions/ITemplate",
-          "title": "The changelog of specific version.\n\nAllowed variables:\n- `{content}`: new version changelog body from `diff`.\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{diffLink}`: link to the diff of this version\n- `{ticket}`: ticket number\n- `{date}`: current date, format is `YYYY-MM-DD`\n- `{time}`: current time, format is `HH:mm:ss`",
+          "title": "The changelog of specific version.\n\nDefault will prepend `## ` before the first line.\n\nAllowed variables:\n- `{content}`: new version changelog body from `diff`.\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{diffLink}`: link to the diff of this version\n- `{ticket}`: ticket number\n- `{date}`: current date, format is `YYYY-MM-DD`\n- `{time}`: current time, format is `HH:mm:ss`",
           "default": {
-            "value": "## [{version}] - {date}\n\n{content}"
+            "value": "[{version}] - {date}\n\n{content}"
           }
         },
         "commit": {
@@ -216,7 +267,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Pattern to match the commit title.\n\nThis is not a regular expression, but a list of prefixes.\n\nSpecial variables:\n- `{num}`: ticket number"
+          "description": "Pattern to match the commit title.\n\nThis is not a regular expression, but a list of prefixes.\n\nOnly allow characters `[a-zA-Z0-9-_]` and have special variables:\n- `{num}`: ticket number"
         },
         "link": {
           "type": "string",
@@ -262,9 +313,9 @@
         },
         "item": {
           "$ref": "#/definitions/ITemplate",
-          "title": "Template of single list item.\n\nAllowed variables:\n- `{title}`: commit title after `:` add will remove all the pr number and autoLink if found\n- `{titleTail}`: commit title after `:`\n- `{titleFull}`: full commit title, which is the first line of the commit message\n- `{author}`: commit author\n- `{hash}`: commit hash, but only first 7 characters\n- `{hashFull}`: commit hash\n- `{pr}`: PR number, if not found, it will use `hash`\n- `{autoLink}`: value of first match auto links, usually will be ticket number\n- `{scope}`: commit scope, see `scopeNames`",
+          "title": "Template of single list item.\n\nAllowed variables:\n- `{title}`: commit title after `:` add will remove all the pr number and autoLink if found\n- `{titleTail}`: commit title after `:`\n- `{titleFull}`: full commit title, which is the first line of the commit message\n- `{author}`: commit author\n- `{hash}`: commit hash, but only first 7 characters\n- `{hashLink}`: commit hash with link, like `[hash](link)`\n- `{hashFull}`: commit hash\n- `{pr}`: PR number, if not found, it will use `hash`\n- `{prLink}`: PR number with link, like `[PR](link)`\n- `{autoLink}`: value of first match auto links, usually will be ticket number\n- `{scope}`: commit scope, see `scopeNames`",
           "default": {
-            "value": "- ({pr}{|\"autoLink\"}) {\"scope\": }{title} - {author}"
+            "value": "- ({prLink}{|\"autoLink\"}) {\"scope\": }{title}{ - @\"author\"}"
           }
         },
         "scopeNames": {
@@ -468,11 +519,11 @@
         },
         "pattern": {
           "type": "string",
-          "description": "Regular Expression pattern to find."
+          "description": "Regular Expression pattern to find the text and replace it by `replacement`."
         },
         "replacement": {
-          "type": "string",
-          "description": "Replacement string.\n\nAllowed variables:\n- `{version}`: version number"
+          "$ref": "#/definitions/ITemplate",
+          "description": "Replacement string.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
         }
       },
       "required": [

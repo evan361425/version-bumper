@@ -80,6 +80,10 @@ lint-image: ## Lint image by trivy
 test: lint ## Run tests by Node.js test runner
 	node --import tsx --test --test-timeout 60000 test/*.spec.ts
 
+.PHONY: test-unit
+test-unit: ## Run tests without lint
+	node --import tsx --test --test-timeout 60000 test/*.spec.ts
+
 .PHONY: test-only
 test-only: ## Run tests with only statement
 	node --import tsx --test-only --test --test-timeout 60000 test/*.spec.ts

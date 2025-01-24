@@ -2,3 +2,5 @@ node_modules
 package-lock.json
 dist
 coverage
+CHANGELOG.debug.md
+.DS_Store

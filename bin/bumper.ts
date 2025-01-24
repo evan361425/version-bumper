@@ -50,6 +50,13 @@ function getPackageJsonFile() {
 }
 
 function onFatalError(error: unknown) {
+  if (error instanceof Error) {
+    if (error.name === 'BumperError') {
+      console.error(error.message);
+      process.exitCode = 1;
+    }
+  }
+
   process.exitCode = 2;
 
   const message = getErrorMessage(error);

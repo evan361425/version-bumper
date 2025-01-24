@@ -8,6 +8,7 @@ import {
   ChangelogTemplate,
   ContentTemplate,
   Diff,
+  Hook,
   PR,
   Repo,
   Tag,
@@ -15,6 +16,7 @@ import {
 } from './factories.js';
 import { GitDatabase } from './git.js';
 import { DeepPartial, IConfig, IDiffGroup, IProcess, ITag } from './interfaces.js';
+import { isDebug } from './io.js';
 import { breaker } from './util.js';
 
 export const DEFAULTS: IConfig = {
@@ -25,20 +27,25 @@ export const DEFAULTS: IConfig = {
     pr: true,
     release: true,
     checkTag: true,
+    checkRemoteTag: false,
     wantedTicket: false,
     useSemanticGroups: true,
     useSemanticTag: true,
     useReleaseCandidateTag: false,
   },
+  hook: {
+    afterVerified: [],
+    afterAll: [],
+  },
   changelog: {
     enable: true,
     destination: 'CHANGELOG.md',
     section: {
-      value: '## [{version}] - {date}\n\n{content}',
+      value: '[{version}] - {date}\n\n{content}',
     },
     commit: {
       message: {
-        value: 'chore: {"versionName" }bump to {version}',
+        value: 'chore: bump to {version}',
       },
       addAll: false,
     },
@@ -46,12 +53,11 @@ export const DEFAULTS: IConfig = {
   autoLinks: [],
   pr: {
     title: {
-      value: '{"ticket" - } New {"versionName" }version {version}',
+      value: '{"ticket" - }New {"versionName" }version {version}',
     },
     body: {
       value: `This PR is auto-generated from bumper
-
-- ticket: {ticket}{<NL>- name: "versionName"}
+{<NL>- ticket: "ticket"}{<NL>- name: "versionName"}
 - version: {version}
 - [diff link]({diffLink})
 
@@ -106,9 +112,11 @@ const RELEASE_CANDIDATE_TAG: ITag = {
 export class Config {
   #tag!: Tag;
   version!: string;
+  versionLast!: string;
   ticket!: string;
 
   readonly process: Required<IProcess>;
+  readonly hook: Hook;
   readonly repo: Repo;
   readonly changelog: Changelog;
   readonly pr: PR;
@@ -121,9 +129,9 @@ export class Config {
    * @param others Fallback options, the later one will override the previous one.
    */
   constructor(...others: DeepPartial<IConfig>[]) {
-    const cfg = { ...DEFAULTS };
+    const cfg: IConfig = JSON.parse(JSON.stringify(DEFAULTS));
     for (const o of others) {
-      softMerge(cfg, o as Record<string, unknown>);
+      softMerge(cfg as Record<string, unknown>, o as Record<string, unknown>);
     }
 
     if (cfg.process!.useSemanticGroups) {
@@ -143,6 +151,7 @@ export class Config {
     }
 
     this.process = cfg.process! as Required<IProcess>;
+    this.hook = Hook.fromCfg(cfg.hook!);
     this.repo = Repo.fromCfg(cfg.repo!);
     this.changelog = Changelog.fromCfg(cfg.changelog!);
     this.autoLinks = cfg.autoLinks!.map((a) => AutoLink.fromCfg(a));
@@ -173,6 +182,7 @@ export class Config {
     return {
       version: this.version,
       versionName: this.#tag.name,
+      versionLast: this.versionLast,
       ticket: this.ticket,
     };
   }
@@ -202,7 +212,16 @@ export class Config {
   }
 
   async bumpChangelog(): Promise<void> {
-    const clog = new ChangelogIO(this.changelog.destination);
+    function getDebugDefaultPath(path: string) {
+      const idx = path.lastIndexOf('.');
+      return idx === -1 ? path + '.debug' : path.slice(0, idx) + '.debug' + path.slice(idx);
+    }
+    const clog = new ChangelogIO(
+      this.changelog.destination,
+      isDebug()
+        ? (this.changelog.destinationDebug ?? getDebugDefaultPath(this.changelog.destination))
+        : this.changelog.destination,
+    );
 
     clog.bump(this.repo, {
       key: this.version,
@@ -241,6 +260,7 @@ export class Config {
     // Ask for wanted vars if not set
     const input = await askForWantedVars(args, this);
     this.version = input.version;
+    this.versionLast = input.versionLast;
     this.ticket = input.ticket;
     this.#tag = input.tag;
   }

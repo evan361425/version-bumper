@@ -3,9 +3,19 @@ import { isDebug } from './io.js';
 import { log, verbose } from './logger.js';
 
 let mockResponses: string[] = [];
+let mockedCommands: string[] = [];
 
+export function resetMocked(): string[][] {
+  const result = [mockResponses, mockedCommands];
+  mockResponses = [];
+  mockedCommands = [];
+  return result;
+}
 export function mockCommandResponse(response: string): void {
   mockResponses.push(response);
+}
+export function getFirstMockedCommand(): string {
+  return mockedCommands.shift() ?? '';
 }
 
 /**
@@ -20,6 +30,7 @@ export function command(name: string, args: string[], oneByOne?: (line: string) 
 
   if (isDebug()) {
     const resp = mockResponses.shift();
+    mockedCommands.push(`${name} ${args.join(' ')}`);
     return Promise.resolve(resp ?? '');
   }
 

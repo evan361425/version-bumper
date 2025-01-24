@@ -77,17 +77,19 @@ export class GitDatabase {
     await command('git', ['tag', version, '-m', removeMarkdownLinks(content)]);
   }
 
-  async push(): Promise<void> {
-    await command('git', ['push', '--no-verify']);
+  async push(hasCommit: boolean): Promise<void> {
+    if (hasCommit) {
+      await command('git', ['push', '--no-verify']);
+    }
     await command('git', ['push', '--tags', '--no-verify']);
   }
 
   /**
    * Create a new branch from the `branch`.
    */
-  async createBranch(name: string): Promise<string> {
-    const sha = await command('gh', ['api', `repos/${this.repo}/git/refs/heads/${this.branch}`, '--jq', '.object.sha']);
-    verbose(`[git] Creating branch '${name}' in ${this.repo} ${this.branch} in sha: ${sha}`);
+  async createBranch(src: string): Promise<string> {
+    const sha = await this.getRefSha(src);
+    verbose(`[git] Creating branch '${this.branch}' in ${this.repo} from ${src}(${sha})`);
 
     return await command('gh', [
       'api',
@@ -95,12 +97,16 @@ export class GitDatabase {
       'POST',
       `repos/${this.repo}/git/refs`,
       '-f',
-      `ref=refs/heads/${name}`,
+      `ref=refs/heads/${this.branch}`,
       '-f',
       `sha=${sha}`,
       '--jq',
       '.object.sha',
     ]);
+  }
+
+  getRefSha(ref?: string): Promise<string> {
+    return command('gh', ['api', `repos/${this.repo}/git/refs/heads/${ref ?? this.branch}`, '--jq', '.object.sha']);
   }
 
   /**
@@ -188,7 +194,7 @@ export class GitDatabase {
       '-f',
       `message='${message}'`,
       '-f',
-      `tree='${tree}'`,
+      `tree=${tree}`,
       '-f',
       `parents[]=${baseTree}`,
       '--jq',
@@ -196,17 +202,19 @@ export class GitDatabase {
     ]);
   }
 
-  async hasTag(tag: string): Promise<boolean> {
+  async hasTag(tag: string, checkRemote: boolean): Promise<boolean> {
     try {
       const local = await command('git', ['tag', '-l', tag]);
       if (local.includes(tag)) {
         return true;
       }
 
-      // const remote = await command('gh', ['api', `repos/${this.repo}/git/ref/tags/${tag}`]);
-      // if (remote.includes(`"refs/tags/${tag}"`)) {
-      //   return true;
-      // }
+      if (checkRemote) {
+        const remote = await command('gh', ['api', `repos/${this.repo}/git/ref/tags/${tag}`]);
+        if (remote.includes(`"refs/tags/${tag}"`)) {
+          return true;
+        }
+      }
     } catch (error) {
       verbose(`[git] Tag ${tag} not found: ${error}`);
     }

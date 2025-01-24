@@ -24,14 +24,21 @@ export const configArgsMap: ConfigArguments<IConfig> = {
     pr: 'pr',
     release: 'release',
     checkTag: 'check-tag',
+    checkRemoteTag: 'check-remote-tag',
     wantedTicket: 'wanted-ticket',
+    askToVerifyContent: 'ask-to-verify-content',
     useSemanticGroups: 'semantic-groups',
     useSemanticTag: 'semantic-tag',
     useReleaseCandidateTag: 'rc-tag',
   },
+  hook: {
+    afterVerified: ['hook-after-verified[]'],
+    afterAll: ['hook-after-all[]'],
+  },
   changelog: {
     enable: 'clog',
     destination: 'clog-dest',
+    destinationDebug: 'clog-dest-debug',
     section: 'clog-section',
     commit: {
       message: 'clog-commit',
@@ -70,6 +77,7 @@ export const configArgsMap: ConfigArguments<IConfig> = {
         {
           repo: 'tag[]pr[]repo',
           head: 'tag[]pr[]head',
+          headFrom: 'tag[]pr[]head-from',
           base: 'tag[]pr[]base',
           labels: ['tag[]pr[]labels[]'],
           reviewers: ['tag[]pr[]reviewers[]'],
@@ -103,58 +111,6 @@ export const argsAliases: Record<string, string> = {
   ticket: 't',
   repo: 'r',
 };
-
-/**
- * @param key
- * @param args from `process.argv`
- * @returns
- */
-export function getValueFromArgs(key: string, args: string[]): string | undefined {
-  const alias = argsAliases[key];
-  const index = args.findIndex((v) => {
-    if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
-    return v === '--' + key || v.startsWith('--' + key + '=');
-  });
-  if (index === -1) return;
-
-  const arg = args[index];
-  if (arg?.includes('=')) return breaker(arg, 1, '=')[1];
-
-  return args[index + 1];
-}
-
-export function getBoolFromArgs(key: string, args: string[]): boolean | undefined {
-  const alias = argsAliases[key];
-  const index = args.findIndex((v) => {
-    if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
-    return v === '--' + key || v === '--no-' + key;
-  });
-  if (index === -1) return undefined;
-
-  const arg = args[index]!;
-  if (arg.includes('=')) return breaker(arg, 1, '=')[1] !== 'false';
-
-  return arg === '--' + key || arg === '-' + alias;
-}
-
-export function getArrayFromArgs(key: string, args: string[]): string[] {
-  const result: string[] = [];
-  args.forEach((k, idx) => {
-    if (k.startsWith('--' + key + '=')) {
-      result.push(breaker(k, 1, '=')[1]!);
-      return;
-    }
-
-    if (k === '--' + key) {
-      const v = args[idx + 1];
-      if (v) {
-        result.push(v);
-      }
-    }
-  });
-
-  return result;
-}
 
 export function loadConfigFromFile(args: string[]): IConfig {
   const name = process.env['BUMPER_CONFIG'] ?? getValueFromArgs('config', args) ?? DEFAULT_CONFIG_PATH;
@@ -253,13 +209,20 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
       pr: getB(configArgsMap.process!.pr!),
       release: getB(configArgsMap.process!.release!),
       checkTag: getB(configArgsMap.process!.checkTag!),
+      checkRemoteTag: getB(configArgsMap.process!.checkRemoteTag!),
+      askToVerifyContent: getB(configArgsMap.process!.askToVerifyContent!),
       useSemanticGroups: getB(configArgsMap.process!.useSemanticGroups!),
       useSemanticTag: getB(configArgsMap.process!.useSemanticTag!),
       useReleaseCandidateTag: getB(configArgsMap.process!.useReleaseCandidateTag!),
     },
+    hook: {
+      afterVerified: getArrayFromArgs(configArgsMap.hook!.afterVerified![0]!, args),
+      afterAll: getArrayFromArgs(configArgsMap.hook!.afterAll![0]!, args),
+    },
     changelog: {
       enable: getB(configArgsMap.changelog!.enable!),
       destination: getV(configArgsMap.changelog!.destination!),
+      destinationDebug: getV(configArgsMap.changelog!.destinationDebug!),
       section: getTemplate(configArgsMap.changelog!.section!),
       commit: {
         message: getTemplate(configArgsMap.changelog!.commit!.message!),
@@ -302,6 +265,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
           return {
             repo: getV(pr.repo!, pra),
             head: getV(pr.head!, pra),
+            headFrom: getV(pr.headFrom!, pra),
             base: getV(pr.base!, pra),
             labels: getArrayFromArgs(pr.labels![0]!, pra),
             reviewers: getArrayFromArgs(pr.reviewers![0]!, pra),
@@ -311,7 +275,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
               return {
                 paths: getArrayFromArgs(r.paths![0]!, repl),
                 pattern: getV(r.pattern!, repl),
-                replacement: getV(r.replacement!, repl),
+                replacement: getTemplate(r.replacement!, repl),
                 commitMessage: getTemplate(r.commitMessage!, repl),
               };
             }),
@@ -333,7 +297,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
 export async function askForWantedVars(
   args: string[],
   cfg: Config,
-): Promise<{ tag: Tag; version: string; ticket: string }> {
+): Promise<{ tag: Tag; version: string; ticket: string; versionLast: string }> {
   const tagName = getValueFromArgs('tag', args) ?? cfg.tags[0]?.name;
   const tag = cfg.tags.find((t) => t.name === tagName);
 
@@ -358,12 +322,59 @@ export async function askForWantedVars(
     throw new BumperError(`Version ${version} is not greater than the last version ${last}`);
   }
 
-  let ticket: string = '';
+  let ticket = getValueFromArgs('ticket', args);
   if (cfg.process.wantedTicket) {
-    ticket = getValueFromArgs('ticket', args) ?? (await askQuestion('Please provide the ticket number:\n'));
+    ticket = ticket ?? (await askQuestion('Please provide the ticket number:\n'));
   }
 
-  return { version, ticket, tag };
+  return { version, ticket: ticket ?? '', tag, versionLast: last };
+}
+
+function getValueFromArgs(key: string, args: string[]): string | undefined {
+  const alias = argsAliases[key];
+  const index = args.findIndex((v) => {
+    if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
+    return v === '--' + key || v.startsWith('--' + key + '=');
+  });
+  if (index === -1) return;
+
+  const arg = args[index];
+  if (arg?.includes('=')) return breaker(arg, 1, '=')[1];
+
+  return args[index + 1];
+}
+
+function getBoolFromArgs(key: string, args: string[]): boolean | undefined {
+  const alias = argsAliases[key];
+  const index = args.findIndex((v) => {
+    if (alias && (v === '-' + alias || v.startsWith('-' + alias + '='))) return true;
+    return v === '--' + key || v === '--no-' + key;
+  });
+  if (index === -1) return undefined;
+
+  const arg = args[index]!;
+  if (arg.includes('=')) return breaker(arg, 1, '=')[1] !== 'false';
+
+  return arg === '--' + key || arg === '-' + alias;
+}
+
+function getArrayFromArgs(key: string, args: string[]): string[] {
+  const result: string[] = [];
+  args.forEach((k, idx) => {
+    if (k.startsWith('--' + key + '=')) {
+      result.push(breaker(k, 1, '=')[1]!);
+      return;
+    }
+
+    if (k === '--' + key) {
+      const v = args[idx + 1];
+      if (v) {
+        result.push(v);
+      }
+    }
+  });
+
+  return result;
 }
 
 type ConfigArguments<T> = T extends ITemplate

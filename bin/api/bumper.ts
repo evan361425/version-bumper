@@ -1,8 +1,8 @@
 import { loadConfigFromArgs, loadConfigFromFile } from '../../lib/config-loader.js';
 import { Config } from '../../lib/config.js';
-import { BumperError } from '../../lib/errors.js';
 import { isDebug, startDebug, stopDebug } from '../../lib/io.js';
 import { log, verbose } from '../../lib/logger.js';
+import { bump, checkTag, createPR, createRelease, prepare } from '../../lib/processes.js';
 
 export async function bumperCommand(args: string[]): Promise<void> {
   const cfg = new Config(loadConfigFromFile(args), loadConfigFromArgs(args));
@@ -18,36 +18,17 @@ export async function bumperCommand(args: string[]): Promise<void> {
     verbose(JSON.stringify(config, undefined, 2));
   }
 
-  if (cfg.process.checkTag) {
-    if (await cfg.git.hasTag(cfg.version)) {
-      throw new BumperError(`Tag ${cfg.version} already exists, please consider using a different version.`);
-    }
-  }
-  log(`[bump] version validation passed: ${cfg.version}`);
+  await checkTag(cfg); // 1. 檢查要求的版本是否已經存在
+  await prepare(cfg); // 2. 準備好待會要用的各種東西
 
-  await cfg.diff.prepareContent(cfg.tag, cfg.repo);
-  await cfg.changelog.section.formatContent(cfg.changelogTemplate);
-
+  await cfg.hook.runAfterVerified(cfg.versionTemplate); // hook
   debug && startDebug();
-  if (cfg.changelog.enable && cfg.tag.withChangelog) {
-    await cfg.bumpChangelog();
-  }
 
-  if (cfg.process.bump) {
-    await cfg.git.tag(cfg.version, cfg.changelog.section.formatted);
-  }
+  await bump(cfg); // 3. 開始進行版本的 bump
+  await createPR(cfg); // 4. 創建 PR
+  await createRelease(cfg); // 5. 創建 Release
 
-  if (cfg.process.push) {
-    await cfg.git.push();
-  }
-
-  if (cfg.process.pr) {
-    await cfg.tag.createPR(cfg.pr, cfg.contentTemplate);
-  }
-
-  if (cfg.process.release) {
-    await cfg.tag.createRelease(cfg.contentTemplate);
-  }
-
+  debug && stopDebug();
+  await cfg.hook.runAfterAll(cfg.versionTemplate); // hook
   log(`[bump] finished bumping version ${cfg.version}`);
 }

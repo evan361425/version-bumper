@@ -4,6 +4,7 @@
 export interface IConfig {
   repo?: IRepo;
   process?: IProcess;
+  hook?: IHook;
   changelog?: IChangelog;
   autoLinks?: IAutoLink[];
   pr?: IPR;
@@ -48,13 +49,21 @@ export interface IProcess {
    */
   release?: boolean;
   /**
-   * Throw error if the tag already exists.
+   * Throw error if tag already exists in local.
    */
   checkTag?: boolean;
+  /**
+   * Throw error if tag already exists in remote.
+   */
+  checkRemoteTag?: boolean;
   /**
    * Ask for the ticket number if not found.
    */
   wantedTicket?: boolean;
+  /**
+   * Ask for verification of the changelog content.
+   */
+  askToVerifyContent?: boolean;
   /**
    * Use semantic commit message to map the `diff.groups`.
    *
@@ -89,6 +98,44 @@ export interface IProcess {
   useReleaseCandidateTag?: boolean;
 }
 /**
+ * Commands to run before and after the process.
+ */
+export interface IHook {
+  /**
+   * Commands to run after version is verified.
+   *
+   * Each string will be separated by space except the string inside the quotes.
+   * This will be run even in debug mode and not support templating as `Template`.
+   *
+   * Command exit code must be 0 to continue the process.
+   *
+   * Allowed variables:
+   * - `{version}`: version number
+   * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{ticket}`: ticket number
+   *
+   * @example ['echo "version: {version}"']
+   */
+  afterVerified?: string[];
+
+  /**
+   * Commands to run after all the process is done.
+   *
+   * Each string will be separated by space except the string inside the quotes.
+   * This will be run even in debug mode and not support templating as `Template`.
+   *
+   * Allowed variables:
+   * - `{version}`: version number
+   * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{ticket}`: ticket number
+   *
+   * @example ['echo "version: {version}"']
+   */
+  afterAll?: string[];
+}
+/**
  * Changelog settings.
  */
 export interface IChangelog {
@@ -101,7 +148,16 @@ export interface IChangelog {
    */
   destination?: string;
   /**
+   * Destination of changelog when in debug mode.
+   *
+   * @example 'CHANGELOG.debug.md'
+   * @default '`destination` with `.debug` suffix before the extension'
+   */
+  destinationDebug?: string;
+  /**
    * The changelog of specific version.
+   *
+   * Default will prepend `## ` before the first line.
    *
    * Allowed variables:
    * - `{content}`: new version changelog body from `diff`.
@@ -393,6 +449,17 @@ export interface ITagPR {
    */
   head?: string;
   /**
+   * Where to create the head branch.
+   *
+   * If this is not set, it will not create the head branch and use it directly to create the PR.
+   *
+   * Allowed variables:
+   * - `{name}`: tag name
+   *
+   * @example 'main'
+   */
+  headFrom?: string;
+  /**
    * Target branch.
    *
    * Allowed variables:
@@ -410,7 +477,9 @@ export interface ITagPR {
    */
   reviewers?: string[];
   /**
-   * What content to replace in the branch.
+   * What content to replace in the head branch.
+   *
+   * Remember to set `headFrom` if you want to create a new branch.
    */
   replacements?: IPRReplace[];
   /**
@@ -423,6 +492,8 @@ export interface ITagPR {
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{ticket}`: ticket number
+   *
+   * @default 'Bump to {version}'
    */
   commitMessage?: ITemplate;
 }
@@ -447,7 +518,7 @@ export interface IPRReplace {
    */
   paths: string[];
   /**
-   * Regular Expression pattern to find.
+   * Regular Expression pattern to find the text and replace it by `replacement`.
    *
    * @example `version: [0-9]+.[0-9]+.[0-9]+$`
    */
@@ -457,10 +528,13 @@ export interface IPRReplace {
    *
    * Allowed variables:
    * - `{version}`: version number
+   * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{ticket}`: ticket number
    *
    * @example `version: {version}`
    */
-  replacement: string;
+  replacement: ITemplate;
 }
 /**
  * How to sort the version, using unix sort algorithm.

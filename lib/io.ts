@@ -5,6 +5,7 @@ let debug = false;
 let verbose = false;
 let rl: readline.Interface | undefined;
 let mockFileContents: string[] = [];
+let mockAsk: string[] = [];
 
 export function startDebug(): void {
   debug = true;
@@ -27,6 +28,9 @@ export function isVerbose(): boolean {
 export function mockFileContent(text: string): void {
   mockFileContents.push(text);
 }
+export function mockAskContent(text: string): void {
+  mockAsk.push(text);
+}
 
 export function readFile(fileName: string): string {
   if (mockFileContents.length !== 0) {
@@ -47,6 +51,10 @@ export function writeFile(fileName: string, data: string) {
 }
 
 export function askQuestion(question: string): Promise<string> {
+  if (mockAsk.length !== 0) {
+    return Promise.resolve(mockAsk.shift()!);
+  }
+
   rl ??= readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -55,6 +63,7 @@ export function askQuestion(question: string): Promise<string> {
   return new Promise((resolve) => {
     rl!.question(question, (answer) => {
       resolve(answer);
+      rl!.close();
     });
   });
 }
