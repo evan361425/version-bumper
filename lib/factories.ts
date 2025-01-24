@@ -171,7 +171,9 @@ export class AutoLink implements IAutoLink {
     if (!result) return;
 
     const [hit, prefix, target, ...numList] = result;
-    const link = this.link.replace(/{num}/g, numList.find((e) => e) ?? '');
+    const link = this.link
+      .replaceAll('{num}', numList.find((e) => e) ?? '') // find the first number
+      .replaceAll('{value}', target!);
     return { hit, prefix: prefix!, target: target!, link };
   }
 }

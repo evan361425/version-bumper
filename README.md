@@ -170,7 +170,7 @@ and if we bump from v1.2.3 to v2.0.0, it will (default, and configurable) render
 ```bash
 $ bumper \
   v2.0.0 \
-  --autolink[]link 'https://jira-domain.com/ABC-{num}' \
+  --autolink[]link 'https://jira-domain.com/{value}' \
   --autolink[]match[]='ABC-{num}' \
   --diff-ignored[]=CHORE \
   --diff-scope[]=scope=ScopeName \
