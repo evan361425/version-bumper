@@ -1,5 +1,5 @@
 import { Config } from './config.js';
-import { BumperError } from './errors';
+import { BumperError } from './errors.js';
 import { askQuestion } from './io.js';
 import { log } from './logger.js';
 

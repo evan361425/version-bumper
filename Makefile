@@ -16,7 +16,8 @@ help: ## Display this help
 ##@ Build
 .PHONY: build-ts
 build-ts: clean ## Build js files to dist
-	npx tsc --project tsconfig.production.json
+	@npx tsc --project tsconfig.production.json
+	@cp bin/api/help-args.txt dist/bin/api/help-args.txt
 
 .PHONY: build-assets
 build-assets: ## Build assets

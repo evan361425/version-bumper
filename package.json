@@ -1,6 +1,6 @@
 {
   "name": "@evan361425/version-bumper",
-  "version": "1.1.4",
+  "version": "2.0.0",
   "description": "Helper to bump version",
   "bin": {
     "bumper": "./dist/bin/bumper.js"
@@ -9,8 +9,7 @@
     "type": "git",
     "url": "https://github.com/evan361425/version-bumper"
   },
-  "types": "./dist/lib/api.d.ts",
-  "main": "./dist/lib/api.js",
+  "main": "./dist/lib/bumper.js",
   "authors": [
     "呂學洲 <evan.lu@104.com.tw>"
   ],

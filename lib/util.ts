@@ -1,4 +1,4 @@
-import { BumperError } from './errors';
+import { BumperError } from './errors.js';
 
 const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 

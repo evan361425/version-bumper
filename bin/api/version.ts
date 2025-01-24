@@ -1,4 +1,4 @@
-import { command } from '../../lib/command';
+import { command } from '../../lib/command.js';
 
 export async function versionCommand(): Promise<string> {
   const info = await command('npm', ['search', '@evan361425/version-bumper', '--parseable', '--prefer-online']);
