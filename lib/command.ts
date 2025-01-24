@@ -61,6 +61,11 @@ export function command(name: string, args: string[], oneByOne?: (line: string) 
     });
     command.on('close', () => {
       if (error !== '') {
+        if (name === 'git' && args[0] === 'push') {
+          res(response);
+          return;
+        }
+
         const err = `${error}`.trim();
         log(`[cmd]: ${name} close with error: ${err}`);
         rej(new Error(`Command: ${name} ${args.join(' ')} \nerror:\n${err}`));
