@@ -318,7 +318,7 @@ export async function askForWantedVars(
   if (!tag.verify(version)) {
     throw new BumperError(`Version ${version} does not match the pattern ${tag.pattern}`);
   }
-  if (!tag.sort.firstIsGreaterThanSecond(version, last)) {
+  if (cfg.process.checkTag && !tag.sort.firstIsGreaterThanSecond(version, last)) {
     throw new BumperError(`Version ${version} is not greater than the last version ${last}`);
   }
 
