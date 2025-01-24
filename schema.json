@@ -130,24 +130,24 @@
           "items": {
             "type": "string"
           },
-          "description": "Commands to run after version is verified.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nCommand exit code must be 0 to continue the process.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number",
           "examples": [
             [
               "echo \"version: {version}\""
             ]
-          ]
+          ],
+          "title": "Commands to run after version is verified.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nCommand exit code must be 0 to continue the process.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
         },
         "afterAll": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Commands to run after all the process is done.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number",
           "examples": [
             [
               "echo \"version: {version}\""
             ]
-          ]
+          ],
+          "title": "Commands to run after all the process is done.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
         }
       },
       "additionalProperties": false,
@@ -186,7 +186,7 @@
           "title": "After update the changelog, commit the changes.",
           "default": {
             "message": {
-              "value": "chore: {\"versionName\" }bump to {version}"
+              "value": "chore: bump to {version}"
             },
             "addAll": false
           }
@@ -247,7 +247,7 @@
           "$ref": "#/definitions/ITemplate",
           "title": "Commit message template.\n\nAllowed variables:\n- `{version}`: current version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number",
           "default": {
-            "value": "chore: {\"versionName\" }bump to {version}"
+            "value": "chore: bump to {version}"
           }
         },
         "addAll": {
@@ -467,6 +467,13 @@
           ],
           "default": "main"
         },
+        "headFrom": {
+          "type": "string",
+          "description": "Where to create the head branch.\n\nIf this is not set, it will not create the head branch and use it directly to create the PR.\n\nAllowed variables:\n- `{name}`: tag name",
+          "examples": [
+            "main"
+          ]
+        },
         "base": {
           "type": "string",
           "description": "Target branch.\n\nAllowed variables:\n- `{name}`: tag name"
@@ -490,11 +497,12 @@
           "items": {
             "$ref": "#/definitions/IPRReplace"
           },
-          "description": "What content to replace in the branch."
+          "description": "What content to replace in the head branch.\n\nRemember to set `headFrom` if you want to create a new branch."
         },
         "commitMessage": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Commit message template.\n\nIf not set, it will use the message in `tag.prBranches[].replacements[].commitMessage`. One of them must be set.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number"
+          "description": "Commit message template.\n\nIf not set, it will use the message in `tag.prBranches[].replacements[].commitMessage`. One of them must be set.\n\nAllowed variables:\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{ticket}`: ticket number",
+          "default": "Bump to {version}"
         }
       },
       "required": [

@@ -113,6 +113,7 @@ export interface IHook {
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @example ['echo "version: {version}"']
@@ -129,6 +130,7 @@ export interface IHook {
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @example ['echo "version: {version}"']
@@ -163,6 +165,8 @@ export interface IChangelog {
    * - `{content}`: new version changelog body from `diff`.
    * - `{version}`: current version number
    * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{diffLink}`: link to the diff of this version
    * - `{ticket}`: ticket number
    * - `{date}`: current date, format is `YYYY-MM-DD`
@@ -184,6 +188,8 @@ export interface IChangelogCommit {
    * Allowed variables:
    * - `{version}`: current version number
    * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    */
   message?: ITemplate;
@@ -235,6 +241,8 @@ export interface IPR {
    * Allowed variables:
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    */
   title?: ITemplate;
@@ -244,6 +252,8 @@ export interface IPR {
    * Allowed variables:
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config, empty if not set
+   * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    * - `{content}`: changelog content
    * - `{diffLink}`: link to the diff of this version
@@ -390,6 +400,8 @@ export interface IRelease {
    * Allowed variables:
    * - `{version}`: current version number
    * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @example 'Stable-{version}'
@@ -403,6 +415,8 @@ export interface IRelease {
    * - `{content}`: new version changelog body.
    * - `{version}`: current version number
    * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{diffLink}`: link to the diff of this version
    * - `{ticket}`: ticket number
    *
@@ -491,6 +505,8 @@ export interface ITagPR {
    * Allowed variables:
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @default 'Bump to {version}'
@@ -510,6 +526,8 @@ export interface IPRReplace {
    * Allowed variables:
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    */
   commitMessage?: ITemplate;
@@ -530,6 +548,7 @@ export interface IPRReplace {
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
+   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @example `version: {version}`

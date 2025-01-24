@@ -69,10 +69,25 @@
 	                                 If `useSemanticTag` is enabled, it will pushed after the semantic tag.
 	                           type: boolean
 	                        default: false
-	--hook-after-verified[]          hook-after-verified[]
+	--hook-after-verified[]          Commands to run after version is verified.
+	                                 Each string will be separated by space except the string inside the quotes.
+	                                 This will be run even in debug mode and not support templating as `Template`.
+	                                 Command exit code must be 0 to continue the process.
+	                                 Allowed variables:
+	                                 - `{version}`: version number
+	                                 - `{versionName}`: version name set in tag config
+	                                 - `{versionLast}`: last version number
+	                                 - `{ticket}`: ticket number
 	                           type: array
 	                        default: <required>
-	--hook-after-all[]               hook-after-all[]
+	--hook-after-all[]               Commands to run after all the process is done.
+	                                 Each string will be separated by space except the string inside the quotes.
+	                                 This will be run even in debug mode and not support templating as `Template`.
+	                                 Allowed variables:
+	                                 - `{version}`: version number
+	                                 - `{versionName}`: version name set in tag config
+	                                 - `{versionLast}`: last version number
+	                                 - `{ticket}`: ticket number
 	                           type: array
 	                        default: <required>
 	--[no-]clog                      Enable changelog generation.
@@ -104,7 +119,7 @@
 	                                 - `{versionName}`: version name set in tag config
 	                                 - `{ticket}`: ticket number
 	                           type: template
-	                        default: -v=chore: {"versionName" }bump to {version}
+	                        default: -v=chore: bump to {version}
 	--[no-]clog-commit-add-all       Execute `git add .` not only the changelog.
 	                           type: boolean
 	                        default: false
@@ -171,6 +186,9 @@
 	--tag[]pr[]head                  tag[]pr[]head
 	                           type: string
 	                        default: main
+	--tag[]pr[]head-from             tag[]pr[]head-from
+	                           type: string
+	                        default: <required>
 	--tag[]pr[]base                  tag[]pr[]base
 	                           type: string
 	                        default: <required>
@@ -182,7 +200,7 @@
 	                        default: <required>
 	--tag[]pr[]commit                tag[]pr[]commit
 	                           type: template
-	                        default: <required>
+	                        default: -v=undefined
 	--tag[]pr[]repl[]paths[]         tag[]pr[]repl[]paths[]
 	                           type: array
 	                        default: <required>

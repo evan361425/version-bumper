@@ -183,6 +183,7 @@ export class Config {
       version: this.version,
       versionName: this.#tag.name,
       versionLast: this.versionLast,
+      versionNoPrefix: this.version.replace(/^[^0-9]*/, ''),
       ticket: this.ticket,
     };
   }

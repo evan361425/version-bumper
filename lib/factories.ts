@@ -815,6 +815,7 @@ export type VersionedTemplate = {
   version: string;
   versionName: string;
   versionLast: string;
+  versionNoPrefix: string;
   ticket: string;
 };
 export type ContentTemplate = VersionedTemplate & {

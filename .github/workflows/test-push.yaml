@@ -22,10 +22,6 @@ jobs:
         with:
           node-version: 20
 
-      - name: Lint and format
-        run: |
-          make install
-          make lint
-
       - name: Test
-        run: make test-ci
+        run: |
+          make test

@@ -28,19 +28,9 @@ build-assets: ## Build assets
 
 .PHONY: bump
 bump: ## Bump the version
-	@current=$$(echo '$(version)' | cut -c 2-); \
-	read -p "Enter new version(origin version $$current): " target; \
-	if [[ ! $$target =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
-		echo "Version must be in x.x.x format"; \
-		exit 1; \
-	fi; \
-	if [[ $$(echo -e "$$target\n$$current" | sort -V | head -n1) == $$target ]]; then \
-		echo "Version must be above $$current"; \
-		exit 1; \
-	fi; \
 	make build-assets; \
-	npm version --no-commit-hooks --no-git-tag-version $$target; \
-	bumper --latestVersion=v$$target
+	bumper \
+		--hook-after-verified[] 'npm version --no-commit-hooks --no-git-tag-version {versionNoPrefix}'
 
 ##@ Dev
 
@@ -87,15 +77,6 @@ test-unit: ## Run tests without lint
 .PHONY: test-only
 test-only: ## Run tests with only statement
 	node --import tsx --test-only --test --test-timeout 60000 test/*.spec.ts
-
-.PHONY: test-ci
-test-ci: clean ## Run tests for CI
-	mkdir -p coverage
-	npx tsc # compile files
-	if ! node --test --experimental-test-coverage --test-timeout 60000 --test-reporter=spec \
-		dist/test/*.spec.js; then \
-		node --test dist/test/*.spec.js; \
-	fi
 
 .PHONY: test-coverage
 test-coverage: clean ## Run tests with coverage and re-run without coverage if failed (to show error message)
