@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Please check git diff.
 
+## [v2.0.2] - 2025-01-24
+
+### Fixed
+
+- ([fd19987](https://github.com/evan361425/version-bumper/commit/fd1998722329a7aefe0abe5fe845606a0e9034f0)) using value for autolink - @wu0dj2k7ao3
+- ([410ed87](https://github.com/evan361425/version-bumper/commit/410ed8715ee1e1297506842d14d212d9ad18f7bd)) correct only mode - @wu0dj2k7ao3
+
 ## [v2.0.1] - 2025-01-24
 
 ### Fixed
@@ -217,7 +224,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.0.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.0.2...HEAD
+[v2.0.2]: https://github.com/evan361425/version-bumper/compare/v2.0.1...v2.0.2
 [v2.0.1]: https://github.com/evan361425/version-bumper/compare/v2.0.0...v2.0.1
 [v1.1.4]: https://github.com/evan361425/version-bumper/compare/v1.1.3...v1.1.4
 [v1.1.3]: https://github.com/evan361425/version-bumper/compare/v1.1.2...v1.1.3
