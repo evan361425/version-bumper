@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Please check git diff.
 
+## [v2.0.0] - 2025-01-24
+
+- New interfaces to make command line more easy.
+- Remove environment variables supported.
+- Allow change files in PR.
+
 ## [v1.1.4] - 2024-07-17
 
 - ([a367db9](https://github.com/evan361425/version-bumper/commit/a367db9b3cde2e2c91544f90484679f9110f2bdf)) fix: correctly find latest version - wu0dj2k7ao3
