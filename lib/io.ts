@@ -3,7 +3,6 @@ import readline from 'node:readline';
 
 let debug = false;
 let verbose = false;
-let rl: readline.Interface | undefined;
 let mockFileContents: string[] = [];
 let mockAsk: string[] = [];
 
@@ -55,15 +54,17 @@ export function askQuestion(question: string): Promise<string> {
     return Promise.resolve(mockAsk.shift()!);
   }
 
-  rl ??= readline.createInterface({
+  const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
   return new Promise((resolve) => {
-    rl!.question(question, (answer) => {
+    rl.question(question, (answer) => {
       resolve(answer);
-      rl!.close();
+      rl.close();
+      // https://stackoverflow.com/questions/44153552/readline-doesnt-stop-line-reading-after-rl-close-emit-in-nodejs
+      rl.removeAllListeners();
     });
   });
 }

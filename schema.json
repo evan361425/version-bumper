@@ -101,7 +101,8 @@
         },
         "askToVerifyContent": {
           "type": "boolean",
-          "title": "Ask for verification of the changelog content."
+          "title": "Ask for verification of the changelog content.",
+          "default": true
         },
         "useSemanticGroups": {
           "type": "boolean",

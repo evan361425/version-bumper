@@ -64,7 +64,7 @@
     Ask for the ticket number if not found.
   --[no-]ask-to-verify-content
     type: boolean
-    default: <required>
+    default: true
     Ask for verification of the changelog content.
   --[no-]semantic-groups
     type: boolean

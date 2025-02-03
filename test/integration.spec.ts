@@ -204,7 +204,9 @@ ${content}`,
     const cfg = new Config(
       {
         repo: { link: 'https://github.com/a/b' },
-        process: {},
+        process: {
+          askToVerifyContent: false,
+        },
         changelog: { enable: false },
       },
       loadConfigFromArgs([`--tag[]name=semantic`, `--tag[]pr[]base=deploy`]),
@@ -226,11 +228,12 @@ ${content}`,
     await createPR(cfg);
 
     const mockedCommand = resetMocked()[1];
-    assert.deepStrictEqual(mockedCommand, [
+    assert.deepStrictEqual(mockedCommand?.slice(0, 3), [
       'git tag --list --sort=-v:refname',
       'git tag -l v1.2.3',
       'git log --pretty=%H %al %s HEAD...v1.2.2',
-      'git tag v1.2.3 -m [v1.2.3] - 2025-01-24\n\nNo commits found.',
+    ]);
+    assert.deepStrictEqual(mockedCommand?.slice(4), [
       'git push --tags --no-verify',
       'gh pr create --title New semantic version v1.2.3 --body This PR is auto-generated from bumper\n' +
         '\n' +

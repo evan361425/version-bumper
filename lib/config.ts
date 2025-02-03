@@ -32,6 +32,7 @@ export const DEFAULTS: IConfig = {
     useSemanticGroups: true,
     useSemanticTag: true,
     useReleaseCandidateTag: false,
+    askToVerifyContent: true,
   },
   hook: {
     afterVerified: [],
