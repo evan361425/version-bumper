@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Please check git diff.
 
+## [v2.0.4] - 2025-02-03
+
+### Fixed
+
+- ([7bdf7e3](https://github.com/evan361425/version-bumper/commit/7bdf7e3176cbe140690c1af8258f4b38a305d100)) correct pr number - @wu0dj2k7ao3
+
 ## [v2.0.3] - 2025-02-03
 
 ### Fixed
@@ -230,7 +236,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.0.3...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.0.4...HEAD
+[v2.0.4]: https://github.com/evan361425/version-bumper/compare/v2.0.3...v2.0.4
 [v2.0.3]: https://github.com/evan361425/version-bumper/compare/v2.0.2...v2.0.3
 [v2.0.2]: https://github.com/evan361425/version-bumper/compare/v2.0.1...v2.0.2
 [v2.0.1]: https://github.com/evan361425/version-bumper/compare/v2.0.0...v2.0.1
