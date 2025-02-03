@@ -549,6 +549,7 @@ export class TagPR implements ITagPR {
     await Promise.all(promises);
 
     let baseTree = await (this.headFrom ? this.#git.createBranch(this.headFrom) : this.#git.getRefSha());
+    const originTree = baseTree;
     // first create separate commit for replacement if needed
     for await (const replace of this.repl.filter((e) => e.commitMessage)) {
       log(`[pr] Start process PR for commit: ${replace.commitMessage!.formatted}`);
@@ -571,7 +572,12 @@ export class TagPR implements ITagPR {
       }
 
       const tree = await this.#git.updateFiles(baseTree, paths, files);
-      await this.#git.createCommit(baseTree, tree, msg);
+      baseTree = await this.#git.createCommit(baseTree, tree, msg);
+    }
+
+    if (originTree !== baseTree) {
+      verbose(`[pr] Update ref to ${baseTree} from ${originTree}`);
+      await this.#git.updateRef(baseTree);
     }
   }
 

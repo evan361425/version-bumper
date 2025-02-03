@@ -133,6 +133,7 @@ void describe('Bump', function () {
     mockCommandResponse('file-sha1\n');
     mockCommandResponse('\nfile-sha2\n');
     mockCommandResponse('\nnew-sha');
+    mockCommandResponse('final-sha');
     await createPR(cfg);
 
     const content = `### Fixed
@@ -177,6 +178,10 @@ void describe('Bump', function () {
     assert.strictEqual(
       getFirstMockedCommand(),
       "gh api -X POST repos/evan361425/version-bumper-2/git/commits -f message='custom bump to v1.2.3' -f tree=new-sha -f parents[]=base-sha --jq .sha",
+    );
+    assert.strictEqual(
+      getFirstMockedCommand(),
+      'gh api -X PATCH repos/evan361425/version-bumper-2/git/refs/heads/temp-semantic -f sha=final-sha',
     );
     assert.strictEqual(
       getFirstMockedCommand(),

@@ -192,6 +192,17 @@ export class GitDatabase {
     ).trim();
   }
 
+  async updateRef(sha: string): Promise<void> {
+    await command('gh', [
+      'api',
+      '-X',
+      'PATCH', // update partial data
+      `repos/${this.repo}/git/refs/heads/${this.branch}`,
+      '-f',
+      `sha=${sha}`,
+    ]);
+  }
+
   /**
    * Create a new commit in the repository.
    *
