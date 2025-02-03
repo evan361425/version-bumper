@@ -253,6 +253,9 @@ export class Diff implements IDiff {
     }
 
     this.#content = await this.formatCommit(result.commits, repo);
+    if (!this.#content) {
+      this.#content = 'No content found.';
+    }
   }
 
   /**
