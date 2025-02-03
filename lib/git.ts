@@ -91,22 +91,32 @@ export class GitDatabase {
     const sha = await this.getRefSha(src);
     verbose(`[git] Creating branch '${this.branch}' in ${this.repo} from ${src}(${sha})`);
 
-    return await command('gh', [
+    return (
+      await command('gh', [
+        'api',
+        '-X',
+        'POST',
+        `repos/${this.repo}/git/refs`,
+        '-f',
+        `ref=refs/heads/${this.branch}`,
+        '-f',
+        `sha=${sha}`,
+        '--jq',
+        '.object.sha',
+      ])
+    ).trim();
+  }
+
+  async getRefSha(ref?: string): Promise<string> {
+    const sha = await command('gh', [
       'api',
-      '-X',
-      'POST',
-      `repos/${this.repo}/git/refs`,
-      '-f',
-      `ref=refs/heads/${this.branch}`,
-      '-f',
-      `sha=${sha}`,
+      `repos/${this.repo}/git/refs/heads/${ref ?? this.branch}`,
       '--jq',
       '.object.sha',
     ]);
-  }
 
-  getRefSha(ref?: string): Promise<string> {
-    return command('gh', ['api', `repos/${this.repo}/git/refs/heads/${ref ?? this.branch}`, '--jq', '.object.sha']);
+    // It will contains new line, which need to be removed
+    return sha.trim();
   }
 
   /**
@@ -142,18 +152,20 @@ export class GitDatabase {
 
     const contentShas = [];
     for await (const content of contents) {
-      const sha = await command('gh', [
-        'api',
-        '-X',
-        'POST',
-        `repos/${this.repo}/git/blobs`,
-        '-f',
-        `content=${Buffer.from(content).toString('base64')}`,
-        '-f',
-        `encoding=base64`,
-        '--jq',
-        '.sha',
-      ]);
+      const sha = (
+        await command('gh', [
+          'api',
+          '-X',
+          'POST',
+          `repos/${this.repo}/git/blobs`,
+          '-f',
+          `content=${Buffer.from(content).toString('base64')}`,
+          '-f',
+          `encoding=base64`,
+          '--jq',
+          '.sha',
+        ])
+      ).trim();
       contentShas.push(sha);
     }
 
@@ -165,17 +177,19 @@ export class GitDatabase {
       apis.push('-f', `tree[][sha]=${contentShas[i]}`);
     }
 
-    return await command('gh', [
-      'api',
-      '-X',
-      'POST',
-      `repos/${this.repo}/git/trees`,
-      '-f',
-      `base_tree=${baseTree}`,
-      ...apis,
-      '--jq',
-      '.sha',
-    ]);
+    return (
+      await command('gh', [
+        'api',
+        '-X',
+        'POST',
+        `repos/${this.repo}/git/trees`,
+        '-f',
+        `base_tree=${baseTree}`,
+        ...apis,
+        '--jq',
+        '.sha',
+      ])
+    ).trim();
   }
 
   /**
@@ -186,20 +200,22 @@ export class GitDatabase {
   async createCommit(baseTree: string, tree: string, message: string): Promise<string> {
     verbose(`[git] Creating commit in ${this.repo} ${this.branch} with message: ${message}`);
 
-    return await command('gh', [
-      'api',
-      '-X',
-      'POST',
-      `repos/${this.repo}/git/commits`,
-      '-f',
-      `message='${message}'`,
-      '-f',
-      `tree=${tree}`,
-      '-f',
-      `parents[]=${baseTree}`,
-      '--jq',
-      '.sha',
-    ]);
+    return (
+      await command('gh', [
+        'api',
+        '-X',
+        'POST',
+        `repos/${this.repo}/git/commits`,
+        '-f',
+        `message='${message}'`,
+        '-f',
+        `tree=${tree}`,
+        '-f',
+        `parents[]=${baseTree}`,
+        '--jq',
+        '.sha',
+      ])
+    ).trim();
   }
 
   async hasTag(tag: string, checkRemote: boolean): Promise<boolean> {

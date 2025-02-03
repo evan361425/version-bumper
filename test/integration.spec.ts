@@ -127,12 +127,12 @@ void describe('Bump', function () {
     assert.strictEqual(getFirstMockedCommand(), 'git push --no-verify');
     assert.strictEqual(getFirstMockedCommand(), 'git push --tags --no-verify');
 
-    mockCommandResponse('base-sha');
+    mockCommandResponse('base-sha ');
     mockCommandResponse(Buffer.from('content1\nversion: v1.2.2\nabc').toString('base64'));
     mockCommandResponse(Buffer.from('content2\nversion: v1.2.2\ndef').toString('base64'));
-    mockCommandResponse('file-sha1');
-    mockCommandResponse('file-sha2');
-    mockCommandResponse('new-sha');
+    mockCommandResponse('file-sha1\n');
+    mockCommandResponse('\nfile-sha2\n');
+    mockCommandResponse('\nnew-sha');
     await createPR(cfg);
 
     const content = `### Fixed
