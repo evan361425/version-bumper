@@ -98,7 +98,7 @@ void describe('Bump', function () {
         'hash1hash1hash1hash1 wu0dj2k7ao3 fix(ABC-123): should update auto link',
         'hash2hash2hash2hash2 wu0dj2k7ao3 fix(test)!: breaking  change with pr #123',
         'hash3hash3hash3hash3 wu0dj2k7ao3 add(scope): some scope and auto link ABC-123',
-        'hash4hash4hash4hash4 wu0dj2k7ao3 feat: simple feature',
+        'hash4hash4hash4hash4 wu0dj2k7ao3 feat: simple feature (#124)',
         'hash5hash5hash5hash5 wu0dj2k7ao3 no any match should be ignored',
         'hash5hash6hash6hash6 wu0dj2k7ao3 fix: specific ignoring CHORE',
       ].join('\n'),
@@ -117,12 +117,12 @@ void describe('Bump', function () {
 ### Fixed
 
 - (hash1ha|ABC-123) should update auto link - @wu0dj2k7ao3
-- (hash2ha) test: breaking change with pr - @wu0dj2k7ao3
+- (123) test: breaking change with pr - @wu0dj2k7ao3
 
 ### Added
 
 - (hash3ha|ABC-123) ScopeOverride: some scope and auto link - @wu0dj2k7ao3
-- (hash4ha) simple feature - @wu0dj2k7ao3`,
+- (124) simple feature - @wu0dj2k7ao3`,
     );
     assert.strictEqual(getFirstMockedCommand(), 'git push --no-verify');
     assert.strictEqual(getFirstMockedCommand(), 'git push --tags --no-verify');
@@ -138,12 +138,12 @@ void describe('Bump', function () {
     const content = `### Fixed
 
 - ([hash1ha](https://github.com/evan361425/version-bumper-1/commit/hash1hash1hash1hash1)|[ABC-123](test-link-123)) should update auto link - @wu0dj2k7ao3
-- ([hash2ha](https://github.com/evan361425/version-bumper-1/commit/hash2hash2hash2hash2)) test: breaking change with pr - @wu0dj2k7ao3
+- ([123](https://github.com/evan361425/version-bumper-1/pull/123)) test: breaking change with pr - @wu0dj2k7ao3
 
 ### Added
 
 - ([hash3ha](https://github.com/evan361425/version-bumper-1/commit/hash3hash3hash3hash3)|[ABC-123](test-link-123)) ScopeOverride: some scope and auto link - @wu0dj2k7ao3
-- ([hash4ha](https://github.com/evan361425/version-bumper-1/commit/hash4hash4hash4hash4)) simple feature - @wu0dj2k7ao3`;
+- ([124](https://github.com/evan361425/version-bumper-1/pull/124)) simple feature - @wu0dj2k7ao3`;
     assert.strictEqual(
       getFirstMockedCommand(),
       'gh api repos/evan361425/version-bumper-2/git/refs/heads/temp-semantic --jq .object.sha',

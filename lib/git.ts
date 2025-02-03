@@ -28,7 +28,7 @@ export class GitCommit {
   }
 
   get pr(): string {
-    return (this._pr ??= this.titleFull.match(/\(?#(\d+)\)/)?.[1] ?? this.hash);
+    return (this._pr ??= this.titleFull.match(/\(?#(\d+)\)?/)?.[1] ?? this.hash);
   }
 
   get scope(): string {
@@ -47,7 +47,7 @@ export class GitCommit {
   parseTitle(autoLinks: IAutoLink[]): string {
     if (this._title) return this._title;
 
-    let title = this.titleTail.replace(/#\d+/, '');
+    let title = this.titleTail.replace(/\(?#\d+\)?/, '');
 
     const match = this.parseAutoLink(autoLinks);
     if (match) {
