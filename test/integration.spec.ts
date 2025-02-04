@@ -89,7 +89,7 @@ void describe('Bump', function () {
     assert.strictEqual(pr.replacements[0]!.replacement.value, 'version: {version}');
 
     await checkTag(cfg);
-    assert.strictEqual(getFirstMockedCommand(), 'git tag --list --sort=-v:refname');
+    assert.strictEqual(getFirstMockedCommand(), 'git tag --list --sort=-taggerdate');
     assert.strictEqual(getFirstMockedCommand(), 'git tag -l v1.2.3');
 
     mockAskContent('y');
@@ -117,12 +117,12 @@ void describe('Bump', function () {
 ### Fixed
 
 - (hash1ha|ABC-123) should update auto link - @wu0dj2k7ao3
-- (123) test: breaking change with pr - @wu0dj2k7ao3
+- (#123) test: breaking change with pr - @wu0dj2k7ao3
 
 ### Added
 
 - (hash3ha|ABC-123) ScopeOverride: some scope and auto link - @wu0dj2k7ao3
-- (124) simple feature - @wu0dj2k7ao3`,
+- (#124) simple feature - @wu0dj2k7ao3`,
     );
     assert.strictEqual(getFirstMockedCommand(), 'git push --no-verify');
     assert.strictEqual(getFirstMockedCommand(), 'git push --tags --no-verify');
@@ -139,12 +139,12 @@ void describe('Bump', function () {
     const content = `### Fixed
 
 - ([hash1ha](https://github.com/evan361425/version-bumper-1/commit/hash1hash1hash1hash1)|[ABC-123](test-link-123)) should update auto link - @wu0dj2k7ao3
-- ([123](https://github.com/evan361425/version-bumper-1/pull/123)) test: breaking change with pr - @wu0dj2k7ao3
+- ([#123](https://github.com/evan361425/version-bumper-1/pull/123)) test: breaking change with pr - @wu0dj2k7ao3
 
 ### Added
 
 - ([hash3ha](https://github.com/evan361425/version-bumper-1/commit/hash3hash3hash3hash3)|[ABC-123](test-link-123)) ScopeOverride: some scope and auto link - @wu0dj2k7ao3
-- ([124](https://github.com/evan361425/version-bumper-1/pull/124)) simple feature - @wu0dj2k7ao3`;
+- ([#124](https://github.com/evan361425/version-bumper-1/pull/124)) simple feature - @wu0dj2k7ao3`;
     assert.strictEqual(
       getFirstMockedCommand(),
       'gh api repos/evan361425/version-bumper-2/git/refs/heads/temp-semantic --jq .object.sha',
@@ -185,12 +185,11 @@ void describe('Bump', function () {
     );
     assert.strictEqual(
       getFirstMockedCommand(),
-      `gh pr create --title 666 - New semantic version v1.2.3 --body This PR is auto-generated from bumper
+      `gh pr create --title 666 - Bump version v1.2.3 --body This PR is auto-generated from [bumper](https://github.com/evan361425/version-bumper).
 
 - ticket: 666
-- name: semantic
-- version: v1.2.3
-- [diff link](https://github.com/evan361425/version-bumper-1/compare/v1.2.2...v1.2.3)
+- version: [v1.2.3](https://github.com/evan361425/version-bumper-1/releases/tag/v1.2.3)
+- [v1.2.2 - v1.2.3](https://github.com/evan361425/version-bumper-1/compare/v1.2.2...v1.2.3)
 
 ${content}
  --assignee @me --base main --head temp-semantic --repo evan361425/version-bumper-2 --reviewer user-1 --reviewer user-2 --label label-1 --label label-2`,
@@ -234,17 +233,16 @@ ${content}`,
 
     const mockedCommand = resetMocked()[1];
     assert.deepStrictEqual(mockedCommand?.slice(0, 3), [
-      'git tag --list --sort=-v:refname',
+      'git tag --list --sort=-taggerdate',
       'git tag -l v1.2.3',
       'git log --pretty=%H %al %s HEAD...v1.2.2',
     ]);
     assert.deepStrictEqual(mockedCommand?.slice(4), [
       'git push --tags --no-verify',
-      'gh pr create --title New semantic version v1.2.3 --body This PR is auto-generated from bumper\n' +
+      'gh pr create --title Bump version v1.2.3 --body This PR is auto-generated from [bumper](https://github.com/evan361425/version-bumper).\n' +
         '\n' +
-        '- name: semantic\n' +
-        '- version: v1.2.3\n' +
-        '- [diff link](https://github.com/a/b/compare/v1.2.2...v1.2.3)\n' +
+        '- version: [v1.2.3](https://github.com/a/b/releases/tag/v1.2.3)\n' +
+        '- [v1.2.2 - v1.2.3](https://github.com/a/b/compare/v1.2.2...v1.2.3)\n' +
         '\n' +
         'No commits found.\n' +
         ' --assignee @me --base deploy --head main --repo a/b',

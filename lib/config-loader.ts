@@ -320,8 +320,15 @@ export async function askForWantedVars(
   if (!tag.verify(version)) {
     throw new BumperError(`Version ${version} does not match the pattern ${tag.pattern}`);
   }
-  if (cfg.process.checkTag && !tag.sort.firstIsGreaterThanSecond(version, last)) {
-    throw new BumperError(`Version ${version} is not greater than the last version ${last}`);
+  if (cfg.process.checkTag) {
+    if (!tag.sort.firstIsGreaterThanSecond(version, last)) {
+      throw new BumperError(`Version ${version} is not greater than the last version ${last}`);
+    }
+  } else {
+    if (version === last) {
+      // avoid getting same version
+      await tag.updateLastTag(version);
+    }
   }
 
   let ticket = getValueFromArgs('ticket', args);

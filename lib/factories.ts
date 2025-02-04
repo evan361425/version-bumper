@@ -309,18 +309,18 @@ export class Diff implements IDiff {
         continue;
       }
 
-      const hashLink = `[${commit.hash}](${repo.commitLink(commit.hashFull)})`;
       const autoLink = commit.parseAutoLink(this.#autoLinks);
       const content = await this.item.formatContent({
+        repo: repo.name,
         title: commit.parseTitle(this.#autoLinks),
         titleTail: commit.titleTail,
         titleFull: commit.titleFull,
         author: commit.author,
         hash: commit.hash,
-        hashLink,
+        hashLink: `[${commit.hash}](${repo.commitLink(commit.hashFull)})`,
         hashFull: commit.hashFull,
         pr: commit.pr,
-        prLink: commit.pr === commit.hash ? hashLink : `[${commit.pr}](${repo.prLink(Number(commit.pr))})`,
+        prLink: commit.pr ? `[${commit.pr}](${repo.prLink(Number(commit.pr))})` : '',
         scope: this.scopeNames[commit.scope] ?? commit.scope,
         autoLink: autoLink ? `[${autoLink.target}](${autoLink.link})` : '',
       });
@@ -406,11 +406,19 @@ export class Tag implements ITag {
   /**
    * Find the last same pattern tag.
    */
-  async findLastTag(): Promise<string> {
+  async findLastTag(notEqual?: string): Promise<string> {
     if (this.#lastTag !== undefined) return this.#lastTag;
 
-    const tag = await command('git', ['tag', '--list', '--sort=-v:refname'], (e) => this.verify(e.trim()));
+    const tag = await command('git', ['tag', '--list', '--sort=-taggerdate'], (e) => e !== notEqual && this.verify(e));
     return (this.#lastTag = tag?.trim() ?? '');
+  }
+
+  /**
+   * If use enter same tag as last one, call this method to find the last tag again.
+   */
+  async updateLastTag(last: string): Promise<void> {
+    this.#lastTag = undefined;
+    await this.findLastTag(last);
   }
 
   /**
@@ -794,23 +802,30 @@ export class Template<T extends Record<string, string>> implements ITemplate {
   async formatContent(data: T): Promise<string> {
     let content = await this.fetchContent();
 
+    const PREFIX = '(?:}}|""|[^}"])';
+    const SUFFIX = '(?:}}|""|\\|\\||[^}|"])';
     Object.entries(data).forEach(([key, value]) => {
-      content = content.replace(new RegExp(`\{([^"}]*"(${key})"[^"}]*|${key})\}`, 'g'), (key) => {
-        if (!value) {
-          return '';
-        }
+      content = content.replace(
+        new RegExp(`{((${PREFIX}*"${key}(\\.[a-zA-Z]+)?"${SUFFIX}*)(\\|[^}]+)?|${key})}`, 'g'),
+        (_, __, main?: string, method?: string, sub?: string) => {
+          if (!value) {
+            const s = sub?.slice(1) ?? '';
+            return data[s] ?? s;
+          }
 
-        // remove the curly braces
-        let [prefix, name, suffix] = key.slice(1, -1).split('"');
-        // not using quote mode
-        if (!name) {
-          return value;
-        }
+          // only pure key matched.
+          if (!main) {
+            return value;
+          }
 
-        prefix = prefix?.replaceAll('<NL>', '\n') ?? '';
-        suffix = suffix?.replaceAll('<NL>', '\n') ?? '';
-        return `${prefix}${value}${suffix}`;
-      });
+          let [prefix, ___, suffix] = main.split('"');
+          prefix = prefix?.replaceAll('<NL>', '\n').replaceAll('""', '"').replaceAll('}}', '}') ?? '';
+          suffix =
+            suffix?.replaceAll('<NL>', '\n').replaceAll('""', '"').replaceAll('}}', '}').replaceAll('||', '|') ?? '';
+
+          return `${processTemplateMethod(value, prefix, method?.slice(1))}${suffix}`;
+        },
+      );
     });
 
     return (this.#formatted = content);
@@ -835,10 +850,10 @@ export class Template<T extends Record<string, string>> implements ITemplate {
 }
 
 export type VersionedTemplate = {
+  repo: string;
   version: string;
   versionName: string;
   versionLast: string;
-  versionNoPrefix: string;
   ticket: string;
 };
 export type ContentTemplate = VersionedTemplate & {
@@ -850,6 +865,7 @@ export type ChangelogTemplate = VersionedTemplate & {
   time: string;
 };
 export type CommitTemplate = {
+  repo: string;
   title: string;
   titleTail: string;
   titleFull: string;
@@ -862,3 +878,19 @@ export type CommitTemplate = {
   autoLink: string;
   scope: string;
 };
+
+function processTemplateMethod(value: string, prefix: string, method?: string): string {
+  switch (method) {
+    case 'upper':
+      return prefix + value.toUpperCase();
+    case 'lower':
+      return prefix + value.toLowerCase();
+    case 'noPrefix':
+      return prefix + value.replace(/^[^0-9]*/, '');
+    case 'prefixInLink':
+      return value.startsWith('[') ? `[${prefix}${value.slice(1)}` : prefix + value;
+    case 'trim':
+      return prefix + value.trim();
+  }
+  return prefix + value;
+}

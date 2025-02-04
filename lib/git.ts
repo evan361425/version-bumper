@@ -28,7 +28,7 @@ export class GitCommit {
   }
 
   get pr(): string {
-    return (this._pr ??= this.titleFull.match(/\(?#(\d+)\)?/)?.[1] ?? this.hash);
+    return (this._pr ??= this.titleFull.match(/\(?#(\d+)\)?/)?.[1] ?? '');
   }
 
   get scope(): string {

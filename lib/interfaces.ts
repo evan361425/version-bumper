@@ -110,10 +110,10 @@ export interface IHook {
    * Command exit code must be 0 to continue the process.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @example ['echo "version: {version}"']
@@ -127,10 +127,10 @@ export interface IHook {
    * This will be run even in debug mode and not support templating as `Template`.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @example ['echo "version: {version}"']
@@ -162,11 +162,11 @@ export interface IChangelog {
    * Default will prepend `## ` before the first line.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{content}`: new version changelog body from `diff`.
    * - `{version}`: current version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{diffLink}`: link to the diff of this version
    * - `{ticket}`: ticket number
    * - `{date}`: current date, format is `YYYY-MM-DD`
@@ -186,10 +186,10 @@ export interface IChangelogCommit {
    * Commit message template.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: current version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    */
   message?: ITemplate;
@@ -239,10 +239,10 @@ export interface IPR {
    * Will replace new line with space and trim the title before use.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    */
   title?: ITemplate;
@@ -250,10 +250,10 @@ export interface IPR {
    * PR's body template.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config, empty if not set
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    * - `{content}`: changelog content
    * - `{diffLink}`: link to the diff of this version
@@ -280,6 +280,7 @@ export interface IDiff {
    * Template of single list item.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{title}`: commit title after `:` add will remove all the pr number and autoLink if found
    * - `{titleTail}`: commit title after `:`
    * - `{titleFull}`: full commit title, which is the first line of the commit message
@@ -287,7 +288,7 @@ export interface IDiff {
    * - `{hash}`: commit hash, but only first 7 characters
    * - `{hashLink}`: commit hash with link, like `[hash](link)`
    * - `{hashFull}`: commit hash
-   * - `{pr}`: PR number, if not found, it will use `hash`
+   * - `{pr}`: PR number
    * - `{prLink}`: PR number with link, like `[PR](link)`
    * - `{autoLink}`: value of first match auto links, usually will be ticket number
    * - `{scope}`: commit scope, see `scopeNames`
@@ -398,10 +399,10 @@ export interface IRelease {
    * Title of the release.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: current version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @example 'Stable-{version}'
@@ -412,11 +413,11 @@ export interface IRelease {
    * Release body.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{content}`: new version changelog body.
    * - `{version}`: current version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{diffLink}`: link to the diff of this version
    * - `{ticket}`: ticket number
    *
@@ -503,10 +504,10 @@ export interface ITagPR {
    * One of them must be set.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @default 'chore: bump to {version}'
@@ -524,10 +525,10 @@ export interface IPRReplace {
    * One of them must be set.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    */
   commitMessage?: ITemplate;
@@ -545,10 +546,10 @@ export interface IPRReplace {
    * Replacement string.
    *
    * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
    * - `{version}`: version number
    * - `{versionName}`: version name set in tag config
    * - `{versionLast}`: last version number
-   * - `{versionNoPrefix}`: remove any character before first number
    * - `{ticket}`: ticket number
    *
    * @example `version: {version}`

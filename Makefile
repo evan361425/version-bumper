@@ -26,6 +26,7 @@ build-assets: ## Build assets
 	@printf '```\n' >> docs/commands.md
 	@node --import tsx bin/schema.ts > schema.json
 	@node --import tsx bin/help.ts > bin/api/help-args.txt
+	@node --import tsx bin/default.ts > config.default.json
 
 .PHONY: bump
 bump: ## Bump the version

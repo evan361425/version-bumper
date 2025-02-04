@@ -149,6 +149,37 @@ bumper \
   --tag[]pr[]reviewers[]=user-1
 ```
 
+## Template
+
+Powerful template language help customize output.
+
+When you see type is "template", it means you can do these things:
+
+- Directly set by suffix `-v`, like `<prefix>-v='Bump to {version}'`,
+  prefix is the key name like "clog-commit".
+- Load content from a file, like `<prefix>-f=./path/to/file`.
+- Load content from GitHub, like `<prefix>-gh-repo=example/example`,
+  `<prefix>-gh-branch=master`, `<prefix>-gh-path=path/to/file`.
+
+Template variables can bind as:
+
+- `{<key>}` for the `<key>` name, like `{versionName}` for the name of version
+- `{<prefix>"<key>"<suffix>}` for the `<key>` name with prefix and suffix,
+  like `Hi, {Version "version" is created}`
+  If `<version>` is `1.0.0`,
+  will be `Hi, Version 1.0.0 is created`,
+  and if `<version>` is empty, it will be `Hi,`.
+- Special characters `<NL>` will be replaced with new line.
+- Special characters `"` can be escaped with `""` and same with `}` and `|`.
+- Suffix end with `|<fallback>` will be replaced with `<fallback>` if empty,
+  `<fallback>` can also using variable but without prefix and suffix,
+  if `<version>` is empty, it will be `Hi, no version`.
+- Key suffix with `.<method>` will be processed by the method,
+  - upper: uppercase the value
+  - lower: lowercase the value
+  - trim: trim the value
+  - noPrefix: remove any character before first number, useful for tag name like "v1.0.0"
+
 ## Changelog
 
 Changelog default using [keep a changelog](https://keepachangelog.com/en/1.0.0/) format

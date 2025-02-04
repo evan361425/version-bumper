@@ -43,7 +43,7 @@ export function command(name: string, args: string[], oneByOne?: (line: string) 
       const lines = data.toString();
       if (oneByOne !== undefined) {
         for (const line of lines.split('\n').filter(Boolean)) {
-          if (oneByOne(line)) {
+          if (oneByOne(line.trim())) {
             command.kill();
             res(line);
             return;

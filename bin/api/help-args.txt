@@ -96,10 +96,10 @@
     This will be run even in debug mode and not support templating as `Template`.
     Command exit code must be 0 to continue the process.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
   --hook-after-all[]
     type: array
@@ -108,10 +108,10 @@
     Each string will be separated by space except the string inside the quotes.
     This will be run even in debug mode and not support templating as `Template`.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
   --[no-]clog
     type: boolean
@@ -133,11 +133,11 @@
     The changelog of specific version.
     Default will prepend `## ` before the first line.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{content}`: new version changelog body from `diff`.
     - `{version}`: current version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{diffLink}`: link to the diff of this version
     - `{ticket}`: ticket number
     - `{date}`: current date, format is `YYYY-MM-DD`
@@ -147,10 +147,10 @@
     default: -v=chore: bump to {version}
     Commit message template.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: current version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
   --[no-]clog-commit-add-all
     type: boolean
@@ -176,20 +176,20 @@
     This will trim the title to 100 characters and append `...` if it's too long.
     Will replace new line with space and trim the title before use.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
   --pr-body
     type: template
     default: <required>
     PR's body template.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: version number
     - `{versionName}`: version name set in tag config, empty if not set
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
     - `{content}`: changelog content
     - `{diffLink}`: link to the diff of this version
@@ -212,9 +212,10 @@
     If two groups have the same priority, the first one will be used.
   --diff-item
     type: template
-    default: -v=- ({prLink}{|"autoLink"}) {"scope": }{title}{ - @"author"}
+    default: -v=- ({#"prLink.prefixInLink"|hashLink}{|"autoLink"}) {"scope": }{title}{ - @"author"}
     Template of single list item.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{title}`: commit title after `:` add will remove all the pr number and autoLink if found
     - `{titleTail}`: commit title after `:`
     - `{titleFull}`: full commit title, which is the first line of the commit message
@@ -222,7 +223,7 @@
     - `{hash}`: commit hash, but only first 7 characters
     - `{hashLink}`: commit hash with link, like `[hash](link)`
     - `{hashFull}`: commit hash
-    - `{pr}`: PR number, if not found, it will use `hash`
+    - `{pr}`: PR number
     - `{prLink}`: PR number with link, like `[PR](link)`
     - `{autoLink}`: value of first match auto links, usually will be ticket number
     - `{scope}`: commit scope, see `scopeNames`
@@ -295,10 +296,10 @@
     If not set, it will use the message in `tag.prBranches[].replacements[].commitMessage`.
     One of them must be set.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
   --tag[]pr[]repl[]paths[]
     type: array
@@ -313,10 +314,10 @@
     default: <required>
     Replacement string.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
   --tag[]pr[]repl[]commit
     type: template
@@ -325,10 +326,10 @@
     If not set, it will use the message in `tag.prBranches[].commitMessage`.
     One of them must be set.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
   --[no-]tag[]release
     type: boolean
@@ -339,21 +340,21 @@
     default: -v=undefined
     Title of the release.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{version}`: current version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{ticket}`: ticket number
   --tag[]release-body
     type: template
     default: -v=undefined
     Release body.
     Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
     - `{content}`: new version changelog body.
     - `{version}`: current version number
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
-    - `{versionNoPrefix}`: remove any character before first number
     - `{diffLink}`: link to the diff of this version
     - `{ticket}`: ticket number
   --[no-]tag[]release-draft

@@ -1,0 +1,106 @@
+{
+  "$schema": "./schema.json",
+  "repo": {
+    "link": ""
+  },
+  "process": {
+    "bump": true,
+    "push": true,
+    "pr": true,
+    "release": true,
+    "checkTag": true,
+    "checkRemoteTag": false,
+    "wantedTicket": false,
+    "useSemanticGroups": true,
+    "useSemanticTag": true,
+    "useReleaseCandidateTag": false,
+    "askToVerifyContent": true
+  },
+  "hook": {
+    "afterVerified": [],
+    "afterAll": []
+  },
+  "changelog": {
+    "enable": true,
+    "destination": "CHANGELOG.md",
+    "section": {
+      "value": "[{version}] - {date}\n\n{content}"
+    },
+    "commit": {
+      "message": {
+        "value": "chore: bump to {version}"
+      },
+      "addAll": true
+    }
+  },
+  "autoLinks": [],
+  "pr": {
+    "title": {
+      "value": "{\"ticket\" - }Bump version {version}"
+    },
+    "body": {
+      "value": "This PR is auto-generated from [bumper](https://github.com/evan361425/version-bumper).\n{<NL>- ticket: \"ticket\"}\n- version: [{version}]({repo}/releases/tag/{version})\n- [{versionLast} - {version}]({diffLink})\n\n{content}\n"
+    }
+  },
+  "diff": {
+    "groups": [
+      {
+        "matches": [
+          "^fix"
+        ],
+        "title": "Fixed",
+        "priority": 0
+      },
+      {
+        "matches": [
+          "^feat",
+          "^add"
+        ],
+        "title": "Added",
+        "priority": 0
+      },
+      {
+        "matches": [
+          "^[w()]+!",
+          "BREAKING CHANGE"
+        ],
+        "title": "Changed",
+        "priority": 1
+      }
+    ],
+    "item": {
+      "value": "- ({#\"prLink.prefixInLink\"|hashLink}{|\"autoLink\"}) {\"scope\": }{title}{ - @\"author\"}"
+    },
+    "scopeNames": {},
+    "ignored": [],
+    "ignoreOthers": true,
+    "othersTitle": "Others"
+  },
+  "tags": [
+    {
+      "name": "semantic",
+      "pattern": "v[0-9]+\\.[0-9]+\\.[0-9]+",
+      "withChangelog": true,
+      "release": {
+        "enable": true,
+        "title": {
+          "value": "{version}"
+        },
+        "body": {
+          "value": "{Ticket: \"ticket\"<NL><NL>}{content}"
+        },
+        "preRelease": false,
+        "draft": false
+      },
+      "prs": [],
+      "sort": {
+        "separator": ".",
+        "fields": [
+          "1,1",
+          "2,2",
+          "3,3"
+        ]
+      }
+    }
+  ]
+}

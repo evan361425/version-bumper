@@ -54,13 +54,13 @@ export const DEFAULTS: IConfig = {
   autoLinks: [],
   pr: {
     title: {
-      value: '{"ticket" - }New {"versionName" }version {version}',
+      value: '{"ticket" - }Bump version {version}',
     },
     body: {
-      value: `This PR is auto-generated from bumper
-{<NL>- ticket: "ticket"}{<NL>- name: "versionName"}
-- version: {version}
-- [diff link]({diffLink})
+      value: `This PR is auto-generated from [bumper](https://github.com/evan361425/version-bumper).
+{<NL>- ticket: "ticket"}
+- version: [{version}]({repo}/releases/tag/{version})
+- [{versionLast} - {version}]({diffLink})
 
 {content}
 `,
@@ -69,7 +69,7 @@ export const DEFAULTS: IConfig = {
   diff: {
     groups: [],
     item: {
-      value: `- ({prLink}{|"autoLink"}) {"scope": }{title}{ - @"author"}`,
+      value: `- ({#"prLink.prefixInLink"|hashLink}{|"autoLink"}) {"scope": }{title}{ - @"author"}`,
     },
     scopeNames: {},
     ignored: [],
@@ -183,10 +183,10 @@ export class Config {
 
   get versionTemplate(): VersionedTemplate {
     return {
+      repo: this.repo.link,
       version: this.version,
       versionName: this.#tag.name,
       versionLast: this.versionLast,
-      versionNoPrefix: this.version.replace(/^[^0-9]*/, ''),
       ticket: this.ticket,
     };
   }
