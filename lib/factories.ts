@@ -416,9 +416,11 @@ export class Tag implements ITag {
   /**
    * If use enter same tag as last one, call this method to find the last tag again.
    */
-  async updateLastTag(last: string): Promise<void> {
+  async updateLastTag(last: string): Promise<string> {
     this.#lastTag = undefined;
     await this.findLastTag(last);
+    log(`[bump] Last tag update to ${this.#lastTag}`);
+    return this.#lastTag!;
   }
 
   /**

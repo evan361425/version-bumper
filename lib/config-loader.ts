@@ -307,7 +307,7 @@ export async function askForWantedVars(
     throw new BumperError(`Tag ${tagName} not found in the configuration.`);
   }
 
-  const last = await tag.findLastTag();
+  let last = await tag.findLastTag();
 
   // start asking for the version
   let version = args[0] ?? '';
@@ -327,7 +327,7 @@ export async function askForWantedVars(
   } else {
     if (version === last) {
       // avoid getting same version
-      await tag.updateLastTag(version);
+      last = await tag.updateLastTag(version);
     }
   }
 
