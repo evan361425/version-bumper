@@ -27,6 +27,7 @@ export const configArgsMap: ConfigArguments<IConfig> = {
     checkRemoteTag: 'check-remote-tag',
     wantedTicket: 'wanted-ticket',
     askToVerifyContent: 'ask-to-verify-content',
+    askToChooseTag: 'ask-to-choose-tag',
     useSemanticGroups: 'semantic-groups',
     useSemanticTag: 'semantic-tag',
     useReleaseCandidateTag: 'rc-tag',
@@ -54,6 +55,12 @@ export const configArgsMap: ConfigArguments<IConfig> = {
   pr: {
     title: 'pr-title',
     body: 'pr-body',
+    repo: 'pr-repo',
+    head: 'pr-head',
+    headFrom: 'pr-head-from',
+    base: 'pr-base',
+    labels: ['pr-labels[]'],
+    reviewers: ['pr-reviewers[]'],
   },
   diff: {
     groups: [
@@ -81,6 +88,7 @@ export const configArgsMap: ConfigArguments<IConfig> = {
           base: 'tag[]pr[]base',
           labels: ['tag[]pr[]labels[]'],
           reviewers: ['tag[]pr[]reviewers[]'],
+          title: 'tag[]pr[]title',
           commitMessage: 'tag[]pr[]commit',
           replacements: [
             {
@@ -213,6 +221,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
       checkTag: processInfo.checkTag ?? getB(configArgsMap.process!.checkTag!),
       checkRemoteTag: processInfo.checkRemoteTag ?? getB(configArgsMap.process!.checkRemoteTag!),
       askToVerifyContent: processInfo.askToVerifyContent ?? getB(configArgsMap.process!.askToVerifyContent!),
+      askToChooseTag: getB(configArgsMap.process!.askToChooseTag!),
       useSemanticGroups: getB(configArgsMap.process!.useSemanticGroups!),
       useSemanticTag: getB(configArgsMap.process!.useSemanticTag!),
       useReleaseCandidateTag: getB(configArgsMap.process!.useReleaseCandidateTag!),
@@ -240,6 +249,12 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
     pr: {
       title: getTemplate(configArgsMap.pr!.title!),
       body: getTemplate(configArgsMap.pr!.body!),
+      repo: getV(configArgsMap.pr!.repo!),
+      head: getV(configArgsMap.pr!.head!),
+      headFrom: getV(configArgsMap.pr!.headFrom!),
+      base: getV(configArgsMap.pr!.base!),
+      labels: getArrayFromArgs(configArgsMap.pr!.labels![0]!, args),
+      reviewers: getArrayFromArgs(configArgsMap.pr!.reviewers![0]!, args),
     },
     diff: {
       groups: splitArrayArgs(args, 'diff-gp').map((ca) => {
@@ -271,6 +286,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
             base: getV(pr.base!, pra),
             labels: getArrayFromArgs(pr.labels![0]!, pra),
             reviewers: getArrayFromArgs(pr.reviewers![0]!, pra),
+            title: getTemplate(pr.title!, pra),
             commitMessage: getTemplate(pr.commitMessage!, pra),
             replacements: splitArrayArgs(pra, 'tag[]pr[]repl').map((repl) => {
               const r = pr.replacements![0]!;
@@ -300,7 +316,14 @@ export async function askForWantedVars(
   args: string[],
   cfg: Config,
 ): Promise<{ tag: Tag; version: string; ticket: string; versionLast: string }> {
-  const tagName = getValueFromArgs('tag', args) ?? cfg.tags[0]?.name;
+  let chosen: string | undefined;
+  if (cfg.process.askToChooseTag) {
+    const tags = cfg.tags.map((t, i) => `${t.name}(${i})`).join(', ');
+    const tag = await askQuestion(`Please choose the tag to bump: ${tags}\n`);
+    chosen = cfg.tags.find((t) => t.name === tag)?.name ?? cfg.tags[Number(tag)]?.name;
+  }
+
+  const tagName = chosen ?? getValueFromArgs('tag', args) ?? cfg.tags[0]?.name;
   const tag = cfg.tags.find((t) => t.name === tagName);
 
   if (!tag) {
@@ -332,8 +355,8 @@ export async function askForWantedVars(
   }
 
   let ticket = getValueFromArgs('ticket', args);
-  if (cfg.process.wantedTicket) {
-    ticket = ticket ?? (await askQuestion('Please provide the ticket number:\n'));
+  if (cfg.process.wantedTicket && !ticket) {
+    ticket = await askQuestion('Please provide the ticket number:\n');
   }
 
   return { version, ticket: ticket ?? '', tag, versionLast: last };

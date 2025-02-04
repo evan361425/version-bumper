@@ -65,6 +65,10 @@ export interface IProcess {
    */
   askToVerifyContent?: boolean;
   /**
+   * Ask to choose which tag pattern to bump if multiple tags found.
+   */
+  askToChooseTag?: boolean;
+  /**
    * Use semantic commit message to map the `diff.groups`.
    *
    * - `^fix` as `Fixed`
@@ -229,9 +233,58 @@ export interface IAutoLink {
   extract(content: string): IAutoLinkMatch | undefined;
 }
 /**
- * Pull Request settings.
+ * Pull Request global settings, custom setting can be found in `tags[].prs`.
  */
 export interface IPR {
+  /**
+   * Repository name.
+   *
+   * Format: `<owner>/<repo>`
+   *
+   * @default 'using `git remote get-url origin`, if not found, ignore this PR'
+   * @example `evan361425/version-bumper`
+   */
+  repo?: string;
+  /**
+   * Source branch.
+   *
+   * Allowed variables:
+   * - `{name}`: tag name
+   * - `{timestamp}`: current timestamp
+   *
+   * This will create the branch if not exists.
+   *
+   * @example 'master'
+   */
+  head?: string;
+  /**
+   * Where to create the head branch.
+   *
+   * If this is not set, it will not create the head branch and use it directly to create the PR.
+   *
+   * Allowed variables:
+   * - `{name}`: tag name
+   *
+   * @example 'main'
+   */
+  headFrom?: string;
+  /**
+   * Target branch.
+   *
+   * Allowed variables:
+   * - `{name}`: tag name
+   *
+   * @example `deploy/{name}`
+   */
+  base?: string;
+  /**
+   * Labels to add to the PR.
+   */
+  labels?: string[];
+  /**
+   * Reviewers to add to the PR.
+   */
+  reviewers?: string[];
   /**
    * PR's title template.
    *
@@ -444,45 +497,35 @@ export interface ITagPR {
   /**
    * Repository name.
    *
-   * Format: `<owner>/<repo>`
+   * see pr.repo
    *
-   * @default 'using `git remote get-url origin`, if not found, ignore this PR'
-   * @example `evan361425/version-bumper`
+   * @see IPR.repo
    */
   repo?: string;
   /**
    * Source branch.
    *
-   * Allowed variables:
-   * - `{name}`: tag name
-   * - `{timestamp}`: current timestamp
+   * see pr.head
    *
-   * This will create the branch if not exists.
-   *
-   * @example 'master'
-   * @default 'main'
+   * @see IPR.head
    */
   head?: string;
   /**
    * Where to create the head branch.
    *
-   * If this is not set, it will not create the head branch and use it directly to create the PR.
+   * see pr.headFrom
    *
-   * Allowed variables:
-   * - `{name}`: tag name
-   *
-   * @example 'main'
+   * @see IPR.headFrom
    */
   headFrom?: string;
   /**
    * Target branch.
    *
-   * Allowed variables:
-   * - `{name}`: tag name
+   * see pr.base
    *
-   * @example `deploy/{name}`
+   * @see IPR.base
    */
-  base: string;
+  base?: string;
   /**
    * Labels to add to the PR.
    */
@@ -491,6 +534,16 @@ export interface ITagPR {
    * Reviewers to add to the PR.
    */
   reviewers?: string[];
+  /**
+   * PR title template.
+   *
+   * Same as `pr.title`, but this will override the tag's `pr.title`.
+   *
+   * see pr.title
+   *
+   * @see IPR.title
+   */
+  title?: ITemplate;
   /**
    * What content to replace in the head branch.
    *

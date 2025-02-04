@@ -104,6 +104,11 @@
           "title": "Ask for verification of the changelog content.",
           "default": true
         },
+        "askToChooseTag": {
+          "type": "boolean",
+          "title": "Ask to choose which tag pattern to bump if multiple tags found.",
+          "default": false
+        },
         "useSemanticGroups": {
           "type": "boolean",
           "title": "Use semantic commit message to map the `diff.groups`.\n\n- `^fix` as `Fixed`\n- `^feat`, `^add` as `Added`\n- `^[\\w\\(\\)]+!`, `BREAKING CHANGE` as `Changed`, with priority 1",
@@ -285,6 +290,43 @@
     "IPR": {
       "type": "object",
       "properties": {
+        "repo": {
+          "type": "string",
+          "description": "Repository name.\n\nFormat: `<owner>/<repo>`",
+          "default": "using `git remote get-url origin`, if not found, ignore this PR"
+        },
+        "head": {
+          "type": "string",
+          "description": "Source branch.\n\nAllowed variables:\n- `{name}`: tag name\n- `{timestamp}`: current timestamp\n\nThis will create the branch if not exists.",
+          "examples": [
+            "master"
+          ]
+        },
+        "headFrom": {
+          "type": "string",
+          "description": "Where to create the head branch.\n\nIf this is not set, it will not create the head branch and use it directly to create the PR.\n\nAllowed variables:\n- `{name}`: tag name",
+          "examples": [
+            "main"
+          ]
+        },
+        "base": {
+          "type": "string",
+          "description": "Target branch.\n\nAllowed variables:\n- `{name}`: tag name"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Labels to add to the PR."
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Reviewers to add to the PR."
+        },
         "title": {
           "$ref": "#/definitions/ITemplate",
           "description": "PR's title template.\n\nThis will trim the title to 100 characters and append `...` if it's too long. Will replace new line with space and trim the title before use.\n\nAllowed variables:\n- `{repo}`: repository link, see `repo.link`\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
@@ -295,7 +337,7 @@
         }
       },
       "additionalProperties": false,
-      "title": "Pull Request settings."
+      "title": "Pull Request global settings, custom setting can be found in `tags[].prs`."
     },
     "IDiff": {
       "type": "object",
@@ -457,27 +499,19 @@
       "properties": {
         "repo": {
           "type": "string",
-          "description": "Repository name.\n\nFormat: `<owner>/<repo>`",
-          "default": "using `git remote get-url origin`, if not found, ignore this PR"
+          "description": "Repository name.\n\nsee pr.repo"
         },
         "head": {
           "type": "string",
-          "description": "Source branch.\n\nAllowed variables:\n- `{name}`: tag name\n- `{timestamp}`: current timestamp\n\nThis will create the branch if not exists.",
-          "examples": [
-            "master"
-          ],
-          "default": "main"
+          "description": "Source branch.\n\nsee pr.head"
         },
         "headFrom": {
           "type": "string",
-          "description": "Where to create the head branch.\n\nIf this is not set, it will not create the head branch and use it directly to create the PR.\n\nAllowed variables:\n- `{name}`: tag name",
-          "examples": [
-            "main"
-          ]
+          "description": "Where to create the head branch.\n\nsee pr.headFrom"
         },
         "base": {
           "type": "string",
-          "description": "Target branch.\n\nAllowed variables:\n- `{name}`: tag name"
+          "description": "Target branch.\n\nsee pr.base"
         },
         "labels": {
           "type": "array",
@@ -493,6 +527,10 @@
           },
           "description": "Reviewers to add to the PR."
         },
+        "title": {
+          "$ref": "#/definitions/ITemplate",
+          "description": "PR title template.\n\nSame as `pr.title`, but this will override the tag's `pr.title`.\n\nsee pr.title"
+        },
         "replacements": {
           "type": "array",
           "items": {
@@ -506,9 +544,6 @@
           "default": "chore: bump to {version}"
         }
       },
-      "required": [
-        "base"
-      ],
       "additionalProperties": false,
       "title": "After tag is created, create PR's."
     },

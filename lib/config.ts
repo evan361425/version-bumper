@@ -33,6 +33,7 @@ export const DEFAULTS: IConfig = {
     useSemanticTag: true,
     useReleaseCandidateTag: false,
     askToVerifyContent: true,
+    askToChooseTag: false,
   },
   hook: {
     afterVerified: [],
@@ -53,6 +54,9 @@ export const DEFAULTS: IConfig = {
   },
   autoLinks: [],
   pr: {
+    base: 'main',
+    headFrom: 'main',
+    head: 'bump-version',
     title: {
       value: '{"ticket" - }Bump version {version}',
     },
@@ -159,7 +163,7 @@ export class Config {
     this.pr = PR.fromCfg(cfg.pr!);
     this.diff = Diff.fromCfg(cfg.diff!, this.autoLinks);
     this.tags = combineTags(tags)
-      .map((t) => Tag.fromCfg(t))
+      .map((t) => Tag.fromCfg(t, this.pr))
       .filter(Boolean) as Tag[];
     this.git = new GitDatabase(this.repo.name);
   }

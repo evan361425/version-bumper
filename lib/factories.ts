@@ -180,12 +180,27 @@ export class AutoLink implements IAutoLink {
 
 export class PR implements IPR {
   constructor(
+    public repo: string = '',
+    public head: string = 'bump-version',
+    public headFrom: string = 'main',
+    public base: string = 'main',
+    readonly labels: string[] = [],
+    readonly reviewers: string[] = [],
     readonly title: Template<VersionedTemplate>,
     readonly body: Template<ContentTemplate>,
   ) {}
 
   static fromCfg(cfg: IPR): PR {
-    return new PR(Template.fromCfg(cfg.title!), Template.fromCfg(cfg.body!));
+    return new PR(
+      cfg.repo,
+      cfg.head,
+      cfg.headFrom,
+      cfg.base,
+      cfg.labels,
+      cfg.reviewers,
+      Template.fromCfg(cfg.title!),
+      Template.fromCfg(cfg.body!),
+    );
   }
 
   formatTitle(v: VersionedTemplate): Promise<string> {
@@ -370,15 +385,16 @@ export class Tag implements ITag {
     readonly sort: TagSort,
   ) {}
 
-  static fromCfg(cfg: ITag): Tag | undefined {
+  static fromCfg(cfg: ITag, pr: PR): Tag | undefined {
     if (!cfg.pattern) return;
 
+    const ts = new Date().getTime();
     return new Tag(
       cfg.name,
       cfg.pattern,
       cfg.withChangelog,
       Release.fromCfg(cfg.release ?? {}),
-      cfg.prs?.map((e) => TagPR.fromCfg(e, cfg.name ?? '')).filter(Boolean) as TagPR[],
+      cfg.prs?.map((e) => TagPR.fromCfg(e, pr, { name: cfg.name ?? '', timestamp: ts.toString() })),
       TagSort.fromCfg(cfg.sort ?? {}),
     );
   }
@@ -462,9 +478,9 @@ export class Tag implements ITag {
     const title = await pr.formatTitle(v);
     const body = await pr.formatBody(v);
 
-    for await (const pr of prs) {
-      await pr.createPR({ title, body });
-      log(`[bump] Created ${this.name} PR (${pr.head} -> ${pr.base})`);
+    for await (const tp of prs) {
+      await tp.createPR(v, title, body);
+      log(`[bump] Created ${this.name} PR (${tp.head} -> ${tp.base})`);
     }
   }
 }
@@ -508,12 +524,13 @@ export class TagPR implements ITagPR {
 
   constructor(
     public repo: string,
-    public head: string = 'main',
-    public headFrom: string = '',
+    public head: string,
+    public headFrom: string,
     public base: string,
     readonly labels: string[] = [],
     readonly reviewers: string[] = [],
     readonly replacements: PRReplace[] = [],
+    readonly title?: Template<VersionedTemplate>,
     readonly commitMessage?: Template<VersionedTemplate>,
   ) {
     assert(
@@ -523,18 +540,16 @@ export class TagPR implements ITagPR {
     this.#git = new GitDatabase(repo, head);
   }
 
-  static fromCfg(cfg: ITagPR, tagName: string): TagPR | undefined {
-    if (!cfg.base) return;
-
-    const ts = new Date().getTime();
+  static fromCfg(cfg: ITagPR, pr: PR, v: { name: string; timestamp: string }): TagPR {
     return new TagPR(
-      cfg.repo ?? '',
-      cfg.head?.replaceAll('{name}', tagName).replaceAll('{timestamp}', ts.toString()),
-      cfg.headFrom?.replaceAll('{name}', tagName),
-      cfg.base.replaceAll('{name}', tagName),
-      cfg.labels,
-      cfg.reviewers,
+      cfg.repo ?? pr.repo,
+      (cfg.head ?? pr.head).replaceAll('{name}', v.name).replaceAll('{timestamp}', v.timestamp),
+      (cfg.headFrom ?? pr.headFrom).replaceAll('{name}', v.name),
+      (cfg.base ?? pr.base).replaceAll('{name}', v.name),
+      cfg.labels ?? pr.labels,
+      cfg.reviewers ?? pr.reviewers,
       cfg.replacements?.map((e) => PRReplace.fromCfg(e)),
+      Template.exist(cfg.title) ? Template.fromCfg(cfg.title!) : undefined, // undefined to later check if it's exist
       Template.fromCfg(Template.exist(cfg.commitMessage) ? cfg.commitMessage! : { value: 'chore: bump to {version}' }),
     );
   }
@@ -594,14 +609,18 @@ export class TagPR implements ITagPR {
     }
   }
 
-  async createPR(v: { title: string; body: string }): Promise<void> {
+  async createPR(v: ContentTemplate, title: string, body: string): Promise<void> {
+    if (this.title) {
+      title = await this.title.formatContent(v);
+    }
+
     await command('gh', [
       'pr',
       'create',
       '--title',
-      v.title,
+      title,
       '--body',
-      v.body,
+      body,
       '--assignee',
       '@me',
       '--base',

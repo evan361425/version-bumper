@@ -42,6 +42,7 @@ void describe('Bump', function () {
         `--tag[]name=semantic`,
         `--tag[]pr[]repo=evan361425/version-bumper-2`,
         `--tag[]pr[]head=temp-{name}`,
+        `--tag[]pr[]head-from=`,
         `--tag[]pr[]base=main`,
         `--tag[]pr[]labels[]=label-1`,
         `--tag[]pr[]labels[]=label-2`,
@@ -245,7 +246,7 @@ ${content}`,
         '- [v1.2.2 - v1.2.3](https://github.com/a/b/compare/v1.2.2...v1.2.3)\n' +
         '\n' +
         'No commits found.\n' +
-        ' --assignee @me --base deploy --head main --repo a/b',
+        ' --assignee @me --base deploy --head bump-version --repo a/b',
     ]);
   });
 });

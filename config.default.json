@@ -14,7 +14,8 @@
     "useSemanticGroups": true,
     "useSemanticTag": true,
     "useReleaseCandidateTag": false,
-    "askToVerifyContent": true
+    "askToVerifyContent": true,
+    "askToChooseTag": false
   },
   "hook": {
     "afterVerified": [],
@@ -35,6 +36,12 @@
   },
   "autoLinks": [],
   "pr": {
+    "repo": "",
+    "head": "bump-version",
+    "headFrom": "main",
+    "base": "main",
+    "labels": [],
+    "reviewers": [],
     "title": {
       "value": "{\"ticket\" - }Bump version {version}"
     },

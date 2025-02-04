@@ -66,6 +66,10 @@
     type: boolean
     default: true
     Ask for verification of the changelog content.
+  --[no-]ask-to-choose-tag
+    type: boolean
+    default: false
+    Ask to choose which tag pattern to bump if multiple tags found.
   --[no-]semantic-groups
     type: boolean
     default: true
@@ -193,6 +197,40 @@
     - `{ticket}`: ticket number
     - `{content}`: changelog content
     - `{diffLink}`: link to the diff of this version
+  --pr-repo
+    type: string
+    default: using `git remote get-url origin`, if not found, ignore this PR
+    Repository name.
+    Format: `<owner>/<repo>`
+  --pr-head
+    type: string
+    default: <required>
+    Source branch.
+    Allowed variables:
+    - `{name}`: tag name
+    - `{timestamp}`: current timestamp
+    This will create the branch if not exists.
+  --pr-head-from
+    type: string
+    default: <required>
+    Where to create the head branch.
+    If this is not set, it will not create the head branch and use it directly to create the PR.
+    Allowed variables:
+    - `{name}`: tag name
+  --pr-base
+    type: string
+    default: <required>
+    Target branch.
+    Allowed variables:
+    - `{name}`: tag name
+  --pr-labels[]
+    type: array
+    default: <required>
+    Labels to add to the PR.
+  --pr-reviewers[]
+    type: array
+    default: <required>
+    Reviewers to add to the PR.
   --diff-gp[]match[]
     type: array
     default: <required>
@@ -257,30 +295,24 @@
     Regular Expression pattern to match the tag.
   --tag[]pr[]repo
     type: string
-    default: using `git remote get-url origin`, if not found, ignore this PR
+    default: <required>
     Repository name.
-    Format: `<owner>/<repo>`
+    see pr.repo
   --tag[]pr[]head
     type: string
-    default: main
+    default: <required>
     Source branch.
-    Allowed variables:
-    - `{name}`: tag name
-    - `{timestamp}`: current timestamp
-    This will create the branch if not exists.
+    see pr.head
   --tag[]pr[]head-from
     type: string
     default: <required>
     Where to create the head branch.
-    If this is not set, it will not create the head branch and use it directly to create the PR.
-    Allowed variables:
-    - `{name}`: tag name
+    see pr.headFrom
   --tag[]pr[]base
     type: string
     default: <required>
     Target branch.
-    Allowed variables:
-    - `{name}`: tag name
+    see pr.base
   --tag[]pr[]labels[]
     type: array
     default: <required>
@@ -289,6 +321,12 @@
     type: array
     default: <required>
     Reviewers to add to the PR.
+  --tag[]pr[]title
+    type: template
+    default: <required>
+    PR title template.
+    Same as `pr.title`, but this will override the tag's `pr.title`.
+    see pr.title
   --tag[]pr[]commit
     type: template
     default: -v=undefined
