@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Please check git diff.
 
+## [v2.1.2] - 2025-02-04
+
+### Added
+
+- ([527a187](https://github.com/evan361425/version-bumper/commit/527a1875173a29ffbe2556d3bd8ba466f7827406)) allow ask to choose tag and global pr settings - @wu0dj2k7ao3
+
 ## [v2.1.1] - 2025-02-04
 
 ### Fixed
@@ -261,7 +267,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.1.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.1.2...HEAD
+[v2.1.2]: https://github.com/evan361425/version-bumper/compare/v2.1.1...v2.1.2
 [v2.1.1]: https://github.com/evan361425/version-bumper/compare/v2.1.0...v2.1.1
 [v2.1.0]: https://github.com/evan361425/version-bumper/compare/v2.0.5...v2.1.0
 [v2.0.5]: https://github.com/evan361425/version-bumper/compare/v2.0.4...v2.0.5
