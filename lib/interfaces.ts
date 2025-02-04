@@ -592,9 +592,11 @@ export interface IPRReplace {
   /**
    * Regular Expression pattern to find the text and replace it by `replacement`.
    *
+   * If this is not set, the whole tag config will be ignored.
+   *
    * @example `version: [0-9]+.[0-9]+.[0-9]+$`
    */
-  pattern: string;
+  pattern?: string;
   /**
    * Replacement string.
    *
