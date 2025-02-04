@@ -105,7 +105,7 @@ export class ChangelogCommit implements IChangelogCommit {
 }
 
 export class AutoLink implements IAutoLink {
-  static readonly inLink = /^[^\\[]*\\]/;
+  static readonly inLink = /^[^\[]*\]/;
 
   /**
    * Regular Expression pattern to match the commit title.
@@ -202,14 +202,6 @@ export class PR implements IPR {
       Template.fromCfg(cfg.body!),
     );
   }
-
-  formatTitle(v: VersionedTemplate): Promise<string> {
-    return this.title.formatContent(v);
-  }
-
-  formatBody(v: ContentTemplate): Promise<string> {
-    return this.body.formatContent(v);
-  }
 }
 
 export class Diff implements IDiff {
@@ -253,7 +245,7 @@ export class Diff implements IDiff {
     this.#content = v;
   }
 
-  async prepareContent(tag: Tag, repo: Repo): Promise<void> {
+  async prepareContent(tag: Tag, repo: Repo, autoLinks: AutoLink[]): Promise<void> {
     if (this.#content) return;
 
     const result = await this.fetchCommits(tag);
@@ -268,6 +260,7 @@ export class Diff implements IDiff {
     }
 
     this.#content = await this.formatCommit(result.commits, repo);
+    autoLinks.forEach((al) => (this.#content = al.inject(this.#content!)));
     if (!this.#content) {
       this.#content = 'No content found.';
     }
@@ -444,11 +437,12 @@ export class Tag implements ITag {
    *
    * Proxy to `Release.formatTitle` and `Release.formatBody`.
    */
-  async createRelease(v: ContentTemplate): Promise<void> {
+  async createRelease(v: ContentTemplate, autoLinks: AutoLink[]): Promise<void> {
     if (!this.release.enable) return;
 
     const title = await this.release.formatTitle(v);
-    const body = await this.release.formatBody(v);
+    let body = await this.release.formatBody(v);
+    autoLinks.forEach((al) => (body = al.inject(body)));
 
     log(`[bump] Creating GitHub release ${title}`);
     await command('gh', [
@@ -464,7 +458,7 @@ export class Tag implements ITag {
     ]);
   }
 
-  async createPR(pr: PR, v: ContentTemplate): Promise<void> {
+  async createPR(pr: PR, v: ContentTemplate, autoLinks: AutoLink[]): Promise<void> {
     if (!this.wantPR) return;
 
     const prs = this.prs.filter((e) => e.repo);
@@ -475,8 +469,9 @@ export class Tag implements ITag {
     }
     verbose(`[pr] Done replacing files`);
 
-    const title = await pr.formatTitle(v);
-    const body = await pr.formatBody(v);
+    const title = await pr.title.formatContent(v);
+    let body = await pr.body.formatContent(v);
+    autoLinks.forEach((al) => (body = al.inject(body)));
 
     for await (const tp of prs) {
       await tp.createPR(v, title, body);

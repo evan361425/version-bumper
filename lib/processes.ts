@@ -25,8 +25,9 @@ export async function prepare(cfg: Config): Promise<void> {
     cfg.diff.content = section.body;
     return;
   } else {
-    await cfg.diff.prepareContent(cfg.tag, cfg.repo);
+    await cfg.diff.prepareContent(cfg.tag, cfg.repo, cfg.autoLinks);
     await cfg.changelog.section.formatContent(cfg.changelogTemplate);
+    cfg.changelog.section.formatted = cfg.injectAutoLinks(cfg.changelog.section.formatted);
   }
 
   if (cfg.process.askToVerifyContent) {
@@ -56,12 +57,12 @@ export async function bump(cfg: Config): Promise<void> {
 
 export async function createPR(cfg: Config): Promise<void> {
   if (cfg.process.pr) {
-    await cfg.tag.createPR(cfg.pr, cfg.contentTemplate);
+    await cfg.tag.createPR(cfg.pr, cfg.contentTemplate, cfg.autoLinks);
   }
 }
 
 export async function createRelease(cfg: Config): Promise<void> {
   if (cfg.process.release) {
-    await cfg.tag.createRelease(cfg.contentTemplate);
+    await cfg.tag.createRelease(cfg.contentTemplate, cfg.autoLinks);
   }
 }

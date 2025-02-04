@@ -66,8 +66,14 @@ export function command(name: string, args: string[], oneByOne?: (line: string) 
           return;
         }
 
+        if (name === 'gh' && error.trim().startsWith('Warning:')) {
+          log(`[cmd]: ${name} finish with message:\n${error}`);
+          res(response);
+          return;
+        }
+
         const err = `${error}`.trim();
-        log(`[cmd]: ${name} close with error: ${err}`);
+        log(`[cmd]: ${name} close with error:\n${err}`);
         rej(new Error(`Command: ${name} ${args.join(' ')} \nerror:\n${err}`));
       } else {
         verbose(`[cmd]: response: ${response}`);

@@ -219,6 +219,13 @@ export class Config {
     await this.initVars(args);
   }
 
+  injectAutoLinks(content: string): string {
+    for (const autoLink of this.autoLinks) {
+      content = autoLink.inject(content);
+    }
+    return content;
+  }
+
   async bumpChangelog(): Promise<void> {
     function getDebugDefaultPath(path: string) {
       const idx = path.lastIndexOf('.');

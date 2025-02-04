@@ -65,10 +65,10 @@ void describe('Bump', function () {
 
     mockAskContent('v1.2.3');
     mockCommandResponse('v1.2.2');
-    await cfg.init([`-t=666`]);
+    await cfg.init([`-t=ABC-666`]);
 
     assert.strictEqual(cfg.version, 'v1.2.3');
-    assert.strictEqual(cfg.ticket, '666');
+    assert.strictEqual(cfg.ticket, 'ABC-666');
     assert.strictEqual(cfg.versionLast, 'v1.2.2');
     assert.strictEqual(cfg.repo.link, 'https://github.com/evan361425/version-bumper-1');
     assert.strictEqual(cfg.diff.ignored[0], 'CHORE');
@@ -186,9 +186,9 @@ void describe('Bump', function () {
     );
     assert.strictEqual(
       getFirstMockedCommand(),
-      `gh pr create --title 666 - Bump version v1.2.3 --body This PR is auto-generated from [bumper](https://github.com/evan361425/version-bumper).
+      `gh pr create --title ABC-666 - Bump version v1.2.3 --body This PR is auto-generated from [bumper](https://github.com/evan361425/version-bumper).
 
-- ticket: 666
+- ticket: [ABC-666](test-link-666)
 - version: [v1.2.3](https://github.com/evan361425/version-bumper-1/releases/tag/v1.2.3)
 - [v1.2.2 - v1.2.3](https://github.com/evan361425/version-bumper-1/compare/v1.2.2...v1.2.3)
 
@@ -199,7 +199,7 @@ ${content}
     await createRelease(cfg);
     assert.strictEqual(
       getFirstMockedCommand(),
-      `gh release create v1.2.3 --title v1.2.3 --prerelease=false --draft=false --notes Ticket: 666
+      `gh release create v1.2.3 --title v1.2.3 --prerelease=false --draft=false --notes Ticket: [ABC-666](test-link-666)
 
 ${content}`,
     );
