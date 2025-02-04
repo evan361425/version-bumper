@@ -31,9 +31,8 @@ build-assets: ## Build assets
 .PHONY: bump
 bump: ## Bump the version
 	@bumper \
-		--hook-after-verified[] 'npm version --no-commit-hooks --no-git-tag-version {versionNoPrefix}' \
-		--hook-after-verified[] 'make build-assets' \
-		--clog-commit-add-all
+		--hook-after-verified[] 'npm version --no-commit-hooks --no-git-tag-version {"version.noPrefix"}' \
+		--hook-after-verified[] 'make build-assets'
 
 ##@ Dev
 

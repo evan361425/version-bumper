@@ -736,20 +736,14 @@ export class HookCommand {
 
   constructor(readonly command: string) {}
 
-  async run(v: VersionedTemplate, idx: number): Promise<void> {
+  async run(v: VersionedTemplate, idx: number): Promise<string | void> {
     let [cmd, ...args] = this.split();
     if (cmd) {
-      args = args.map((a) => {
-        Object.entries(v).forEach(([key, value]) => {
-          a = a.replaceAll(`{${key}}`, value);
-        });
-
-        return a;
-      });
-
+      const pArgs = await Promise.all(args.map((a) => new Template(a).formatContent(v)));
       try {
-        const result = await command(cmd, args);
+        const result = await command(cmd, pArgs);
         log(`[hook] #${idx} ${cmd} result: ${result.trim()}`);
+        return result;
       } catch (error) {
         throw new BumperError(`Hook#${idx} ${error}`);
       }
@@ -759,7 +753,7 @@ export class HookCommand {
   protected split(): string[] {
     return (this.#splitted ??=
       this.command.match(/"([^"]+)"|'([^']+)'|\S+/g)?.map(
-        (token) => token.replace(/^['"]|['"]$/g, ''), // 移除引號
+        (token) => token.replaceAll(/^['"]|['"]$/g, ''), // 移除引號
       ) ?? []);
   }
 }
