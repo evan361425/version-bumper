@@ -7,9 +7,9 @@ Features:
 - Collect commits and build Changelog
 - Hooking: before, after commit scripts
 - Autolink for tickets (e.g. Jira)
-- GitHub PR, allow update files and create branch
+- [GitHub PR](#change-files-in-other-repo-and-create-pr), allow update files and create branch
 - GitHub release
-- Highly flexible by configuration and power template on variables
+- Highly flexible by configuration and power [template](#template) on variables
 - Tiny without any dependencies
 
 ## Usage
@@ -124,7 +124,6 @@ and changing files `file1.txt`, `file2.txt` to base branch `master`.
 
 ```bash
 bumper \
-  --pr-only
   --tag[]name=semantic \
   --tag[]pr[]repo=evan361425/version-bumper-deploy \
   --tag[]pr[]head=temp-{name} \
@@ -136,7 +135,7 @@ bumper \
   --tag[]pr[]repl[]repl-v='version: {version}'
 ```
 
-### Create PR only (usually re-create)
+### Create PR only (for specific stage or re-create)
 
 ```bash
 bumper \
@@ -153,32 +152,53 @@ bumper \
 
 Powerful template language help customize output.
 
-When you see type is "template", it means you can do these things:
-
-- Directly set by suffix `-v`, like `<prefix>-v='Bump to {version}'`,
-  prefix is the key name like "clog-commit".
-- Load content from a file, like `<prefix>-f=./path/to/file`.
-- Load content from GitHub, like `<prefix>-gh-repo=example/example`,
-  `<prefix>-gh-branch=master`, `<prefix>-gh-path=path/to/file`.
-
 Template variables can bind as:
 
-- `{<key>}` for the `<key>` name, like `{versionName}` for the name of version
+- `{<key>}` for the value of `<key>`, like `{versionName}` for the name of version
 - `{<prefix>"<key>"<suffix>}` for the `<key>` name with prefix and suffix,
   like `Hi, {Version "version" is created}`
   If `<version>` is `1.0.0`,
   will be `Hi, Version 1.0.0 is created`,
   and if `<version>` is empty, it will be `Hi,`.
 - Special characters `<NL>` will be replaced with new line.
-- Special characters `"` can be escaped with `""` and same with `}` and `|`.
+- Special characters `"` can be escaped with `""` and same with `}` (`}}`) and `|` (`||`).
 - Suffix end with `|<fallback>` will be replaced with `<fallback>` if empty,
   `<fallback>` can also using variable but without prefix and suffix,
+  like `Hi, {Version "version" is created|no version}`
   if `<version>` is empty, it will be `Hi, no version`.
 - Key suffix with `.<method>` will be processed by the method,
   - upper: uppercase the value
   - lower: lowercase the value
   - trim: trim the value
-  - noPrefix: remove any character before first number, useful for tag name like "v1.0.0"
+  - noPrefix: remove any character before first number, useful for tag name like `v1.0.0`
+  - prefixInLink: put prefix inside markdown link not outside, like `[<prefix><text>](<link>)`
+
+### Examples
+
+This is default commit message for changelog:
+
+```text
+- ({#"prLink.prefixInLink"|hashLink}{|"autoLink"}) {"scope.upper": }{title}{ - @"author"}
+```
+
+If the variables are:
+
+```json
+{
+  "title": "some new feature",
+  "author": "evan361425",
+  "hashLink": "[sha1-value](commit-link)",
+  "prLink": "[123](pr-link)",
+  "scope": "component-1",
+  "autoLink": "" // empty means not found
+}
+```
+
+Will render
+
+```text
+- ([#123](pr-link)) COMPONENT-1: some new feature - evan361425
+```
 
 ## Changelog
 
