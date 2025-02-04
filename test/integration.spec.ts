@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, afterEach, describe, it } from 'node:test';
@@ -28,6 +28,7 @@ void describe('Bump', function () {
         },
         changelog: {
           destinationDebug: clogFile,
+          destination: 'non-exist',
         },
         process: {
           askToVerifyContent: true,
@@ -115,6 +116,8 @@ void describe('Bump', function () {
       getFirstMockedCommand(),
       `git tag v1.2.3 -m [v1.2.3] - ${today}
 
+Ticket: ABC-666
+
 ### Fixed
 
 - (hash1ha|ABC-123) should update auto link - @wu0dj2k7ao3
@@ -146,6 +149,27 @@ void describe('Bump', function () {
 
 - ([hash3ha](https://github.com/evan361425/version-bumper-1/commit/hash3hash3hash3hash3)|[ABC-123](test-link-123)) ScopeOverride: some scope and auto link - @wu0dj2k7ao3
 - ([#124](https://github.com/evan361425/version-bumper-1/pull/124)) simple feature - @wu0dj2k7ao3`;
+
+    const changelog = readFileSync(clogFile, 'utf-8');
+    assert.strictEqual(
+      changelog,
+      `# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [v1.2.3] - 2025-02-04
+
+Ticket: [ABC-666](test-link-666)
+
+${content}
+
+[v1.2.3]: https://github.com/evan361425/version-bumper-1/compare/v1.2.2...v1.2.3
+`,
+    );
+
     assert.strictEqual(
       getFirstMockedCommand(),
       'gh api repos/evan361425/version-bumper-2/git/refs/heads/temp-semantic --jq .object.sha',

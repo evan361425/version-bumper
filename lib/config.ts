@@ -43,7 +43,7 @@ export const DEFAULTS: IConfig = {
     enable: true,
     destination: 'CHANGELOG.md',
     section: {
-      value: '[{version}] - {date}\n\n{content}',
+      value: '[{version}] - {date}\n\n{Ticket: "ticket"<NL><NL>}{content}',
     },
     commit: {
       message: {

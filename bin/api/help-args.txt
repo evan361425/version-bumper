@@ -133,7 +133,7 @@
     type: template
     default: -v=[{version}] - {date}
 
-{content}
+{Ticket: "ticket"<NL><NL>}{content}
     The changelog of specific version.
     Default will prepend `## ` before the first line.
     Allowed variables:
@@ -347,6 +347,7 @@
     type: string
     default: <required>
     Regular Expression pattern to find the text and replace it by `replacement`.
+    If this is not set, the whole tag config will be ignored.
   --tag[]pr[]repl[]repl
     type: template
     default: <required>
