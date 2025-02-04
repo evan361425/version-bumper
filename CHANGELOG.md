@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Please check git diff.
 
+## [v2.1.0] - 2025-02-04
+
+### Added
+
+- ([2322041](https://github.com/evan361425/version-bumper/commit/2322041036dacb69d2b1c6c61bbc9e11a4ffad66)) allow template in hook commands - @wu0dj2k7ao3
+- ([f6a1cd0](https://github.com/evan361425/version-bumper/commit/f6a1cd0351e963c980eb866bbbfb0b60154b0e1c)) allow function and fallback in template - @wu0dj2k7ao3
+
+### Fixed
+
+- ([bbe3aab](https://github.com/evan361425/version-bumper/commit/bbe3aab3173f3a7a71148d2e8572d6e01a4c9440)) add fallback message for all ignored content - @wu0dj2k7ao3
+- ([d0eaa69](https://github.com/evan361425/version-bumper/commit/d0eaa693053f52a8df47c4b1edae57b2aad8ea9c)) patch commit to pr - @wu0dj2k7ao3
+
 ## [v2.0.5] - 2025-02-03
 
 ### Fixed
@@ -242,7 +254,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.0.5...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.1.0...HEAD
+[v2.1.0]: https://github.com/evan361425/version-bumper/compare/v2.0.5...v2.1.0
 [v2.0.5]: https://github.com/evan361425/version-bumper/compare/v2.0.4...v2.0.5
 [v2.0.4]: https://github.com/evan361425/version-bumper/compare/v2.0.3...v2.0.4
 [v2.0.3]: https://github.com/evan361425/version-bumper/compare/v2.0.2...v2.0.3

@@ -30,7 +30,7 @@ build-assets: ## Build assets
 
 .PHONY: bump
 bump: ## Bump the version
-	@bumper \
+	@node --import tsx bin/bumper.ts \
 		--hook-after-verified[] 'npm version --no-commit-hooks --no-git-tag-version {"version.noPrefix"}' \
 		--hook-after-verified[] 'make build-assets'
 
