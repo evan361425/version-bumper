@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Please check git diff.
 
+## [v2.1.1] - 2025-02-04
+
+### Fixed
+
+- ([8e7d121](https://github.com/evan361425/version-bumper/commit/8e7d1217dc46383ca1b979e01d342f1443a314f2)) log when update last tag - @wu0dj2k7ao3
+- ([130541f](https://github.com/evan361425/version-bumper/commit/130541feca5b729faa12581f26f3837176ee7490)) add specific package name for version cmd - @wu0dj2k7ao3
+
 ## [v2.1.0] - 2025-02-04
 
 ### Added
@@ -254,7 +261,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.1.0...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.1.1...HEAD
+[v2.1.1]: https://github.com/evan361425/version-bumper/compare/v2.1.0...v2.1.1
 [v2.1.0]: https://github.com/evan361425/version-bumper/compare/v2.0.5...v2.1.0
 [v2.0.5]: https://github.com/evan361425/version-bumper/compare/v2.0.4...v2.0.5
 [v2.0.4]: https://github.com/evan361425/version-bumper/compare/v2.0.3...v2.0.4
