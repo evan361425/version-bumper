@@ -98,7 +98,7 @@ ${message}`);
     console.log('searching for latest version...');
     console.log(`Current version: ${getVersion()}`);
     console.log(`Latest version: ${await versionCommand()}`);
-    console.log('Update command: npm update -g');
+    console.log('Update command: npm update -g @evan361425/version-bumper');
     return;
   }
 
