@@ -178,7 +178,7 @@ void describe('Bump', function () {
     );
     assert.strictEqual(
       getFirstMockedCommand(),
-      "gh api -X POST repos/evan361425/version-bumper-2/git/commits -f message='custom bump to v1.2.3' -f tree=new-sha -f parents[]=base-sha --jq .sha",
+      'gh api -X POST repos/evan361425/version-bumper-2/git/commits -f message=custom bump to v1.2.3 -f tree=new-sha -f parents[]=base-sha --jq .sha',
     );
     assert.strictEqual(
       getFirstMockedCommand(),

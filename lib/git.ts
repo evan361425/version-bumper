@@ -218,7 +218,7 @@ export class GitDatabase {
         'POST',
         `repos/${this.repo}/git/commits`,
         '-f',
-        `message='${message}'`,
+        `message=${message}`,
         '-f',
         `tree=${tree}`,
         '-f',
