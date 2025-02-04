@@ -4,7 +4,7 @@ Yet, another helper for bumping version.
 
 Features:
 
-- Collect commits and build Changelog
+- Collect commits and build [Changelog](#changelog)
 - Hooking: before, after commit scripts
 - Autolink for tickets (e.g. Jira)
 - [GitHub PR](#change-files-in-other-repo-and-create-pr), allow update files and create branch
