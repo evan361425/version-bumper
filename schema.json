@@ -453,9 +453,6 @@
           "description": "Something about sorting the version."
         }
       },
-      "required": [
-        "pattern"
-      ],
       "additionalProperties": false,
       "title": "Tag settings.\n\nThis will be used as list and the first match of the pattern will be used."
     },
@@ -572,6 +569,7 @@
       },
       "required": [
         "paths",
+        "pattern",
         "replacement"
       ],
       "additionalProperties": false,

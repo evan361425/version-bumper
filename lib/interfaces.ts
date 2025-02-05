@@ -418,7 +418,7 @@ export interface ITag {
    *
    * @example v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+
    */
-  pattern: string;
+  pattern?: string;
   /**
    * Should use this tag to generate changelog.
    *
@@ -596,7 +596,7 @@ export interface IPRReplace {
    *
    * @example `version: [0-9]+.[0-9]+.[0-9]+$`
    */
-  pattern?: string;
+  pattern: string;
   /**
    * Replacement string.
    *
