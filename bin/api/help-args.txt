@@ -16,6 +16,10 @@
     default: <required>
     Wanted `tags` item's name, it will then use it to ask for the version number.
     If not found, it will use the first `tags`'s name.
+  --last,-l
+    type: string
+    default: <required>
+    Last version to diff, default use next match pattern tag
   --ticket,-t
     type: string
     default: <required>
