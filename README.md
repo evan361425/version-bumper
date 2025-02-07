@@ -148,6 +148,48 @@ bumper \
   --tag[]pr[]reviewers[]=user-1
 ```
 
+### Prepare PR setting in config file and only one specific PR
+
+In `config.json`, we have
+
+```json
+{
+  "tags": [
+    {
+      "name": "semantic",
+      "prs": [
+        {
+          "head": "main",
+          "base": "develop"
+        },
+        {
+          "head": "main",
+          "base": "production"
+        }
+      ]
+    }
+  ]
+}
+```
+
+If we only want create first PR, we can:
+
+```bash
+bumper --tag[]name=semantic --tag[]only-pr[]=0
+```
+
+### Develop stage is bump step by step, but production has bump multiple versions
+
+Although we bump version in develop from `v1.0.0` to `v1.0.1` and `v1.0.2`,
+but we bump directly from `v1.0.0` to `v1.0.2` in production.
+
+We can specify correct last version directly by `--last` flag to
+generate correct diff content.
+
+```bash
+bumper --last v1.0.0
+```
+
 ## Template
 
 Powerful template language help customize output.
