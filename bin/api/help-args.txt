@@ -66,6 +66,11 @@
     type: boolean
     default: false
     Ask for the ticket number if not found.
+  --[no-]diff-from-clog
+    type: boolean
+    default: false
+    Get diff content from the changelog.
+    Default using `git diff` to get the diff content.
   --[no-]ask-to-verify-content
     type: boolean
     default: true

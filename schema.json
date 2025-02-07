@@ -99,6 +99,11 @@
           "title": "Ask for the ticket number if not found.",
           "default": false
         },
+        "diffFromChangelog": {
+          "type": "boolean",
+          "title": "Get diff content from the changelog.\n\nDefault using `git diff` to get the diff content.",
+          "default": false
+        },
         "askToVerifyContent": {
           "type": "boolean",
           "title": "Ask for verification of the changelog content.",
