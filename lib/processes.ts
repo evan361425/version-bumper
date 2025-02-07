@@ -14,16 +14,14 @@ export async function checkTag(cfg: Config): Promise<void> {
 }
 
 export async function prepare(cfg: Config): Promise<void> {
-  // push/release only
-  if (!cfg.process.bump && !cfg.process.push && (cfg.process.pr || cfg.process.release)) {
+  if (cfg.process.diffFromChangelog) {
     const clog = new ChangelogIO(cfg.changelog.destination, cfg.changelog.destination);
     const section = clog.content.sections.find((s) => s.header.includes(cfg.version));
     if (!section) {
-      throw new BumperError(`When using only mode changelog section must be provided, not found: ${cfg.version}`);
+      throw new BumperError(`Changelog section not found in version: ${cfg.version}`);
     }
 
     cfg.diff.content = section.body;
-    return;
   } else {
     await cfg.diff.prepareContent(cfg.tag, cfg.repo, cfg.autoLinks);
     await cfg.changelog.section.formatContent(cfg.changelogTemplate);

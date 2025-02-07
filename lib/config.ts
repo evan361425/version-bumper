@@ -29,6 +29,7 @@ export const DEFAULTS: IConfig = {
     checkTag: true,
     checkRemoteTag: false,
     wantedTicket: false,
+    diffFromChangelog: false,
     useSemanticGroups: true,
     useSemanticTag: true,
     useReleaseCandidateTag: false,

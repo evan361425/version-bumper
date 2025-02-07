@@ -61,6 +61,12 @@ export interface IProcess {
    */
   wantedTicket?: boolean;
   /**
+   * Get diff content from the changelog.
+   *
+   * Default using `git diff` to get the diff content.
+   */
+  diffFromChangelog?: boolean;
+  /**
    * Ask for verification of the changelog content.
    */
   askToVerifyContent?: boolean;
