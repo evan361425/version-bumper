@@ -99,6 +99,7 @@
         "preRelease": false,
         "draft": false
       },
+      "onlyPrIndices": [],
       "prs": [],
       "sort": {
         "separator": ".",

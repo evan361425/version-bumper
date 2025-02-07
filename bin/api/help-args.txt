@@ -166,6 +166,7 @@
     Replace the matched pattern with the link.
     Allowed variables:
     - `{num}`: ticket number
+    - `{value}`: value of the matched result, example: `MYPROJ-1234`
   --autolink[]match[]
     type: array
     default: <required>
@@ -293,6 +294,11 @@
     type: string
     default: <required>
     Regular Expression pattern to match the tag.
+  --tag[]only-pr[]
+    type: array
+    default: <required>
+    Default using all PR, but can specify wanted index of PR.
+    0-based index.
   --tag[]pr[]repo
     type: string
     default: <required>

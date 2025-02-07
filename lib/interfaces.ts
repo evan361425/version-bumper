@@ -214,7 +214,7 @@ export interface IAutoLink {
    * Only allow characters `[a-zA-Z0-9-_]` and have special variables:
    * - `{num}`: ticket number
    *
-   * @example `MYPROJ-{num}`
+   * @example ["MYPROJ-{num}"]
    */
   matches: string[];
   /**
@@ -222,8 +222,9 @@ export interface IAutoLink {
    *
    * Allowed variables:
    * - `{num}`: ticket number
+   * - `{value}`: value of the matched result, example: `MYPROJ-1234`
    *
-   * @example `https://jira.com/browse/MYPROJ-{num}`
+   * @example "https://jira.com/browse/{value}"
    */
   link: string;
 
@@ -274,7 +275,7 @@ export interface IPR {
    * Allowed variables:
    * - `{name}`: tag name
    *
-   * @example `deploy/{name}`
+   * @example 'deploy/{name}'
    */
   base?: string;
   /**
@@ -326,7 +327,7 @@ export interface IDiff {
    *
    * If `ignoreOthers` is enabled, this will not be used.
    *
-   * @example Others
+   * @example 'Others'
    */
   othersTitle?: string;
   /**
@@ -376,7 +377,7 @@ export interface IDiffGroup {
    *
    * Recommended to follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format.
    *
-   * @example `^fix`, `^feat`, `^[\w\(\)]+!`, `^remove`
+   * @example [`^fix`, `^feat`, `^[\w\(\)]+!`, `^remove`]
    */
   matches: string[];
   /**
@@ -409,14 +410,14 @@ export interface ITag {
    *
    * Default is empty value which will be considered as no name.
    *
-   * @example stable
+   * @example 'stable'
    * @default ''
    */
   name?: string;
   /**
    * Regular Expression pattern to match the tag.
    *
-   * @example v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+
+   * @example 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+'
    */
   pattern?: string;
   /**
@@ -429,6 +430,14 @@ export interface ITag {
    * Something about GitHub Release.
    */
   release?: IRelease;
+  /**
+   * Default using all PR, but can specify wanted index of PR.
+   *
+   * 0-based index.
+   *
+   * @example [0, 2]
+   */
+  onlyPrIndices?: number[];
   /**
    * Something about PR's.
    */
@@ -607,7 +616,7 @@ export interface IPRReplace {
    * - `{versionLast}`: last version number
    * - `{ticket}`: ticket number
    *
-   * @example `version: {version}`
+   * @example {"value": "version: {version}"}
    */
   replacement: ITemplate;
 }
@@ -672,7 +681,7 @@ export interface ITemplateGitHub {
   /**
    * Repository name.
    *
-   * @example evan361425/version-bumper
+   * @example 'evan361425/version-bumper'
    */
   repo: string;
   /**
@@ -685,7 +694,7 @@ export interface ITemplateGitHub {
   /**
    * File path to the template file.
    *
-   * @example docs/TEMPLATE.md
+   * @example 'docs/TEMPLATE.md'
    */
   path: string;
 }
@@ -701,7 +710,7 @@ export type IAutoLinkMatch = {
   /**
    * Auto link key
    *
-   * @example ABC-123
+   * @example 'ABC-123'
    */
   target: string;
   /**

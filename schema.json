@@ -225,7 +225,10 @@
       "properties": {
         "repo": {
           "type": "string",
-          "description": "Repository name."
+          "description": "Repository name.",
+          "examples": [
+            "evan361425/version-bumper"
+          ]
         },
         "branch": {
           "type": "string",
@@ -237,7 +240,10 @@
         },
         "path": {
           "type": "string",
-          "description": "File path to the template file."
+          "description": "File path to the template file.",
+          "examples": [
+            "docs/TEMPLATE.md"
+          ]
         }
       },
       "required": [
@@ -273,11 +279,19 @@
           "items": {
             "type": "string"
           },
-          "description": "Pattern to match the commit title.\n\nThis is not a regular expression, but a list of prefixes.\n\nOnly allow characters `[a-zA-Z0-9-_]` and have special variables:\n- `{num}`: ticket number"
+          "description": "Pattern to match the commit title.\n\nThis is not a regular expression, but a list of prefixes.\n\nOnly allow characters `[a-zA-Z0-9-_]` and have special variables:\n- `{num}`: ticket number",
+          "examples": [
+            [
+              "MYPROJ-{num}"
+            ]
+          ]
         },
         "link": {
           "type": "string",
-          "description": "Replace the matched pattern with the link.\n\nAllowed variables:\n- `{num}`: ticket number"
+          "description": "Replace the matched pattern with the link.\n\nAllowed variables:\n- `{num}`: ticket number\n- `{value}`: value of the matched result, example: `MYPROJ-1234`",
+          "examples": [
+            "https://jira.com/browse/{value}"
+          ]
         }
       },
       "required": [
@@ -311,7 +325,10 @@
         },
         "base": {
           "type": "string",
-          "description": "Target branch.\n\nAllowed variables:\n- `{name}`: tag name"
+          "description": "Target branch.\n\nAllowed variables:\n- `{name}`: tag name",
+          "examples": [
+            "deploy/{name}"
+          ]
         },
         "labels": {
           "type": "array",
@@ -351,6 +368,9 @@
         },
         "othersTitle": {
           "type": "string",
+          "examples": [
+            "Others"
+          ],
           "title": "Title of the group that doesn't match any group.\n\nIf `ignoreOthers` is enabled, this will not be used.",
           "default": "Others"
         },
@@ -426,11 +446,17 @@
         "name": {
           "type": "string",
           "description": "Name of the tag.\n\nDefault is empty value which will be considered as no name.",
+          "examples": [
+            "stable"
+          ],
           "default": ""
         },
         "pattern": {
           "type": "string",
-          "description": "Regular Expression pattern to match the tag."
+          "description": "Regular Expression pattern to match the tag.",
+          "examples": [
+            "v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+"
+          ]
         },
         "withChangelog": {
           "type": "boolean",
@@ -440,6 +466,19 @@
         "release": {
           "$ref": "#/definitions/IRelease",
           "description": "Something about GitHub Release."
+        },
+        "onlyPrIndices": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Default using all PR, but can specify wanted index of PR.\n\n0-based index.",
+          "examples": [
+            [
+              0,
+              2
+            ]
+          ]
         },
         "prs": {
           "type": "array",
@@ -564,7 +603,12 @@
         },
         "replacement": {
           "$ref": "#/definitions/ITemplate",
-          "description": "Replacement string.\n\nAllowed variables:\n- `{repo}`: repository link, see `repo.link`\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
+          "description": "Replacement string.\n\nAllowed variables:\n- `{repo}`: repository link, see `repo.link`\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number",
+          "examples": [
+            {
+              "value": "version: {version}"
+            }
+          ]
         }
       },
       "required": [

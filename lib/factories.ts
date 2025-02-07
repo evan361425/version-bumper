@@ -374,6 +374,7 @@ export class Tag implements ITag {
     readonly pattern: string,
     readonly withChangelog: boolean = true,
     readonly release: Release,
+    readonly onlyPrIndices: number[] = [],
     readonly prs: TagPR[] = [],
     readonly sort: TagSort,
   ) {}
@@ -387,6 +388,7 @@ export class Tag implements ITag {
       cfg.pattern,
       cfg.withChangelog,
       Release.fromCfg(cfg.release ?? {}),
+      cfg.onlyPrIndices ?? [],
       cfg.prs?.map((e) => TagPR.fromCfg(e, pr, { name: cfg.name ?? '', timestamp: ts.toString() })),
       TagSort.fromCfg(cfg.sort ?? {}),
     );
@@ -461,7 +463,9 @@ export class Tag implements ITag {
   async createPR(pr: PR, v: ContentTemplate, autoLinks: AutoLink[]): Promise<void> {
     if (!this.wantPR) return;
 
-    const prs = this.prs.filter((e) => e.repo);
+    const prs = this.prs
+      .filter((e) => Boolean(e.repo))
+      .filter((_, i) => this.onlyPrIndices.length === 0 || this.onlyPrIndices.includes(i));
     log(`[pr] Start process ${prs.length} PR for ${this.name}`);
 
     for await (const pr of prs) {

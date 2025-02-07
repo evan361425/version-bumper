@@ -56,6 +56,8 @@ void describe('Bump', function () {
         'package.json',
         `--tag[]pr[]repl[]paths[]=other.txt`,
         `--tag[]pr[]repl[]repl-v=version: {version}`,
+        `--tag[]pr[]repo=test/test`,
+        `--tag[]only-pr[]=0`,
         `--autolink[]link=test-link-{num}`,
         `--autolink[]match[]=ABC-{num}`,
       ]),

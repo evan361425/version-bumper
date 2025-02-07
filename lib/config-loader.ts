@@ -80,6 +80,7 @@ export const configArgsMap: ConfigArguments<IConfig> = {
     {
       name: 'tag[]name',
       pattern: 'tag[]pattern',
+      onlyPrIndices: ['tag[]only-pr[]'],
       prs: [
         {
           repo: 'tag[]pr[]repo',
@@ -277,6 +278,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
       return {
         name: getV(tag.name!, ca),
         pattern: getV(tag.pattern!, ca),
+        onlyPrIndices: getArrayFromArgs(tag.onlyPrIndices![0]!, ca).map((v) => Number(v)),
         prs: splitArrayArgs(ca, 'tag[]pr').map((pra) => {
           const pr = tag.prs![0]!;
           return {
