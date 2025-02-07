@@ -398,13 +398,17 @@ export class Tag implements ITag {
     return this.prs.length > 0 && this.prs.some((e) => e.repo);
   }
 
-  get mustLastTag(): string {
+  get lastTag(): string {
     if (this.#lastTag === undefined) {
       // not bumper error, this should be a developer error
       throw new Error('Last tag is not ready');
     }
 
     return this.#lastTag;
+  }
+
+  set lastTag(v: string) {
+    this.#lastTag = v;
   }
 
   /**

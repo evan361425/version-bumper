@@ -333,7 +333,7 @@ export async function askForWantedVars(
     throw new BumperError(`Tag ${tagName} not found in the configuration.`);
   }
 
-  let last = getValueFromArgs('last', args) ?? (await tag.findLastTag());
+  let last = (tag.lastTag = getValueFromArgs('last', args) ?? (await tag.findLastTag()));
 
   // start asking for the version
   let version = args[0] ?? '';

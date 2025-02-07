@@ -182,7 +182,7 @@ export class Config {
    * It must call after `askForWantedVars` for last tag fetching.
    */
   get diffLink(): string {
-    return this.repo.compareLink({ from: this.#tag.mustLastTag, to: this.version });
+    return this.repo.compareLink({ from: this.#tag.lastTag, to: this.version });
   }
 
   get versionTemplate(): VersionedTemplate {
