@@ -119,6 +119,7 @@ export const argsAliases: Record<string, string> = {
   tag: 'T',
   ticket: 't',
   repo: 'r',
+  last: 'l',
 };
 
 export function loadConfigFromFile(args: string[]): IConfig {
@@ -332,7 +333,7 @@ export async function askForWantedVars(
     throw new BumperError(`Tag ${tagName} not found in the configuration.`);
   }
 
-  let last = await tag.findLastTag();
+  let last = getValueFromArgs('last', args) ?? (await tag.findLastTag());
 
   // start asking for the version
   let version = args[0] ?? '';
@@ -345,15 +346,14 @@ export async function askForWantedVars(
   if (!tag.verify(version)) {
     throw new BumperError(`Version ${version} does not match the pattern ${tag.pattern}`);
   }
+
   if (cfg.process.checkTag) {
     if (!tag.sort.firstIsGreaterThanSecond(version, last)) {
       throw new BumperError(`Version ${version} is not greater than the last version ${last}`);
     }
-  } else {
-    if (version === last) {
-      // avoid getting same version
-      last = await tag.updateLastTag(version);
-    }
+  } else if (!getValueFromArgs('last', args) && version === last) {
+    // if no user specific setting, check if the version is same as last
+    last = await tag.updateLastTag(version);
   }
 
   let ticket = getValueFromArgs('ticket', args);

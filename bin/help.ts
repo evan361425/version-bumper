@@ -56,6 +56,7 @@ function findArgs(): MyArg[] {
     new MyArg('verbose', 'Output many logs to stdout', 'boolean', argsAliases['verbose'], false),
     new MyArg('config', 'Path to the configuration file.', 'string', argsAliases['config'], DEFAULT_CONFIG_PATH),
     new MyArg('tag', TAG, 'string', argsAliases['tag']),
+    new MyArg('last', 'Last version to diff, default use next match pattern tag', 'string', argsAliases['last']),
     new MyArg('ticket', TICKET, 'string', argsAliases['ticket']),
     new MyArg('only-pr', 'Only create PR, no any bumping.', 'boolean', undefined, false),
     new MyArg('only-release', 'Only create GitHub release, no any bumping.', 'boolean', undefined, false),
