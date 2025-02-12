@@ -647,13 +647,12 @@ export class TagPR implements ITagPR {
       const msg = await this.commitMessage.formatContent(v);
       log(`[pr] Start process PR for commit: ${msg}`);
 
-      const files = [];
-      const paths = replacements.flatMap((e) => e.paths);
+      const files: Record<string, string> = {};
       for await (const replace of replacements) {
-        files.push(...(await replace.replaceFiles(this.#git, v)));
+        await replace.replaceFiles(this.#git, v, files);
       }
 
-      const tree = await this.#git.updateFiles(baseTree, paths, files);
+      const tree = await this.#git.updateFiles(baseTree, files);
       baseTree = await this.#git.createCommit(baseTree, tree, msg);
     }
 
@@ -725,19 +724,28 @@ export class PRReplace implements IPRReplace {
     return false;
   }
 
-  async replaceFiles(git: GitDatabase, v: VersionedTemplate): Promise<string[]> {
+  async replaceFiles(git: GitDatabase, v: VersionedTemplate, files: Record<string, string>): Promise<void> {
     const pattern = new RegExp(this.pattern, 'm');
 
-    const files = await git.fetchFiles(this.paths);
-    const content = await this.replacement.formatContent(v);
+    const newPaths = this.paths.filter((p) => !files[p]);
+    const newFiles = await git.fetchFiles(newPaths);
 
-    return files.map((f) => f.replace(pattern, content));
+    for (let i = 0; i < newPaths.length; i++) {
+      files[newPaths[i]!] = newFiles[i]!;
+    }
+
+    const content = await this.replacement.formatContent(v);
+    for (let i = 0; i < this.paths.length; i++) {
+      const path = this.paths[i]!;
+      files[path] = files[path]!.replace(pattern, content);
+    }
   }
 
   async createTree(git: GitDatabase, baseTree: string, v: VersionedTemplate): Promise<string> {
-    const files = await this.replaceFiles(git, v);
+    const files: Record<string, string> = {};
+    await this.replaceFiles(git, v, files);
 
-    return await git.updateFiles(baseTree, this.paths, files);
+    return await git.updateFiles(baseTree, files);
   }
 }
 

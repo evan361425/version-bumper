@@ -1,4 +1,3 @@
-import assert from 'node:assert';
 import { command } from './command.js';
 import { IAutoLink, IAutoLinkMatch } from './interfaces.js';
 import { verbose } from './logger.js';
@@ -160,12 +159,11 @@ export class GitDatabase {
    *
    * @returns new tree sha
    */
-  async updateFiles(baseTree: string, paths: string[], contents: string[]): Promise<string> {
-    assert(paths.length === contents.length, 'Paths and contents must have the same length');
-    verbose(`[git] Updating files in ${this.repo} ${this.branch} in paths: ${paths.join(', ')}`);
+  async updateFiles(baseTree: string, files: Record<string, string>): Promise<string> {
+    verbose(`[git] Updating files in ${this.repo} ${this.branch} in paths: ${Object.keys(files).join(', ')}`);
 
-    const contentShas = [];
-    for await (const content of contents) {
+    const apis = [];
+    for await (const [path, content] of Object.entries(files)) {
       const sha = (
         await command('gh', [
           'api',
@@ -180,15 +178,11 @@ export class GitDatabase {
           '.sha',
         ])
       ).trim();
-      contentShas.push(sha);
-    }
 
-    const apis = [];
-    for (let i = 0; i < paths.length; i++) {
-      apis.push('-f', `tree[][path]=${paths[i]}`);
+      apis.push('-f', `tree[][path]=${path}`);
       apis.push('-f', `tree[][mode]=100644`);
       apis.push('-f', `tree[][type]=blob`);
-      apis.push('-f', `tree[][sha]=${contentShas[i]}`);
+      apis.push('-f', `tree[][sha]=${sha}`);
     }
 
     return (
