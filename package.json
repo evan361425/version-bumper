@@ -1,6 +1,6 @@
 {
   "name": "@evan361425/version-bumper",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Helper to bump version",
   "bin": {
     "bumper": "./dist/bin/bumper.js"
