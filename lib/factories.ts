@@ -329,7 +329,7 @@ export class Diff implements IDiff {
         hashFull: commit.hashFull,
         pr: commit.pr,
         prLink: commit.pr ? `[${commit.pr}](${repo.prLink(Number(commit.pr))})` : '',
-        scope: this.scopeNames[commit.scope] ?? commit.scope,
+        scope: this.scopeNames[commit.parseScope(this.#autoLinks)] ?? commit.parseScope(this.#autoLinks),
         autoLink: autoLink ? `[${autoLink.target}](${autoLink.link})` : '',
       });
 

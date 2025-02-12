@@ -31,13 +31,27 @@ export class GitCommit {
     return (this._pr ??= this.titleFull.match(/\(?#(\d+)\)?/)?.[1] ?? '');
   }
 
-  get scope(): string {
-    return (this._scope ??= this.titleFull.match(/^\w+\((\w+)\)/)?.[1] ?? '');
+  parseScope(autoLinks: IAutoLink[]): string {
+    if (this._scope) return this._scope;
+
+    let scope = this.titleFull.match(/^\w+\(([^\)]+)\)/)?.[1];
+    if (!scope) return (this._scope = '');
+
+    const al = this.parseAutoLink(autoLinks, scope);
+    if (al) {
+      scope = scope.replace(al.target, '').trim();
+    }
+
+    return (this._scope = scope
+      .replaceAll(/[^\w- ]/g, ' ')
+      .replaceAll(/ +/g, ' ')
+      .trim());
   }
 
-  parseAutoLink(autoLinks: IAutoLink[]): IAutoLinkMatch | undefined {
+  parseAutoLink(autoLinks: IAutoLink[], message?: string): IAutoLinkMatch | undefined {
+    message = message ?? this.titleFull;
     for (const link of autoLinks) {
-      const match = link.extract(this.titleFull);
+      const match = link.extract(message);
       if (match) return match;
     }
 

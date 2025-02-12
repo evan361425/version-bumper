@@ -99,7 +99,7 @@ void describe('Bump', function () {
     mockAskContent('y');
     mockCommandResponse(
       [
-        'hash1hash1hash1hash1 wu0dj2k7ao3 fix(ABC-123): should update auto link',
+        'hash1hash1hash1hash1 wu0dj2k7ao3 fix(comp|ABC-123): should update auto link',
         'hash2hash2hash2hash2 wu0dj2k7ao3 fix(test)!: breaking  change with pr #123',
         'hash3hash3hash3hash3 wu0dj2k7ao3 add(scope): some scope and auto link ABC-123',
         'hash4hash4hash4hash4 wu0dj2k7ao3 feat: simple feature (#124)',
@@ -122,7 +122,7 @@ Ticket: ABC-666
 
 ### Fixed
 
-- (hash1ha|ABC-123) should update auto link - @wu0dj2k7ao3
+- (hash1ha|ABC-123) comp: should update auto link - @wu0dj2k7ao3
 - (#123) test: breaking change with pr - @wu0dj2k7ao3
 
 ### Added
@@ -144,7 +144,7 @@ Ticket: ABC-666
 
     const content = `### Fixed
 
-- ([hash1ha](https://github.com/evan361425/version-bumper-1/commit/hash1hash1hash1hash1)|[ABC-123](test-link-123)) should update auto link - @wu0dj2k7ao3
+- ([hash1ha](https://github.com/evan361425/version-bumper-1/commit/hash1hash1hash1hash1)|[ABC-123](test-link-123)) comp: should update auto link - @wu0dj2k7ao3
 - ([#123](https://github.com/evan361425/version-bumper-1/pull/123)) test: breaking change with pr - @wu0dj2k7ao3
 
 ### Added
