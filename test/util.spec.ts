@@ -2,8 +2,8 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import { SortField } from '../lib/util.js';
 
-void describe.only('Util', function () {
-  void it.only('sort release candidate', async function () {
+void describe('Util', function () {
+  void it('sort release candidate', async function () {
     const fields = [
       SortField.fromString('1,1'), // major
       SortField.fromString('2,2'), // minor

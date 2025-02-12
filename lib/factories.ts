@@ -16,6 +16,7 @@ import {
   IRelease,
   IRepo,
   ITag,
+  ITagFrom,
   ITagPR,
   ITagSort,
   ITemplate,
@@ -373,6 +374,7 @@ export class Tag implements ITag {
     readonly name: string = '',
     readonly pattern: string,
     readonly withChangelog: boolean = true,
+    readonly from: TagFrom[],
     readonly release: Release,
     readonly onlyPrIndices: number[] = [],
     readonly prs: TagPR[] = [],
@@ -387,6 +389,7 @@ export class Tag implements ITag {
       cfg.name,
       cfg.pattern,
       cfg.withChangelog,
+      (cfg.from?.map((e) => TagFrom.fromCfg(e)).filter(Boolean) as TagFrom[] | undefined) ?? [],
       Release.fromCfg(cfg.release ?? {}),
       cfg.onlyPrIndices ?? [],
       cfg.prs?.map((e) => TagPR.fromCfg(e, pr, { name: cfg.name ?? '', timestamp: ts.toString() })),
@@ -411,6 +414,20 @@ export class Tag implements ITag {
     this.#lastTag = v;
   }
 
+  async findTagFrom(): Promise<{ tag: string; from: TagFrom } | undefined> {
+    if (this.from.length === 0) return;
+
+    for await (const from of this.from) {
+      verbose(`[tag] find next tag from ${from.name}`);
+      const tag = await from.findNextTag();
+      if (tag) {
+        return { from, tag };
+      }
+    }
+
+    return;
+  }
+
   /**
    * Check if the tag is matched.
    */
@@ -425,7 +442,7 @@ export class Tag implements ITag {
     if (this.#lastTag !== undefined) return this.#lastTag;
 
     const tag = await command('git', ['tag', '--list', '--sort=-taggerdate'], (e) => e !== notEqual && this.verify(e));
-    return (this.#lastTag = tag?.trim() ?? '');
+    return (this.#lastTag = tag);
   }
 
   /**
@@ -485,6 +502,40 @@ export class Tag implements ITag {
       await tp.createPR(v, title, body);
       log(`[bump] Created ${this.name} PR (${tp.head} -> ${tp.base})`);
     }
+  }
+}
+
+export class TagFrom implements ITagFrom {
+  #replaceFrom: RegExp;
+
+  constructor(
+    readonly name: string,
+    readonly replaceFrom: string,
+    readonly replaceTo: string = '$1',
+  ) {
+    this.#replaceFrom = new RegExp(replaceFrom);
+  }
+
+  static fromCfg(cfg: ITagFrom): TagFrom | undefined {
+    if (cfg.name && cfg.replaceFrom) {
+      return new TagFrom(cfg.name, cfg.replaceFrom, cfg.replaceTo);
+    }
+    return undefined;
+  }
+
+  findNextTag(): Promise<string> {
+    return command('git', ['tag', '--list', '--sort=-taggerdate'], (e) => this.#replaceFrom.test(e));
+  }
+
+  replace(tag: string): string {
+    const matched = this.#replaceFrom.exec(tag);
+    if (!matched) return '';
+
+    let result = this.replaceTo;
+    for (let i = 1; i < matched.length; i++) {
+      result = result.replaceAll(`$${i}`, matched[i]!);
+    }
+    return result;
   }
 }
 

@@ -31,6 +31,13 @@ export function command(name: string, args: string[], oneByOne?: (line: string) 
   if (isDebug()) {
     const resp = mockResponses.shift();
     mockedCommands.push(`${name} ${args.join(' ')}`);
+    if (oneByOne !== undefined) {
+      for (const line of resp?.split('\n').filter(Boolean) ?? []) {
+        if (oneByOne(line.trim())) {
+          return Promise.resolve(line.trim());
+        }
+      }
+    }
     return Promise.resolve(resp ?? '');
   }
 
@@ -45,7 +52,7 @@ export function command(name: string, args: string[], oneByOne?: (line: string) 
         for (const line of lines.split('\n').filter(Boolean)) {
           if (oneByOne(line.trim())) {
             command.kill();
-            res(line);
+            res(line.trim());
             return;
           }
         }

@@ -90,7 +90,8 @@ const SEMANTIC_GROUPS: IDiffGroup[] = [
 ];
 const SEMANTIC_TAG: ITag = {
   name: 'semantic',
-  pattern: 'v[0-9]+\\.[0-9]+\\.[0-9]+',
+  pattern: 'v\\d+\\.\\d+\\.\\d+',
+  from: [],
   prs: [],
   release: {
     enable: true,
@@ -105,7 +106,7 @@ const SEMANTIC_TAG: ITag = {
 };
 const RELEASE_CANDIDATE_TAG: ITag = {
   name: 'release-candidate',
-  pattern: 'v[0-9]+\\.[0-9]+\\.[0-9]+-rc\\.[0-9]+',
+  pattern: 'v\\d+\\.\\d+\\.\\d+-rc\\.\\d+',
   prs: [],
   release: { enable: false },
   withChangelog: false,
@@ -144,6 +145,14 @@ export class Config {
       cfg.diff!.groups = cfg.diff!.groups!.concat(SEMANTIC_GROUPS);
     }
     if (cfg.process!.useSemanticTag) {
+      if (cfg.process!.useReleaseCandidateTag) {
+        SEMANTIC_TAG.from?.push({
+          name: RELEASE_CANDIDATE_TAG.name,
+          replaceFrom: '(v\\d+\\.\\d+\\.\\d+)-rc\\.\\d+',
+          replaceTo: '$1',
+        });
+      }
+
       cfg.tags!.push(SEMANTIC_TAG);
     }
     if (cfg.process!.useReleaseCandidateTag) {

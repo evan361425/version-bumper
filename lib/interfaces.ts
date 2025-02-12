@@ -433,6 +433,13 @@ export interface ITag {
    */
   withChangelog?: boolean;
   /**
+   * Bump the version from the specific tag by selecting it name.
+   *
+   * For example, if there has a tag called `v1.1.0-rc.1`, you can use this
+   * settings to bump the version to `v1.1.0` without typing the full tag name.
+   */
+  from?: ITagFrom[];
+  /**
    * Something about GitHub Release.
    */
   release?: IRelease;
@@ -452,6 +459,32 @@ export interface ITag {
    * Something about sorting the version.
    */
   sort?: ITagSort;
+}
+/**
+ * Bump the version from the specific tag by selecting it name.
+ */
+export interface ITagFrom {
+  /**
+   * Name of the tag to bump from.
+   *
+   * @example 'release-candidate'
+   * @default 'If both `semantic` and `release-candidate` are enabled, it will default to use `release-candidate` in the `semantic` settings'
+   */
+  name?: string;
+  /**
+   * Regex pattern to match the tag.
+   *
+   * @example '(v\d+\.\d+\.\d+)-rc\.\d+'
+   * @default 'If both `semantic` and `release-candidate` are enabled, it will default to use `(v\d+\.\d+\.\d+)-rc\.\d+` in the `semantic` settings'
+   */
+  replaceFrom?: string;
+  /**
+   * Replace the tag with this pattern.
+   *
+   * @example '$1'
+   * @default '$1'
+   */
+  replaceTo?: string;
 }
 /**
  * GitHub Release settings.

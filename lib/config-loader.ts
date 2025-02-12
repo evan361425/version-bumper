@@ -82,6 +82,13 @@ export const configArgsMap: ConfigArguments<IConfig> = {
       name: 'tag[]name',
       pattern: 'tag[]pattern',
       onlyPrIndices: ['tag[]only-pr[]'],
+      from: [
+        {
+          name: 'tag[]from[]name',
+          replaceFrom: 'tag[]from[]replace-from',
+          replaceTo: 'tag[]from[]replace-to',
+        },
+      ],
       prs: [
         {
           repo: 'tag[]pr[]repo',
@@ -282,6 +289,14 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
         name: getV(tag.name!, ca),
         pattern: getV(tag.pattern!, ca),
         onlyPrIndices: getArrayFromArgs(tag.onlyPrIndices![0]!, ca).map((v) => Number(v)),
+        from: splitArrayArgs(ca, 'tag[]from').map((fa) => {
+          const from = tag.from![0]!;
+          return {
+            name: getV(from.name!, fa),
+            replaceFrom: getV(from.replaceFrom!, fa),
+            replaceTo: getV(from.replaceTo!, fa),
+          };
+        }),
         prs: splitArrayArgs(ca, 'tag[]pr').map((pra) => {
           const pr = tag.prs![0]!;
           return {
@@ -317,10 +332,20 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
   };
 }
 
+/**
+ * Step 1: Find wanted Tag by the name or simply using first.
+ * Step 2: Find the version to bump.
+ *   - From the arguments
+ *   - From the TagFrom
+ *   - Ask the user
+ * Step 3: Verify the version and update the last tag if needed.
+ * Step 4: Find the ticket number if needed.
+ */
 export async function askForWantedVars(
   args: string[],
   cfg: Config,
 ): Promise<{ tag: Tag; version: string; ticket: string; versionLast: string }> {
+  // Step1: find the wanted tag
   let chosen: string | undefined;
   if (cfg.process.askToChooseTag) {
     const tags = cfg.tags.map((t, i) => `${t.name}(${i})`).join(', ');
@@ -335,16 +360,24 @@ export async function askForWantedVars(
     throw new BumperError(`Tag ${tagName} not found in the configuration.`);
   }
 
-  let last = (tag.lastTag = getValueFromArgs('last', args) ?? (await tag.findLastTag()));
-
-  // start asking for the version
+  // Step2: find the version
   let version = args[0] ?? '';
+  let last = (tag.lastTag = getValueFromArgs('last', args) ?? (await tag.findLastTag()));
+  verbose(`[tag]: last tag found: ${last}`);
+
   if (!version || version.startsWith('-')) {
     const nameInfo = tag.name ? `${tag.name} ` : '';
     const lastInfo = last ? `(last version is ${last})` : '(no previous version found)';
-    version = await askQuestion(`Enter new ${nameInfo}version ${lastInfo} with pattern: ${tag.pattern}\n`);
+    const tagFrom = await tag.findTagFrom();
+    if (tagFrom) {
+      version = tagFrom.from.replace(tagFrom.tag);
+      log(`Found tag ${version} from previous ${tagFrom.from.name} tag: ${tagFrom.tag}`);
+    } else {
+      version = await askQuestion(`Enter new ${nameInfo}version ${lastInfo} with pattern: ${tag.pattern}\n`);
+    }
   }
 
+  // Step3: verify the version
   if (!tag.verify(version)) {
     throw new BumperError(`Version ${version} does not match the pattern ${tag.pattern}`);
   }
@@ -358,6 +391,7 @@ export async function askForWantedVars(
     last = await tag.updateLastTag(version);
   }
 
+  // Step4: find the ticket
   let ticket = getValueFromArgs('ticket', args);
   if (cfg.process.wantedTicket && !ticket) {
     ticket = await askQuestion('Please provide the ticket number:\n');
