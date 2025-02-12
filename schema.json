@@ -468,6 +468,13 @@
           "description": "Should use this tag to generate changelog.",
           "default": true
         },
+        "from": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ITagFrom"
+          },
+          "description": "Bump the version from the specific tag by selecting it name.\n\nFor example, if there has a tag called `v1.1.0-rc.1`, you can use this settings to bump the version to `v1.1.0` without typing the full tag name."
+        },
         "release": {
           "$ref": "#/definitions/IRelease",
           "description": "Something about GitHub Release."
@@ -499,6 +506,37 @@
       },
       "additionalProperties": false,
       "title": "Tag settings.\n\nThis will be used as list and the first match of the pattern will be used."
+    },
+    "ITagFrom": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the tag to bump from.",
+          "examples": [
+            "release-candidate"
+          ],
+          "default": "If both `semantic` and `release-candidate` are enabled, it will default to use `release-candidate` in the `semantic` settings"
+        },
+        "replaceFrom": {
+          "type": "string",
+          "description": "Regex pattern to match the tag.",
+          "examples": [
+            "(vd+.d+.d+)-rc.d+"
+          ],
+          "default": "If both `semantic` and `release-candidate` are enabled, it will default to use `(vd+.d+.d+)-rc.d+` in the `semantic` settings"
+        },
+        "replaceTo": {
+          "type": "string",
+          "description": "Replace the tag with this pattern.",
+          "examples": [
+            "$1"
+          ],
+          "default": "$1"
+        }
+      },
+      "additionalProperties": false,
+      "title": "Bump the version from the specific tag by selecting it name."
     },
     "IRelease": {
       "type": "object",

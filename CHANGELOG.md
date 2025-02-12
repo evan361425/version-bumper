@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Please check git diff.
 
+## [v2.3.0] - 2025-02-12
+
+### Added
+
+- ([c19f8b5](https://github.com/evan361425/version-bumper/commit/c19f8b505a8ce5756888550b830aa19112e044b8)) allow directly bump from release candidate - @wu0dj2k7ao3
+
+### Fixed
+
+- ([9eab9b4](https://github.com/evan361425/version-bumper/commit/9eab9b45590bb1cc46e9440376c04192c3e5cf7a)) allow both scope and auto link in commit head message - @wu0dj2k7ao3
+
 ## [v2.2.3] - 2025-02-07
 
 ### Fixed
@@ -310,7 +320,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.2.3...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.3.0...HEAD
+[v2.3.0]: https://github.com/evan361425/version-bumper/compare/v2.2.3...v2.3.0
 [v2.2.3]: https://github.com/evan361425/version-bumper/compare/v2.2.2...v2.2.3
 [v2.2.2]: https://github.com/evan361425/version-bumper/compare/v2.2.1...v2.2.2
 [v2.2.1]: https://github.com/evan361425/version-bumper/compare/v2.2.0...v2.2.1

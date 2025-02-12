@@ -87,8 +87,9 @@
   "tags": [
     {
       "name": "semantic",
-      "pattern": "v[0-9]+\\.[0-9]+\\.[0-9]+",
+      "pattern": "v\\d+\\.\\d+\\.\\d+",
       "withChangelog": true,
+      "from": [],
       "release": {
         "enable": true,
         "title": {

@@ -308,6 +308,18 @@
     default: <required>
     Default using all PR, but can specify wanted index of PR.
     0-based index.
+  --tag[]from[]name
+    type: string
+    default: If both `semantic` and `release-candidate` are enabled, it will default to use `release-candidate` in the `semantic` settings
+    Name of the tag to bump from.
+  --tag[]from[]replace-from
+    type: string
+    default: If both `semantic` and `release-candidate` are enabled, it will default to use `(vd+.d+.d+)-rc.d+` in the `semantic` settings
+    Regex pattern to match the tag.
+  --tag[]from[]replace-to
+    type: string
+    default: $1
+    Replace the tag with this pattern.
   --tag[]pr[]repo
     type: string
     default: <required>
