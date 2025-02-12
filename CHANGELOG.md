@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Please check git diff.
 
+## [v2.3.2] - 2025-02-12
+
+### Fixed
+
+- ([cdce090](https://github.com/evan361425/version-bumper/commit/cdce0904f98c8de2bde29889452b804aef26571e)) allow replace multiple times in same files - @wu0dj2k7ao3
+
 ## [v2.3.1] - 2025-02-12
 
 ### Fixed
@@ -326,7 +332,8 @@ Please check git diff.
 
 Initialize Release
 
-[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.3.1...HEAD
+[unreleased]: https://github.com/evan361425/version-bumper/compare/v2.3.2...HEAD
+[v2.3.2]: https://github.com/evan361425/version-bumper/compare/v2.3.1...v2.3.2
 [v2.3.1]: https://github.com/evan361425/version-bumper/compare/v2.3.0...v2.3.1
 [v2.3.0]: https://github.com/evan361425/version-bumper/compare/v2.2.3...v2.3.0
 [v2.2.3]: https://github.com/evan361425/version-bumper/compare/v2.2.2...v2.2.3
