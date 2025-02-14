@@ -114,6 +114,25 @@
     - `{versionName}`: version name set in tag config
     - `{versionLast}`: last version number
     - `{ticket}`: ticket number
+  --hook-repl[]paths[]
+    type: array
+    default: <required>
+    File path to replace.
+  --hook-repl[]pattern
+    type: string
+    default: <required>
+    Regular Expression pattern to find the text and replace it by `replacement`.
+    If this is not set, the whole tag config will be ignored.
+  --hook-repl[]repl
+    type: template
+    default: <required>
+    Replacement string.
+    Allowed variables:
+    - `{repo}`: repository link, see `repo.link`
+    - `{version}`: version number
+    - `{versionName}`: version name set in tag config
+    - `{versionLast}`: last version number
+    - `{ticket}`: ticket number
   --hook-after-all[]
     type: array
     default: <required>

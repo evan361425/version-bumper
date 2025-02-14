@@ -20,7 +20,8 @@
   },
   "hook": {
     "afterVerified": [],
-    "afterAll": []
+    "afterAll": [],
+    "replacements": []
   },
   "changelog": {
     "enable": true,

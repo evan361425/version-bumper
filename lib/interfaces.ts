@@ -129,7 +129,10 @@ export interface IHook {
    * @example ['echo "version: {version}"']
    */
   afterVerified?: string[];
-
+  /**
+   * Files to replace after version verified.
+   */
+  replacements?: IReplace[];
   /**
    * Commands to run after all the process is done.
    *
@@ -618,7 +621,7 @@ export interface ITagPR {
 /**
  * PR's files replacement settings.
  */
-export interface IPRReplace {
+export interface IPRReplace extends IReplace {
   /**
    * Commit message template.
    *
@@ -633,31 +636,6 @@ export interface IPRReplace {
    * - `{ticket}`: ticket number
    */
   commitMessage?: ITemplate;
-  /**
-   * File path to replace.
-   */
-  paths: string[];
-  /**
-   * Regular Expression pattern to find the text and replace it by `replacement`.
-   *
-   * If this is not set, the whole tag config will be ignored.
-   *
-   * @example `version: [0-9]+.[0-9]+.[0-9]+$`
-   */
-  pattern: string;
-  /**
-   * Replacement string.
-   *
-   * Allowed variables:
-   * - `{repo}`: repository link, see `repo.link`
-   * - `{version}`: version number
-   * - `{versionName}`: version name set in tag config
-   * - `{versionLast}`: last version number
-   * - `{ticket}`: ticket number
-   *
-   * @example {"value": "version: {version}"}
-   */
-  replacement: ITemplate;
 }
 /**
  * How to sort the version, using unix sort algorithm.
@@ -692,6 +670,36 @@ export interface ITagSort {
    * @default ['1,1n']
    */
   fields?: string[];
+}
+/**
+ * Replacement settings.
+ */
+export interface IReplace {
+  /**
+   * File path to replace.
+   */
+  paths: string[];
+  /**
+   * Regular Expression pattern to find the text and replace it by `replacement`.
+   *
+   * If this is not set, the whole tag config will be ignored.
+   *
+   * @example `version: [0-9]+.[0-9]+.[0-9]+$`
+   */
+  pattern: string;
+  /**
+   * Replacement string.
+   *
+   * Allowed variables:
+   * - `{repo}`: repository link, see `repo.link`
+   * - `{version}`: version number
+   * - `{versionName}`: version name set in tag config
+   * - `{versionLast}`: last version number
+   * - `{ticket}`: ticket number
+   *
+   * @example {"value": "version: {version}"}
+   */
+  replacement: ITemplate;
 }
 /**
  * Template settings.

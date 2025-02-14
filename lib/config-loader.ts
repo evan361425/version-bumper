@@ -35,6 +35,13 @@ export const configArgsMap: ConfigArguments<IConfig> = {
   },
   hook: {
     afterVerified: ['hook-after-verified[]'],
+    replacements: [
+      {
+        paths: ['hook-repl[]paths[]'],
+        pattern: 'hook-repl[]pattern',
+        replacement: 'hook-repl[]repl',
+      },
+    ],
     afterAll: ['hook-after-all[]'],
   },
   changelog: {
@@ -239,6 +246,14 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
     },
     hook: {
       afterVerified: getArrayFromArgs(configArgsMap.hook!.afterVerified![0]!, args),
+      replacements: splitArrayArgs(args, 'hook-repl').map((ha) => {
+        const repl = configArgsMap.hook!.replacements![0]!;
+        return {
+          paths: getArrayFromArgs(repl.paths![0]!, ha),
+          pattern: getV(repl.pattern!, ha),
+          replacement: getTemplate(repl.replacement!, ha),
+        };
+      }),
       afterAll: getArrayFromArgs(configArgsMap.hook!.afterAll![0]!, args),
     },
     changelog: {

@@ -14,6 +14,7 @@ import {
   IPR,
   IPRReplace,
   IRelease,
+  IReplace as IReplacement,
   IRepo,
   ITag,
   ITagFrom,
@@ -22,6 +23,7 @@ import {
   ITemplate,
   ITemplateGitHub,
 } from './interfaces.js';
+import { readFile, writeFile } from './io.js';
 import { log, verbose } from './logger.js';
 import { breaker, SortField } from './util.js';
 
@@ -56,6 +58,103 @@ export class Repo implements IRepo {
 
   prLink(pr: number): string {
     return `${this.link}/pull/${pr}`;
+  }
+}
+
+export class Hook implements IHook {
+  readonly #afterVerified: HookCommand[];
+  readonly #afterAll: HookCommand[];
+
+  constructor(
+    readonly afterVerified: string[] = [],
+    readonly afterAll: string[] = [],
+    readonly replacements: Replacement[] = [],
+  ) {
+    this.#afterVerified = afterVerified.map((c) => new HookCommand(c));
+    this.#afterAll = afterAll.map((c) => new HookCommand(c));
+  }
+
+  static fromCfg(cfg: IHook): Hook {
+    return new Hook(
+      cfg.afterVerified,
+      cfg.afterAll,
+      cfg.replacements?.map((e) => Replacement.fromCfg(e)).filter((r) => !r.isEmpty('hook')),
+    );
+  }
+
+  async runAfterVerified(v: VersionedTemplate): Promise<void> {
+    let i = 1;
+    for await (const hook of this.#afterVerified) {
+      await hook.run(v, i++);
+    }
+
+    const files: Record<string, string> = {};
+    for await (const repl of this.replacements) {
+      await repl.replaceFiles(new GitDatabase(''), v, files);
+    }
+
+    for (const [path, content] of Object.entries(files)) {
+      log(`[hook] Replaced file ${path}`);
+      writeFile(path, content);
+    }
+  }
+
+  async runAfterAll(v: VersionedTemplate): Promise<void> {
+    let i = 1;
+    for await (const hook of this.#afterAll) {
+      await hook.run(v, i++);
+    }
+  }
+}
+
+export class Replacement implements IReplacement {
+  constructor(
+    readonly paths: string[],
+    readonly pattern: string,
+    readonly replacement: Template<VersionedTemplate>,
+  ) {}
+
+  static fromCfg(cfg: IReplacement): Replacement {
+    return new Replacement(cfg.paths, cfg.pattern, Template.fromCfg(cfg.replacement));
+  }
+
+  isEmpty(name: string): boolean {
+    if (this.paths.length === 0) {
+      log(`[replace] No paths found in ${name}, skip it`);
+      return true;
+    }
+
+    if (!this.pattern) {
+      log(`[replace] No pattern found in ${name}, skip it`);
+      return true;
+    }
+
+    if (!Template.exist(this.replacement)) {
+      log(`[replace] No replacement found in ${name}, skip it`);
+      return true;
+    }
+
+    return false;
+  }
+
+  async replaceFiles(git: GitDatabase, v: VersionedTemplate, files: Record<string, string>): Promise<void> {
+    const newPaths = this.paths.filter((p) => !files[p]);
+    const newFiles = await this.findFiles(git, newPaths);
+
+    for (let i = 0; i < newPaths.length; i++) {
+      files[newPaths[i]!] = newFiles[i]!;
+    }
+
+    const content = await this.replacement.formatContent(v);
+    const pattern = new RegExp(this.pattern, 'm');
+    for (let i = 0; i < this.paths.length; i++) {
+      const path = this.paths[i]!;
+      files[path] = files[path]!.replace(pattern, content);
+    }
+  }
+
+  async findFiles(_git: GitDatabase, paths: string[]): Promise<string[]> {
+    return paths.map((path) => readFile(path));
   }
 }
 
@@ -688,57 +787,23 @@ export class TagPR implements ITagPR {
   }
 }
 
-export class PRReplace implements IPRReplace {
+export class PRReplace extends Replacement implements IPRReplace {
   constructor(
-    readonly paths: string[],
-    readonly pattern: string,
-    readonly replacement: Template<VersionedTemplate>,
+    repl: Replacement,
     readonly commitMessage?: Template<VersionedTemplate>,
-  ) {}
+  ) {
+    super(repl.paths, repl.pattern, repl.replacement);
+  }
 
-  static fromCfg(cfg: IPRReplace): PRReplace {
+  static override fromCfg(cfg: IPRReplace): PRReplace {
     return new PRReplace(
-      cfg.paths,
-      cfg.pattern,
-      Template.fromCfg(cfg.replacement),
+      Replacement.fromCfg(cfg),
       Template.exist(cfg.commitMessage) ? Template.fromCfg(cfg.commitMessage!) : undefined,
     );
   }
 
-  isEmpty(name: string): boolean {
-    if (this.paths.length === 0) {
-      log(`[pr] No PR replace paths found in ${name}, skip it`);
-      return true;
-    }
-
-    if (!this.pattern) {
-      log(`[pr] No PR replace pattern found in ${name}, skip it`);
-      return true;
-    }
-
-    if (!Template.exist(this.replacement)) {
-      log(`[cfg] No PR replace replacement found in ${name}, skip it`);
-      return true;
-    }
-
-    return false;
-  }
-
-  async replaceFiles(git: GitDatabase, v: VersionedTemplate, files: Record<string, string>): Promise<void> {
-    const pattern = new RegExp(this.pattern, 'm');
-
-    const newPaths = this.paths.filter((p) => !files[p]);
-    const newFiles = await git.fetchFiles(newPaths);
-
-    for (let i = 0; i < newPaths.length; i++) {
-      files[newPaths[i]!] = newFiles[i]!;
-    }
-
-    const content = await this.replacement.formatContent(v);
-    for (let i = 0; i < this.paths.length; i++) {
-      const path = this.paths[i]!;
-      files[path] = files[path]!.replace(pattern, content);
-    }
+  override async findFiles(git: GitDatabase, paths: string[]): Promise<string[]> {
+    return await git.fetchFiles(paths);
   }
 
   async createTree(git: GitDatabase, baseTree: string, v: VersionedTemplate): Promise<string> {
@@ -780,37 +845,6 @@ export class TagSort implements ITagSort {
     }
 
     return false;
-  }
-}
-
-export class Hook implements IHook {
-  readonly #afterVerified: HookCommand[];
-  readonly #afterAll: HookCommand[];
-
-  constructor(
-    readonly afterVerified: string[] = [],
-    readonly afterAll: string[] = [],
-  ) {
-    this.#afterVerified = afterVerified.map((c) => new HookCommand(c));
-    this.#afterAll = afterAll.map((c) => new HookCommand(c));
-  }
-
-  static fromCfg(cfg: IHook): Hook {
-    return new Hook(cfg.afterVerified, cfg.afterAll);
-  }
-
-  async runAfterVerified(v: VersionedTemplate): Promise<void> {
-    let i = 1;
-    for await (const hook of this.#afterVerified) {
-      await hook.run(v, i++);
-    }
-  }
-
-  async runAfterAll(v: VersionedTemplate): Promise<void> {
-    let i = 1;
-    for await (const hook of this.#afterAll) {
-      await hook.run(v, i++);
-    }
   }
 }
 
@@ -916,6 +950,7 @@ export class Template<T extends Record<string, string>> implements ITemplate {
     }
 
     if (this.file) {
+      // should throw exception if file not found
       return (this.#content = readFileSync(this.file, 'utf-8'));
     }
 
