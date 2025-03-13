@@ -856,6 +856,15 @@ export class HookCommand {
   async run(v: VersionedTemplate, idx: number): Promise<string | void> {
     let [cmd, ...args] = this.split();
     if (cmd) {
+      let [versionName, realCmd] = cmd.split(':');
+      if (realCmd) {
+        if (versionName !== v.versionName) {
+          log(`[hook] #${idx} Skip hook because version name not equal to ${versionName}`);
+          return;
+        }
+        cmd = realCmd;
+      }
+
       const pArgs = await Promise.all(args.map((a) => new Template(a).formatContent(v)));
       try {
         const result = await command(cmd, pArgs);
