@@ -219,6 +219,10 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
     processInfo.pr = getB('only-pr') ?? false;
     processInfo.release = getB('only-release') ?? false;
 
+    if (processInfo.release) {
+      processInfo.diffFromChangelog = true;
+    }
+
     processInfo.bump = false;
     processInfo.checkTag = false;
     processInfo.checkRemoteTag = false;
@@ -237,7 +241,7 @@ export function loadConfigFromArgs(args: string[]): DeepPartial<IConfig> {
       release: processInfo.release ?? getB(configArgsMap.process!.release!),
       checkTag: processInfo.checkTag ?? getB(configArgsMap.process!.checkTag!),
       checkRemoteTag: processInfo.checkRemoteTag ?? getB(configArgsMap.process!.checkRemoteTag!),
-      diffFromChangelog: getB(configArgsMap.process!.diffFromChangelog!),
+      diffFromChangelog: getB(configArgsMap.process!.diffFromChangelog!) ?? processInfo.diffFromChangelog,
       askToVerifyContent: processInfo.askToVerifyContent ?? getB(configArgsMap.process!.askToVerifyContent!),
       askToChooseTag: getB(configArgsMap.process!.askToChooseTag!),
       useSemanticGroups: getB(configArgsMap.process!.useSemanticGroups!),
