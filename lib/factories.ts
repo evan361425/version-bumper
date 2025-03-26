@@ -540,7 +540,7 @@ export class Tag implements ITag {
   async findLastTag(notEqual?: string): Promise<string> {
     if (this.#lastTag !== undefined) return this.#lastTag;
 
-    const tag = await command('git', ['tag', '--list', '--sort=-taggerdate'], (e) => e !== notEqual && this.verify(e));
+    const tag = await command('git', ['tag', '--list', '--sort=-creatordate'], (e) => e !== notEqual && this.verify(e));
     return (this.#lastTag = tag);
   }
 
