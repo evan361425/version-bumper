@@ -261,7 +261,13 @@ export class Config {
     if (!this.repo.link) {
       const repo = await command('git', ['remote', 'get-url', 'origin']);
 
-      const [_, rawRepoName] = breaker(repo, 1, 'github.com/');
+      // for https://github.com/evan361425/version-bumper.git
+      let [_, rawRepoName] = breaker(repo, 1, 'github.com/');
+      if (!rawRepoName) {
+        // for git@github.com:evan361425/version-bumper.git
+        let [_, two] = breaker(repo, 1, 'github.com:');
+        rawRepoName = two;
+      }
       const repoName = rawRepoName?.split('.')[0];
       if (!repoName) {
         throw new BumperError(`Cannot parse repo name: ${repo}`);
