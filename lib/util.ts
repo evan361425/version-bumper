@@ -2,10 +2,24 @@ import { BumperError } from './errors.js';
 
 const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
+/**
+ * This function mainly different from the String.split function
+ * because it will not split the string which after [length] slices.
+ *
+ * for example:
+ * ```
+ * const value = 'test=123=456'
+ * value.split('=',2) // ['test', '123']
+ * breaker(value, 2, '=') // ['test', '123=456']
+ * ```
+ */
 export function breaker(value: string, length = 1, separator = '\n'): string[] {
   const result: string[] = [];
   for (let i = 0; i < length; i++) {
     const index = value.indexOf(separator);
+    if (index === -1) {
+      break;
+    }
     result.push(value.substring(0, index));
     value = value.substring(index + separator.length);
   }
