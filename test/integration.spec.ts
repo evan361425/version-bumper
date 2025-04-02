@@ -93,7 +93,7 @@ void describe('Bump', function () {
     assert.strictEqual(pr.replacements[0]!.replacement.value, 'version: {version}');
 
     await checkTag(cfg);
-    assert.strictEqual(getFirstMockedCommand(), 'git tag --list --sort=-taggerdate');
+    assert.strictEqual(getFirstMockedCommand(), 'git tag --list --sort=-creatordate');
     assert.strictEqual(getFirstMockedCommand(), 'git tag -l v1.2.3');
 
     mockAskContent('y');
@@ -260,7 +260,7 @@ ${content}`,
 
     const mockedCommand = resetMocked()[1];
     assert.deepStrictEqual(mockedCommand?.slice(0, 3), [
-      'git tag --list --sort=-taggerdate',
+      'git tag --list --sort=-creatordate',
       'git tag -l v1.2.3',
       'git log --pretty=%H %al %s HEAD...v1.2.2',
     ]);
