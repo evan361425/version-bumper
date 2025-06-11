@@ -146,7 +146,7 @@
               "echo \"version: {version}\""
             ]
           ],
-          "title": "Commands to run after version is verified.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nCommand exit code must be 0 to continue the process.\n\nAllowed variables:\n- `{repo}`: repository link, see `repo.link`\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
+          "title": "Commands to run after version is verified.\n\nEach string will be separated by space except the string inside the quotes. This will be run even in debug mode and not support templating as `Template`.\n\nPrefix with `{versionName}:` to the command will make it only executible when the version name is matched, for example: `['production:echo \"version: {version}\"]` will only run when the version name is `production`.\n\nCommand exit code must be 0 to continue the process.\n\nAllowed variables:\n- `{repo}`: repository link, see `repo.link`\n- `{version}`: version number\n- `{versionName}`: version name set in tag config\n- `{versionLast}`: last version number\n- `{ticket}`: ticket number"
         },
         "replacements": {
           "type": "array",

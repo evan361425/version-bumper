@@ -107,6 +107,7 @@
     Commands to run after version is verified.
     Each string will be separated by space except the string inside the quotes.
     This will be run even in debug mode and not support templating as `Template`.
+    Prefix with `{versionName}:` to the command will make it only executible when the version name is matched, for example: `['production:echo "version: {version}"]` will only run when the version name is `production`.
     Command exit code must be 0 to continue the process.
     Allowed variables:
     - `{repo}`: repository link, see `repo.link`

@@ -858,6 +858,9 @@ export class HookCommand {
     if (cmd) {
       let [versionName, realCmd] = cmd.split(':');
       if (realCmd) {
+        // only specify version name can execute the command, for example:
+        // `production:echo "Hello World"`
+        // will only execute when this tag is for production version.
         if (versionName !== v.versionName) {
           log(`[hook] #${idx} Skip hook because version name not equal to ${versionName}`);
           return;
